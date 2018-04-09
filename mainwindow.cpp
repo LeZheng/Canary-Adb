@@ -7,7 +7,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    this->ui->leftDockWidget->setWidget();
+    this->ui->leftDockWidget->setTitleBarWidget(new QWidget(this));
+    this->ui->leftDockWidget->titleBarWidget()->setFixedHeight(0);
+    this->ui->rightDockWidget->setTitleBarWidget(new QWidget(this));
+    this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
+    this->ui->bottomDockWidget->setTitleBarWidget(new QWidget(this));
+    this->ui->bottomDockWidget->titleBarWidget()->setFixedHeight(0);
 }
 
 MainWindow::~MainWindow()

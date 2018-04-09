@@ -28,13 +28,15 @@ SOURCES += \
         mainwindow.cpp \
     cfileform.cpp \
     cconsoleform.cpp \
-    cdeviceform.cpp
+    cdeviceform.cpp \
+    candroiddevice.cpp
 
 HEADERS += \
         mainwindow.h \
     cfileform.h \
     cconsoleform.h \
-    cdeviceform.h
+    cdeviceform.h \
+    candroiddevice.h
 
 FORMS += \
         mainwindow.ui \

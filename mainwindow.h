@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDockWidget>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"
