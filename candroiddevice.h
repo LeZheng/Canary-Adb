@@ -4,13 +4,48 @@
 #include <QObject>
 #include <QProcess>
 #include <QMap>
+#include <QTextCodec>
+
+namespace candroid {
+class CAndroidApp;
+class CAndroidDevice;
+class CAndroidConfig;
+}
+
+class ProcessResult
+{
+public:
+    const int exitCode;
+    const QString resultStr;
+    explicit ProcessResult(int exitCode,QString resultStr);
+};
+
+class CAndroidApp : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit CAndroidApp(const QString package,QObject *parent = nullptr);
+    const QString package;
+
+    QString getName();
+    void uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
+    void pmClear();//(method "清除应用数据" "adb shell pm clear com.qihoo360.mobilesafe")
+    QString getRunningService();//(method "查看正在运行的 Services" "adb shell dumpsys activity services com.qihoo360.mobilesafe")
+    QString getInfo();//(method "获取应用信息" "adb shell dumpsys package <packagename>")
+    QString getInstallPath();//(method "获取安装路径" "adb shell pm path ecarx.weather")
+    //TODO 与应用交互
+
+private:
+    QString name;
+};
 
 class CAndroidDevice : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CAndroidDevice(QString serialNumber,QObject *parent = nullptr);
+    explicit CAndroidDevice(const QString serialNumber,QObject *parent = nullptr);
     const QString serialNumber;
     QString getModel();
     QString getBattery();
@@ -34,6 +69,7 @@ public:
     QProcess * screenRecord(QString recordPath,int timeLimit = 5);// (method "屏幕录制" "adb shell screenrecord /sdcard/filename.mp4 --time-limit 5")
     void reboot();// (method "重启手机" "adb reboot")
     QStringList pmListPackage();// (method "获取应用列表" "adb shell pm list packages"
+    QList<CAndroidApp *> getApplications();
     void install(QString apkPath);// (method "安装应用" "adb install -rsd temp.apk"
     QString getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
         //TODO 按键模拟和输入
@@ -50,26 +86,21 @@ private:
     QString networkInfo;// (field "网络信息" :read "adb shell ifconfig")
     QString cpuInfo;// (field "cpu 信息" :read "adb shell cat /proc/cpuinfo")
     QString memInfo;// (field "内存信息" :read "adb shell cat /proc/meminfo")
-    QString sysProp;// (field "系统属性" :read "adb shell cat /system/build.prop")
+    QMap<QString, QString> sysProps;// (field "系统属性" :read "adb shell cat /system/build.prop")
 };
 
-class CAndroidApp : public QObject
+class CAndroidConfig
 {
-    Q_OBJECT
 public:
-    explicit CAndroidApp(QString package,QObject *parent = nullptr);
-    const QString package;
-
-    QString getName();
-    void uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
-    void pmClear();//(method "清除应用数据" "adb shell pm clear com.qihoo360.mobilesafe")
-    QString getRunningService();//(method "查看正在运行的 Services" "adb shell dumpsys activity services com.qihoo360.mobilesafe")
-    QString getInfo();//(method "获取应用信息" "adb shell dumpsys package <packagename>")
-    QString getInstallPath();//(method "获取安装路径" "adb shell pm path ecarx.weather")
-    //TODO 与应用交互
+    static CAndroidConfig * config;
+    static QString androidSdkPath;
+    static QString androidAdbPath;
+    static QList<CAndroidDevice *> getDevices();
+    static CAndroidConfig * getInstance(){ return config; }
 
 private:
-    QString name;
+    QList<CAndroidDevice *> deviceList;
+    CAndroidConfig(){}
 
 };
 
