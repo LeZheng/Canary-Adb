@@ -143,12 +143,10 @@ QMap<QString, QString> CAndroidDevice::getSystemProps()
                                       .arg(serialNumber));
 
     QStringList lines = result.resultStr.split("\n");
-    for(int i = 0;i < lines.length();i++)
-    {
+    for(int i = 0; i < lines.length(); i++) {
         QString line = lines.at(i);
         QStringList keyAndValue = line.split('=');
-        if(keyAndValue.size() == 2)
-        {
+        if(keyAndValue.size() == 2) {
             sysProps[keyAndValue.at(0)] = keyAndValue.at(1);
         }
     }
@@ -157,7 +155,7 @@ QMap<QString, QString> CAndroidDevice::getSystemProps()
 
 QString CAndroidDevice::getSystemProp(QString key)
 {
-    if(sysProps.size() == 0){
+    if(sysProps.size() == 0) {
         getSystemProps();
     }
     if(sysProps.contains(key))
@@ -226,8 +224,7 @@ QList<CAndroidApp *> CAndroidDevice::getApplications()
                                       .arg(CAndroidConfig::androidAdbPath)
                                       .arg(serialNumber));
     QListIterator<QString> packageIter(result.resultStr.split('\n'));
-    for(;packageIter.hasNext();)
-    {
+    for(; packageIter.hasNext();) {
         applicationList << new CAndroidApp(packageIter.next(),this);
     }
     return applicationList;
@@ -263,12 +260,10 @@ QList<CAndroidDevice *> CAndroidConfig::getDevices()
     ProcessResult result = processCmd(cmd.append(" devices"));
     deviceStrList = result.resultStr.split("\n");
     deviceStrList.removeAt(0);
-    for(int i = 0;i < deviceStrList.size();i++)
-    {
+    for(int i = 0; i < deviceStrList.size(); i++) {
         QString line = deviceStrList.at(i);
         line = line.trimmed();
-        if(line.endsWith("device"))
-        {
+        if(line.endsWith("device")) {
             QString serialNumber = line.left(line.length() - 6).trimmed();
             CAndroidConfig::getInstance()->deviceList.append(new CAndroidDevice(serialNumber));
         }
@@ -276,8 +271,8 @@ QList<CAndroidDevice *> CAndroidConfig::getDevices()
     return CAndroidConfig::getInstance()->deviceList;
 }
 
-CAndroidApp::CAndroidApp(QString package,QObject *parent):
-    QObject(parent),package(package)
+CAndroidApp::CAndroidApp(QString package,CAndroidDevice *parent):
+    QObject(parent),package(package),device(parent)
 {
 
 }
@@ -291,7 +286,7 @@ void CAndroidApp::uninstall()
 {
     int exitCode = QProcess::execute(tr("%1 -s %2 uninstall %3")
                                      .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
+                                     .arg(device->serialNumber)
                                      .arg(package));
 }
 
@@ -299,7 +294,7 @@ void CAndroidApp::pmClear()
 {
     int exitCode = QProcess::execute(tr("%1 -s %2 shell pm clear %3")
                                      .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
+                                     .arg(device->serialNumber)
                                      .arg(package));
 }
 
@@ -307,7 +302,7 @@ QString CAndroidApp::getRunningService()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys activity services %3")
                                       .arg(CAndroidConfig::androidAdbPath)
-                                      .arg(serialNumber)
+                                      .arg(device->serialNumber)
                                       .arg(package));
     return result.resultStr;
 }
@@ -316,7 +311,7 @@ QString CAndroidApp::getInfo()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys package %3")
                                       .arg(CAndroidConfig::androidAdbPath)
-                                      .arg(serialNumber)
+                                      .arg(device->serialNumber)
                                       .arg(package));
     return result.resultStr;
 }
@@ -325,7 +320,7 @@ QString CAndroidApp::getInstallPath()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell pm path %3")
                                       .arg(CAndroidConfig::androidAdbPath)
-                                      .arg(serialNumber)
+                                      .arg(device->serialNumber)
                                       .arg(package));
     return result.resultStr;
 }

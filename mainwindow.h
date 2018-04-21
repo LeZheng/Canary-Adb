@@ -8,7 +8,8 @@
 #include "cconsoleform.h"
 #include "cfileform.h"
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -23,6 +24,10 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    void initToolBar();
+    void initFileWidget();
+    void initDeviceWidget();
+    void initConsoleWidget();
 };
 
 #endif // MAINWINDOW_H

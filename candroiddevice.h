@@ -6,11 +6,14 @@
 #include <QMap>
 #include <QTextCodec>
 
-namespace candroid {
+namespace candroid
+{
 class CAndroidApp;
 class CAndroidDevice;
 class CAndroidConfig;
 }
+
+class CAndroidDevice;
 
 class ProcessResult
 {
@@ -25,8 +28,9 @@ class CAndroidApp : public QObject
     Q_OBJECT
 
 public:
-    explicit CAndroidApp(const QString package,QObject *parent = nullptr);
+    explicit CAndroidApp(const QString package,CAndroidDevice *parent = nullptr);
     const QString package;
+    const CAndroidDevice * device;
 
     QString getName();
     void uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
@@ -72,7 +76,7 @@ public:
     QList<CAndroidApp *> getApplications();
     void install(QString apkPath);// (method "安装应用" "adb install -rsd temp.apk"
     QString getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
-        //TODO 按键模拟和输入
+    //TODO 按键模拟和输入
     QProcess * logcat(QString patterns);// (method "查看日志" "adb logcat -v long ActivityManager:I *:S")
 
 private:
@@ -96,11 +100,14 @@ public:
     static QString androidSdkPath;
     static QString androidAdbPath;
     static QList<CAndroidDevice *> getDevices();
-    static CAndroidConfig * getInstance(){ return config; }
+    static CAndroidConfig * getInstance()
+    {
+        return config;
+    }
 
 private:
     QList<CAndroidDevice *> deviceList;
-    CAndroidConfig(){}
+    CAndroidConfig() {}
 
 };
 

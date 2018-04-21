@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     w.show();
 
     QList<CAndroidDevice *> devices = CAndroidConfig::getDevices();
-    for(int i = 0;i < devices.size();i++){
+    for(int i = 0; i < devices.size(); i++) {
         qDebug() << devices.at(i)->serialNumber;
     }
 

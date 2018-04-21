@@ -13,9 +13,34 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
     this->ui->bottomDockWidget->setTitleBarWidget(new QWidget(this));
     this->ui->bottomDockWidget->titleBarWidget()->setFixedHeight(0);
+
+    initToolBar();
+    initFileWidget();
+    initDeviceWidget();
+    initConsoleWidget();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::initToolBar()
+{
+    //TODO
+}
+
+void MainWindow::initFileWidget()
+{
+    //TODO
+}
+
+void MainWindow::initDeviceWidget()
+{
+    //TODO
+}
+
+void MainWindow::initConsoleWidget()
+{
+    //TODO
 }
