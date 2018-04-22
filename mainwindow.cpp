@@ -32,15 +32,18 @@ void MainWindow::initToolBar()
 
 void MainWindow::initFileWidget()
 {
+    ui->leftDockWidget->setWidget(new CFileForm(this));
     //TODO
 }
 
 void MainWindow::initDeviceWidget()
 {
+    ui->rightDockWidget->setWidget(new CDeviceForm(this));
     //TODO
 }
 
 void MainWindow::initConsoleWidget()
 {
+    ui->bottomDockWidget->setWidget(new CConsoleForm(this));
     //TODO
 }
