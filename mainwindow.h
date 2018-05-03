@@ -3,10 +3,13 @@
 
 #include <QMainWindow>
 #include <QDockWidget>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"
 #include "cfileform.h"
+#include "candroiddevice.h"
 
 namespace Ui
 {
@@ -23,11 +26,16 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    CFileForm *fileForm;
 
     void initToolBar();
     void initFileWidget();
     void initDeviceWidget();
     void initConsoleWidget();
+
+private slots:
+    void showFileRequestMenu(const QPoint &pos,const QModelIndex &index,QString path);
+    void showDeviceRequestMenu(const QPoint &pos,QString name);
 };
 
 #endif // MAINWINDOW_H

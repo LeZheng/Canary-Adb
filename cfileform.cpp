@@ -7,8 +7,11 @@ CFileForm::CFileForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    fileTreeView = ui->fileTreeView;
     workPath = QDir::rootPath();
-    model = new QDirModel(this);
+    model = new QFileSystemModel(this);
+    model->setRootPath(workPath);
+    model->setReadOnly(false);
     ui->fileTreeView->setModel(model);
     QStyle * style = QApplication::style();
     ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));
@@ -32,7 +35,9 @@ CFileForm::CFileForm(QWidget *parent) :
     });
     connect(ui->fileTreeView,&QTreeView::customContextMenuRequested,[this](const QPoint &pos) {
         QModelIndex index = this->ui->fileTreeView->indexAt(pos);
-        emit itemMenuRequested(pos,this->model->filePath(index));
+        if(index.isValid()) {
+            emit itemMenuRequested(pos,index,this->model->filePath(index));
+        }
     });
     connect(this->ui->prevBtn,&QPushButton::clicked,[this]() {
         QModelIndex pIndex = this->ui->fileTreeView->rootIndex();

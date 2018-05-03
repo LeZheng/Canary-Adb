@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "candroiddevice.h"
+
 namespace Ui
 {
 class CDeviceForm;
@@ -16,8 +18,15 @@ public:
     explicit CDeviceForm(QWidget *parent = 0);
     ~CDeviceForm();
 
+public slots:
+    void updateDevices(QList<CAndroidDevice *> deviceList);
+
 private:
     Ui::CDeviceForm *ui;
+
+signals:
+    void itemDoubleClicked(QString name);
+    void itemMenuRequested(const QPoint &pos,QString name);
 };
 
 #endif // CDEVICEFORM_H

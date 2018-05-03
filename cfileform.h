@@ -2,8 +2,9 @@
 #define CFILEFORM_H
 
 #include <QWidget>
-#include <QDirModel>
+#include <QFileSystemModel>
 #include <QStack>
+#include <QTreeView>
 
 namespace Ui
 {
@@ -18,13 +19,17 @@ public:
     explicit CFileForm(QWidget *parent = 0);
     ~CFileForm();
 
+    QFileSystemModel * getModel(){return model;}
+    QTreeView * getTreeView(){return fileTreeView;}
+
 signals:
     void itemDoubleClicked(QString path);
-    void itemMenuRequested(const QPoint &pos,QString path);
+    void itemMenuRequested(const QPoint &pos,const QModelIndex &index,QString path);
 
 private:
     Ui::CFileForm *ui;
-    QDirModel * model;
+    QFileSystemModel * model;
+    QTreeView * fileTreeView;
     QString workPath;
     QStack<QModelIndex> historyPathStack;
 };

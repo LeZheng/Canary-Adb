@@ -60,9 +60,9 @@ void CAndroidDevice::setWmSize(int width, int height)
 
 void CAndroidDevice::resetWmSize()
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 shell wm size reset")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber));
+    ProcessResult result = processCmd(tr("%1 -s %2 shell wm size reset")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber));
 }
 
 QString CAndroidDevice::getWmDensity()
@@ -75,17 +75,17 @@ QString CAndroidDevice::getWmDensity()
 
 void CAndroidDevice::setWmDensity(int density)
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 shell wm density %3")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
-                                     .arg(density));
+    ProcessResult result = processCmd(tr("%1 -s %2 shell wm density %3")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(density));
 }
 
 void CAndroidDevice::resetWmDensity()
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 shell wm density reset")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber));
+    ProcessResult result = processCmd(tr("%1 -s %2 shell wm density reset")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber));
 }
 
 QString CAndroidDevice::getWindownDisplay()
@@ -166,28 +166,28 @@ QString CAndroidDevice::getSystemProp(QString key)
 
 void CAndroidDevice::screenShot(QString path)
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 shell screencap -p %3")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
-                                     .arg(path));
+    ProcessResult result = processCmd(tr("%1 -s %2 shell screencap -p %3")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(path));
 }
 
 void  CAndroidDevice::pull(QString srcPath, QString desPath)
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 pull %3 %4")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
-                                     .arg(srcPath)
-                                     .arg(desPath));
+    ProcessResult result = processCmd(tr("%1 -s %2 pull %3 %4")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(srcPath)
+                                      .arg(desPath));
 }
 
 void  CAndroidDevice::push(QString srcPath, QString desPath)
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 push %3 %4")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
-                                     .arg(srcPath)
-                                     .arg(desPath));
+    ProcessResult result = processCmd(tr("%1 -s %2 push %3 %4")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(srcPath)
+                                      .arg(desPath));
 }
 
 QProcess * CAndroidDevice::screenRecord(QString recordPath, int timeLimit)
@@ -203,9 +203,9 @@ QProcess * CAndroidDevice::screenRecord(QString recordPath, int timeLimit)
 
 void CAndroidDevice::reboot()
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 reboot")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber));
+    ProcessResult result = processCmd(tr("%1 -s %2 reboot")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber));
 }
 
 QStringList CAndroidDevice::pmListPackage()
@@ -232,10 +232,10 @@ QList<CAndroidApp *> CAndroidDevice::getApplications()
 
 void CAndroidDevice::install(QString apkPath)
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 install -rsd %3")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(serialNumber)
-                                     .arg(apkPath));
+    ProcessResult result = processCmd(tr("%1 -s %2 install -r %3")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(apkPath));
 }
 
 QString CAndroidDevice::getRunningService()
@@ -254,18 +254,19 @@ QProcess *CAndroidDevice::logcat(QString patterns)
 
 QList<CAndroidDevice *> CAndroidConfig::getDevices()
 {
-    CAndroidConfig::getInstance()->deviceList.clear();
-    QStringList deviceStrList;
-    QString cmd = CAndroidConfig::androidAdbPath;
-    ProcessResult result = processCmd(cmd.append(" devices"));
-    deviceStrList = result.resultStr.split("\n");
-    deviceStrList.removeAt(0);
-    for(int i = 0; i < deviceStrList.size(); i++) {
-        QString line = deviceStrList.at(i);
-        line = line.trimmed();
-        if(line.endsWith("device")) {
-            QString serialNumber = line.left(line.length() - 6).trimmed();
-            CAndroidConfig::getInstance()->deviceList.append(new CAndroidDevice(serialNumber));
+    if(CAndroidConfig::getInstance()->deviceList.isEmpty()) {
+        QStringList deviceStrList;
+        QString cmd = CAndroidConfig::androidAdbPath;
+        ProcessResult result = processCmd(cmd.append(" devices"));
+        deviceStrList = result.resultStr.split("\n");
+        deviceStrList.removeAt(0);
+        for(int i = 0; i < deviceStrList.size(); i++) {
+            QString line = deviceStrList.at(i);
+            line = line.trimmed();
+            if(line.endsWith("device")) {
+                QString serialNumber = line.left(line.length() - 6).trimmed();
+                CAndroidConfig::getInstance()->deviceList.append(new CAndroidDevice(serialNumber));
+            }
         }
     }
     return CAndroidConfig::getInstance()->deviceList;
@@ -284,18 +285,18 @@ QString CAndroidApp::getName()
 
 void CAndroidApp::uninstall()
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 uninstall %3")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(device->serialNumber)
-                                     .arg(package));
+    ProcessResult result = processCmd(tr("%1 -s %2 uninstall %3")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(device->serialNumber)
+                                      .arg(package));
 }
 
 void CAndroidApp::pmClear()
 {
-    int exitCode = QProcess::execute(tr("%1 -s %2 shell pm clear %3")
-                                     .arg(CAndroidConfig::androidAdbPath)
-                                     .arg(device->serialNumber)
-                                     .arg(package));
+    ProcessResult result = processCmd(tr("%1 -s %2 shell pm clear %3")
+                                      .arg(CAndroidConfig::androidAdbPath)
+                                      .arg(device->serialNumber)
+                                      .arg(package));
 }
 
 QString CAndroidApp::getRunningService()
