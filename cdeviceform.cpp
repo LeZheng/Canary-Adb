@@ -37,5 +37,7 @@ void CDeviceForm::updateDevices(QList<CAndroidDevice *> deviceList)
         }
         ui->deviceListWidget->clear();
         ui->deviceListWidget->addItems(deviceNameList);
+    }else{
+        ui->deviceListWidget->clear();
     }
 }

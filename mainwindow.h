@@ -32,7 +32,8 @@ private:
     void initFileWidget();
     void initDeviceWidget();
     void initConsoleWidget();
-
+protected:
+    virtual void closeEvent(QCloseEvent *event);
 private slots:
     void showFileRequestMenu(const QPoint &pos,const QModelIndex &index,QString path);
     void showDeviceRequestMenu(const QPoint &pos,QString name);

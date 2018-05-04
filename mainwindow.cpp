@@ -42,8 +42,11 @@ void MainWindow::initDeviceWidget()
 {
     CDeviceForm *deviceForm = new CDeviceForm(this);
     ui->rightDockWidget->setWidget(deviceForm);
-    deviceForm->updateDevices(CAndroidConfig::getDevices());
+    deviceForm->updateDevices(CAndroidContext::getDevices());
     connect(deviceForm,&CDeviceForm::itemMenuRequested,this,&MainWindow::showDeviceRequestMenu);
+    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,[deviceForm](){
+        deviceForm->updateDevices(CAndroidContext::getDevices());
+    });
     //TODO
 }
 
@@ -51,6 +54,11 @@ void MainWindow::initConsoleWidget()
 {
     ui->bottomDockWidget->setWidget(new CConsoleForm(this));
     //TODO
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    CAndroidContext::getInstance()->stopListenAdb();
 }
 
 void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,QString path)
@@ -76,7 +84,7 @@ void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,
     } else if(QFileInfo(path).isFile()) {
         //TODO File
         if(path.endsWith(".apk")) {
-            QList<CAndroidDevice *> deviceList = CAndroidConfig::getDevices();
+            QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
             if(!deviceList.isEmpty()) {
                 QMenu *installApkMenu = menu.addMenu(tr("install apk to..."));
                 for(int i = 0; i < deviceList.size(); i++) {

@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QMap>
 #include <QTextCodec>
+#include <QtConcurrent/QtConcurrent>
 
 namespace candroid
 {
@@ -51,6 +52,7 @@ class CAndroidDevice : public QObject
 public:
     explicit CAndroidDevice(const QString serialNumber,QObject *parent = nullptr);
     const QString serialNumber;
+    void initBaseInfo();
     QString getModel();
     QString getBattery();
     QString getWmSize();
@@ -93,21 +95,30 @@ private:
     QMap<QString, QString> sysProps;// (field "系统属性" :read "adb shell cat /system/build.prop")
 };
 
-class CAndroidConfig
+class CAndroidContext : public QObject
 {
+    Q_OBJECT
 public:
-    static CAndroidConfig * config;
+    static CAndroidContext * config;
     static QString androidSdkPath;
     static QString androidAdbPath;
     static QList<CAndroidDevice *> getDevices();
-    static CAndroidConfig * getInstance()
+    static CAndroidContext * getInstance()
     {
         return config;
     }
+    void startListenAdb();
+    void stopListenAdb();
+
+signals:
+    void deviceListUpdated();
 
 private:
-    QList<CAndroidDevice *> deviceList;
-    CAndroidConfig() {}
+    QObjectCleanupHandler cleanupHandler;
+    QMutex deviceMapMutex;
+    volatile bool isRunning = false;
+    QMap<QString,CAndroidDevice *> deviceMap;
+    CAndroidContext() {}
 
 };
 
