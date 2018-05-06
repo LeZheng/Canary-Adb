@@ -29,22 +29,22 @@ void CAndroidDevice::initBaseInfo()
 {
     this->model = processCmd(tr("%1 -s %2 shell getprop ro.product.model")
                              .arg(CAndroidContext::androidAdbPath)
-                             .arg(serialNumber)).resultStr;
+                             .arg(serialNumber)).resultStr.trimmed();
     this->battery = processCmd(tr("%1 -s %2 shell dumpsys battery")
                                .arg(CAndroidContext::androidAdbPath)
-                               .arg(serialNumber)).resultStr;
+                               .arg(serialNumber)).resultStr.trimmed();
     this->wmSize = processCmd(tr("%1 -s %2 shell wm size")
                               .arg(CAndroidContext::androidAdbPath)
-                              .arg(serialNumber)).resultStr;
+                              .arg(serialNumber)).resultStr.trimmed();
     this->wmDensity = processCmd(tr("%1 -s %2 shell wm density")
                                  .arg(CAndroidContext::androidAdbPath)
-                                 .arg(serialNumber)).resultStr;
+                                 .arg(serialNumber)).resultStr.trimmed();
     this->androidId = processCmd(tr("%1 -s %2 shell settings get secure android_id")
                                  .arg(CAndroidContext::androidAdbPath)
-                                 .arg(serialNumber)).resultStr;
+                                 .arg(serialNumber)).resultStr.trimmed();
     this->androidVersion = processCmd(tr("%1 -s %2 shell getprop ro.build.version.release")
                                       .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber)).resultStr;
+                                      .arg(serialNumber)).resultStr.trimmed();
 }
 
 QString CAndroidDevice::getModel()

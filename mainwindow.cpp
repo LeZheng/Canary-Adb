@@ -44,7 +44,7 @@ void MainWindow::initDeviceWidget()
     ui->rightDockWidget->setWidget(deviceForm);
     deviceForm->updateDevices(CAndroidContext::getDevices());
     connect(deviceForm,&CDeviceForm::itemMenuRequested,this,&MainWindow::showDeviceRequestMenu);
-    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,[deviceForm](){
+    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[deviceForm](){
         deviceForm->updateDevices(CAndroidContext::getDevices());
     });
     //TODO
@@ -102,7 +102,7 @@ void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,
     menu.exec(QCursor::pos());
 }
 
-void MainWindow::showDeviceRequestMenu(const QPoint &pos, QString name)
+void MainWindow::showDeviceRequestMenu(QString name)
 {
     QMenu menu;
     menu.addAction(tr("record screen"),[this](){

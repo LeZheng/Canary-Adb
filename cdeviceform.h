@@ -26,7 +26,7 @@ private:
 
 signals:
     void itemDoubleClicked(QString name);
-    void itemMenuRequested(const QPoint &pos,QString name);
+    void itemMenuRequested(QString name);
 };
 
 #endif // CDEVICEFORM_H

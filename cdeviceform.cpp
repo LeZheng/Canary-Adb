@@ -1,26 +1,27 @@
 #include "cdeviceform.h"
 #include "ui_cdeviceform.h"
 
+#include <QLineEdit>//TODO delete
+
 CDeviceForm::CDeviceForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CDeviceForm)
 {
     ui->setupUi(this);
 
-    connect(ui->deviceListWidget,&QListWidget::itemDoubleClicked,[this](QListWidgetItem *item) {
-        emit itemDoubleClicked(item->text());
+    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+    connect(ui->refreshToolButton,&QToolButton::clicked,[this](){
+        this->updateDevices(CAndroidContext::getDevices());
     });
 
-    connect(ui->deviceListWidget,&QListWidget::customContextMenuRequested,[this](const QPoint &pos) {
-        QListWidgetItem * item = this->ui->deviceListWidget->itemAt(pos);
-        if(item != nullptr){
-            emit itemMenuRequested(pos,this->ui->deviceListWidget->itemAt(pos)->text());
+    connect(ui->deviceStackedWidget,&QStackedWidget::customContextMenuRequested,[this](const QPoint &pos) {
+        QString allName = this->ui->deviceComboBox->currentText();
+        if(!allName.isEmpty()){
+            QString tempName = allName.right(allName.size() - allName.indexOf('[') - 1);
+            emit itemMenuRequested(tempName.left(tempName.size() - 1));
         }
     });
-
-    connect(ui->deviceListWidget,&QListWidget::clicked,[this](const QModelIndex &index) {
-        //TODO
-    });
+    connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
 }
 
 CDeviceForm::~CDeviceForm()
@@ -30,14 +31,15 @@ CDeviceForm::~CDeviceForm()
 
 void CDeviceForm::updateDevices(QList<CAndroidDevice *> deviceList)
 {
+    ui->deviceComboBox->clear();
+
     if(!deviceList.isEmpty()) {
         QStringList deviceNameList;
-        for(int i = 0;i < deviceList.size();i++){
-            deviceNameList << deviceList.at(i)->serialNumber;
+        for(int i = 0; i < deviceList.size(); i++) {
+            CAndroidDevice * device = deviceList.at(i);
+            deviceNameList << tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
+//            ui->deviceStackedWidget->addWidget(new QLineEdit(device->getAndroidVersion(),ui->deviceStackedWidget));
         }
-        ui->deviceListWidget->clear();
-        ui->deviceListWidget->addItems(deviceNameList);
-    }else{
-        ui->deviceListWidget->clear();
+        ui->deviceComboBox->addItems(deviceNameList);
     }
 }
