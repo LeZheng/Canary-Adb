@@ -36,7 +36,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
     void showFileRequestMenu(const QPoint &pos,const QModelIndex &index,QString path);
-    void showDeviceRequestMenu(QString name);
+    void showDeviceRequestMenu(CAndroidDevice *device);
 };
 
 #endif // MAINWINDOW_H

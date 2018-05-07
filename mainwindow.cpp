@@ -40,14 +40,26 @@ void MainWindow::initFileWidget()
 
 void MainWindow::initDeviceWidget()
 {
-    CDeviceForm *deviceForm = new CDeviceForm(this);
-    ui->rightDockWidget->setWidget(deviceForm);
-    deviceForm->updateDevices(CAndroidContext::getDevices());
-    connect(deviceForm,&CDeviceForm::itemMenuRequested,this,&MainWindow::showDeviceRequestMenu);
-    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[deviceForm](){
-        deviceForm->updateDevices(CAndroidContext::getDevices());
+    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+    connect(ui->refreshToolButton,&QToolButton::clicked,[this]() {
+//        this->updateDevices(CAndroidContext::getDevices());TODO
     });
-    //TODO
+    connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
+    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
+        QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
+        this->ui->deviceComboBox->clear();
+        if(!deviceList.isEmpty()) {
+            QStringList deviceNameList;
+            for(int i = 0; i < deviceList.size(); i++) {
+                CAndroidDevice * device = deviceList.at(i);
+                deviceNameList << tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
+                CDeviceForm *deviceForm = new CDeviceForm(device,this->ui->deviceStackedWidget);
+                this->ui->deviceStackedWidget->addWidget(deviceForm);
+                connect(deviceForm,&CDeviceForm::itemMenuRequested,this,&MainWindow::showDeviceRequestMenu);
+            }
+            this->ui->deviceComboBox->addItems(deviceNameList);
+        }
+    });
 }
 
 void MainWindow::initConsoleWidget()
@@ -89,7 +101,7 @@ void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,
                 QMenu *installApkMenu = menu.addMenu(tr("install apk to..."));
                 for(int i = 0; i < deviceList.size(); i++) {
                     CAndroidDevice * device = deviceList.at(i);
-                    installApkMenu->addAction(device->serialNumber,[device,path]() {
+                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,path]() {
                         device->install(path);
                     });
                 }
@@ -102,34 +114,34 @@ void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,
     menu.exec(QCursor::pos());
 }
 
-void MainWindow::showDeviceRequestMenu(QString name)
+void MainWindow::showDeviceRequestMenu(CAndroidDevice *device)
 {
     QMenu menu;
-    menu.addAction(tr("record screen"),[this](){
+    menu.addAction(tr("record screen"),[this]() {
         //TODO
     });
-    menu.addAction(tr("screen shot"),[this](){
+    menu.addAction(tr("screen shot"),[this]() {
         //TODO
     });
-    menu.addAction(tr("set wm size"),[this](){
+    menu.addAction(tr("set wm size"),[this]() {
         //TODO
     });
-    menu.addAction(tr("set wm density"),[this](){
+    menu.addAction(tr("set wm density"),[this]() {
         //TODO
     });
-    menu.addAction(tr("get file"),[this](){
+    menu.addAction(tr("get file"),[this]() {
         //TODO
     });
-    menu.addAction(tr("add file"),[this](){
+    menu.addAction(tr("add file"),[this]() {
         //TODO
     });
-    menu.addAction(tr("reboot"),[this](){
+    menu.addAction(tr("reboot"),[this]() {
         //TODO
     });
-    menu.addAction(tr("install app"),[this](){
+    menu.addAction(tr("install app"),[this]() {
         //TODO
     });
-    menu.addAction(tr("logcat"),[this](){
+    menu.addAction(tr("logcat"),[this]() {
         //TODO
     });
     menu.exec(QCursor::pos());

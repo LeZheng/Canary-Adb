@@ -3,25 +3,19 @@
 
 #include <QLineEdit>//TODO delete
 
-CDeviceForm::CDeviceForm(QWidget *parent) :
+CDeviceForm::CDeviceForm(CAndroidDevice * device,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CDeviceForm)
 {
     ui->setupUi(this);
+    devicePointer = device;
+    updateDevices();
 
-    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-    connect(ui->refreshToolButton,&QToolButton::clicked,[this](){
-        this->updateDevices(CAndroidContext::getDevices());
-    });
-
-    connect(ui->deviceStackedWidget,&QStackedWidget::customContextMenuRequested,[this](const QPoint &pos) {
-        QString allName = this->ui->deviceComboBox->currentText();
-        if(!allName.isEmpty()){
-            QString tempName = allName.right(allName.size() - allName.indexOf('[') - 1);
-            emit itemMenuRequested(tempName.left(tempName.size() - 1));
+    connect(ui->deviceIconLabel,&QLabel::customContextMenuRequested,[this]() {
+        if(!devicePointer.isNull()) {
+            emit itemMenuRequested(devicePointer);
         }
     });
-    connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
 }
 
 CDeviceForm::~CDeviceForm()
@@ -29,17 +23,15 @@ CDeviceForm::~CDeviceForm()
     delete ui;
 }
 
-void CDeviceForm::updateDevices(QList<CAndroidDevice *> deviceList)
+void CDeviceForm::updateDevices()
 {
-    ui->deviceComboBox->clear();
-
-    if(!deviceList.isEmpty()) {
-        QStringList deviceNameList;
-        for(int i = 0; i < deviceList.size(); i++) {
-            CAndroidDevice * device = deviceList.at(i);
-            deviceNameList << tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
-//            ui->deviceStackedWidget->addWidget(new QLineEdit(device->getAndroidVersion(),ui->deviceStackedWidget));
-        }
-        ui->deviceComboBox->addItems(deviceNameList);
+    if(!devicePointer.isNull()) {
+        CAndroidDevice * device = devicePointer;
+        ui->androidIdLineEdit->setText(device->getAndroidId());
+        ui->androidVersionLineEdit->setText(device->getAndroidVersion());
+        ui->deviceNameLineEdit->setText(device->getModel());
+        ui->wmDensityLineEdit->setText(device->getWmDensity());
+        ui->wmSizeLineEdit->setText(device->getWmSize());
+        ui->deviceIconLabel->setPixmap(QPixmap(":/img/phone"));
     }
 }

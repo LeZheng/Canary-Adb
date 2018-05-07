@@ -43,3 +43,6 @@ FORMS += \
     cfileform.ui \
     cconsoleform.ui \
     cdeviceform.ui
+
+RESOURCES += \
+    canary-img.qrc

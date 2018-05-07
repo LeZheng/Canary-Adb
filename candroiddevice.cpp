@@ -30,9 +30,6 @@ void CAndroidDevice::initBaseInfo()
     this->model = processCmd(tr("%1 -s %2 shell getprop ro.product.model")
                              .arg(CAndroidContext::androidAdbPath)
                              .arg(serialNumber)).resultStr.trimmed();
-    this->battery = processCmd(tr("%1 -s %2 shell dumpsys battery")
-                               .arg(CAndroidContext::androidAdbPath)
-                               .arg(serialNumber)).resultStr.trimmed();
     this->wmSize = processCmd(tr("%1 -s %2 shell wm size")
                               .arg(CAndroidContext::androidAdbPath)
                               .arg(serialNumber)).resultStr.trimmed();
@@ -54,6 +51,9 @@ QString CAndroidDevice::getModel()
 
 QString CAndroidDevice::getBattery()
 {
+    this->battery = processCmd(tr("%1 -s %2 shell dumpsys battery")
+                               .arg(CAndroidContext::androidAdbPath)
+                               .arg(serialNumber)).resultStr.trimmed();
     return this->battery;
 }
 

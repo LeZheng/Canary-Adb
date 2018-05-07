@@ -2,6 +2,8 @@
 #define CDEVICEFORM_H
 
 #include <QWidget>
+#include <QTableWidget>
+#include <QPointer>
 
 #include "candroiddevice.h"
 
@@ -15,18 +17,18 @@ class CDeviceForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit CDeviceForm(QWidget *parent = 0);
+    explicit CDeviceForm(CAndroidDevice * device,QWidget *parent = 0);
     ~CDeviceForm();
 
 public slots:
-    void updateDevices(QList<CAndroidDevice *> deviceList);
+    void updateDevices();
 
 private:
     Ui::CDeviceForm *ui;
+    QPointer<CAndroidDevice> devicePointer;
 
 signals:
-    void itemDoubleClicked(QString name);
-    void itemMenuRequested(QString name);
+    void itemMenuRequested(CAndroidDevice *device);
 };
 
 #endif // CDEVICEFORM_H
