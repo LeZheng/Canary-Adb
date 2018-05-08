@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QPointer>
-
+#include <QDropEvent>
+#include <QMenu>
+#include <QDrag>
 #include "candroiddevice.h"
 
 namespace Ui
@@ -26,6 +28,13 @@ public slots:
 private:
     Ui::CDeviceForm *ui;
     QPointer<CAndroidDevice> devicePointer;
+    QPoint mStartPoint;
+
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dropEvent(QDropEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
 
 signals:
     void itemMenuRequested(CAndroidDevice *device);

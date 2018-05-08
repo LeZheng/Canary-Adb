@@ -1,6 +1,10 @@
 #include "cfileform.h"
 #include "ui_cfileform.h"
 
+#include <QDebug>
+#include <QDrag>
+#include <QMimeData>
+
 CFileForm::CFileForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CFileForm)
