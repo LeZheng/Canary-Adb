@@ -2,5 +2,6 @@
     <qresource prefix="/img">
         <file alias="phone">img/smartphone.png</file>
         <file alias="phone_small">img/smartphone_small.png</file>
+        <file alias="startup_bg">img/startup_bg.jpg</file>
     </qresource>
 </RCC>

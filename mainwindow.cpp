@@ -42,12 +42,18 @@ void MainWindow::initDeviceWidget()
 {
     ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     connect(ui->refreshToolButton,&QToolButton::clicked,[this]() {
-//        this->updateDevices(CAndroidContext::getDevices());TODO
+        //TODO
     });
     connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
     connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
         this->ui->deviceComboBox->clear();
+        while(this->ui->deviceStackedWidget->count() > 0){
+            QWidget *widget = this->ui->deviceStackedWidget->widget(0);
+            this->ui->deviceStackedWidget->removeWidget(widget);
+            delete widget;
+        }
+
         if(!deviceList.isEmpty()) {
             QStringList deviceNameList;
             for(int i = 0; i < deviceList.size(); i++) {
@@ -59,6 +65,7 @@ void MainWindow::initDeviceWidget()
             }
             this->ui->deviceComboBox->addItems(deviceNameList);
         }
+
     });
 }
 

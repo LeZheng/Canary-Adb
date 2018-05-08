@@ -25,41 +25,40 @@ CAndroidDevice::CAndroidDevice(QString serialNumber,QObject *parent) :
 
 }
 
-void CAndroidDevice::initBaseInfo()
-{
-    this->model = processCmd(tr("%1 -s %2 shell getprop ro.product.model")
-                             .arg(CAndroidContext::androidAdbPath)
-                             .arg(serialNumber)).resultStr.trimmed();
-    this->wmSize = processCmd(tr("%1 -s %2 shell wm size")
-                              .arg(CAndroidContext::androidAdbPath)
-                              .arg(serialNumber)).resultStr.trimmed();
-    this->wmDensity = processCmd(tr("%1 -s %2 shell wm density")
-                                 .arg(CAndroidContext::androidAdbPath)
-                                 .arg(serialNumber)).resultStr.trimmed();
-    this->androidId = processCmd(tr("%1 -s %2 shell settings get secure android_id")
-                                 .arg(CAndroidContext::androidAdbPath)
-                                 .arg(serialNumber)).resultStr.trimmed();
-    this->androidVersion = processCmd(tr("%1 -s %2 shell getprop ro.build.version.release")
-                                      .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber)).resultStr.trimmed();
-}
-
 QString CAndroidDevice::getModel()
 {
     return this->model;
 }
 
+void CAndroidDevice::updateModel()
+{
+    this->model = processCmd(tr("%1 -s %2 shell getprop ro.product.model")
+                             .arg(CAndroidContext::androidAdbPath)
+                             .arg(serialNumber)).resultStr.trimmed();
+}
+
 QString CAndroidDevice::getBattery()
+{
+    return this->battery;
+}
+
+void CAndroidDevice::updateBattery()
 {
     this->battery = processCmd(tr("%1 -s %2 shell dumpsys battery")
                                .arg(CAndroidContext::androidAdbPath)
                                .arg(serialNumber)).resultStr.trimmed();
-    return this->battery;
 }
 
 QString CAndroidDevice::getWmSize()
 {
     return this->wmSize;
+}
+
+void CAndroidDevice::updateWmSize()
+{
+    this->wmSize = processCmd(tr("%1 -s %2 shell wm size")
+                              .arg(CAndroidContext::androidAdbPath)
+                              .arg(serialNumber)).resultStr.trimmed();
 }
 
 void CAndroidDevice::setWmSize(int width, int height)
@@ -83,6 +82,13 @@ QString CAndroidDevice::getWmDensity()
     return this->wmDensity;
 }
 
+void CAndroidDevice::updateWmDensity()
+{
+    this->wmDensity = processCmd(tr("%1 -s %2 shell wm density")
+                                 .arg(CAndroidContext::androidAdbPath)
+                                 .arg(serialNumber)).resultStr.trimmed();
+}
+
 void CAndroidDevice::setWmDensity(int density)
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell wm density %3")
@@ -98,12 +104,16 @@ void CAndroidDevice::resetWmDensity()
                                       .arg(serialNumber));
 }
 
-QString CAndroidDevice::getWindownDisplay()
+QString CAndroidDevice::getWindowDisplay()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys window displays")
+    return this->windownDisplay;
+}
+
+void CAndroidDevice::updateWindowDiaplay()
+{
+    this->windownDisplay = processCmd(tr("%1 -s %2 shell dumpsys window displays")
                                       .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber));
-    return result.resultStr;
+                                      .arg(serialNumber)).resultStr.trimmed();
 }
 
 QString CAndroidDevice::getAndroidId()
@@ -111,36 +121,76 @@ QString CAndroidDevice::getAndroidId()
     return this->androidId;
 }
 
+void CAndroidDevice::updateAndroidId()
+{
+    this->androidId = processCmd(tr("%1 -s %2 shell settings get secure android_id")
+                                 .arg(CAndroidContext::androidAdbPath)
+                                 .arg(serialNumber)).resultStr.trimmed();
+}
+
 QString CAndroidDevice::getAndroidVersion()
 {
     return this->androidVersion;
 }
 
+void CAndroidDevice::updateAndroidVersion()
+{
+    this->androidVersion = processCmd(tr("%1 -s %2 shell getprop ro.build.version.release")
+                                      .arg(CAndroidContext::androidAdbPath)
+                                      .arg(serialNumber)).resultStr.trimmed();
+}
+
 QString CAndroidDevice::getNetworkInfo()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell ifconfig")
-                                      .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber));
-    return result.resultStr;
+    return this->networkInfo;
+}
+
+void CAndroidDevice::updateNetworkInfo()
+{
+    this->networkInfo = processCmd(tr("%1 -s %2 shell ifconfig")
+                                   .arg(CAndroidContext::androidAdbPath)
+                                   .arg(serialNumber)).resultStr.trimmed();
 }
 
 QString CAndroidDevice::getCpuInfo()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell cat /proc/cpuinfo")
-                                      .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber));
-    return result.resultStr;
+    return this->cpuInfo;
 }
 
-QString CAndroidDevice::getMenInfo()
+void CAndroidDevice::updateCpuInfo()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell cat /proc/meminfo")
-                                      .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber));
-    return result.resultStr;
+    this->cpuInfo = processCmd(tr("%1 -s %2 shell cat /proc/cpuinfo")
+                               .arg(CAndroidContext::androidAdbPath)
+                               .arg(serialNumber)).resultStr.trimmed();
+}
+
+QString CAndroidDevice::getMemInfo()
+{
+
+    return this->memInfo;
+}
+
+void CAndroidDevice::updateMemInfo()
+{
+    this->memInfo = processCmd(tr("%1 -s %2 shell cat /proc/meminfo")
+                               .arg(CAndroidContext::androidAdbPath)
+                               .arg(serialNumber)).resultStr.trimmed();
 }
 
 QMap<QString, QString> CAndroidDevice::getSystemProps()
+{
+    return sysProps;
+}
+
+QString CAndroidDevice::getSystemProp(QString key)
+{
+    if(sysProps.contains(key))
+        return sysProps[key];
+    else
+        return "";
+}
+
+void CAndroidDevice::updateSystemProps()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell cat /system/build.prop")
                                       .arg(CAndroidContext::androidAdbPath)
@@ -154,18 +204,6 @@ QMap<QString, QString> CAndroidDevice::getSystemProps()
             sysProps[keyAndValue.at(0)] = keyAndValue.at(1);
         }
     }
-    return sysProps;
-}
-
-QString CAndroidDevice::getSystemProp(QString key)
-{
-    if(sysProps.size() == 0) {
-        getSystemProps();
-    }
-    if(sysProps.contains(key))
-        return sysProps[key];
-    else
-        return "";
 }
 
 void CAndroidDevice::screenShot(QString path)
@@ -212,24 +250,24 @@ void CAndroidDevice::reboot()
                                       .arg(serialNumber));
 }
 
-QStringList CAndroidDevice::pmListPackage()
+void CAndroidDevice::pmListPackage()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell pm list packages")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
-
-    return result.resultStr.split('\n');
+    QListIterator<QString> packageIter(result.resultStr.split('\n'));
+    while(packageIter.hasNext()) {
+        QString packageName = packageIter.next();
+        applicationMap.insert(packageName,new CAndroidApp(packageName,this));
+    }
 }
 
 QList<CAndroidApp *> CAndroidDevice::getApplications()
 {
     QList<CAndroidApp *> applicationList;
-    ProcessResult result = processCmd(tr("%1 -s %2 shell pm list packages")
-                                      .arg(CAndroidContext::androidAdbPath)
-                                      .arg(serialNumber));
-    QListIterator<QString> packageIter(result.resultStr.split('\n'));
-    for(; packageIter.hasNext();) {
-        applicationList << new CAndroidApp(packageIter.next(),this);
+    QMapIterator<QString,CAndroidApp *> iter(this->applicationMap);
+    while(iter.hasNext()){
+        applicationList << iter.next().value();
     }
     return applicationList;
 }
@@ -261,7 +299,7 @@ QList<CAndroidDevice *> CAndroidContext::getDevices()
     QMutexLocker locker(&(CAndroidContext::getInstance()->deviceMapMutex));
     QList<CAndroidDevice *> deviceList;
     QMapIterator<QString,CAndroidDevice *> iter(CAndroidContext::getInstance()->deviceMap);
-    while(iter.hasNext()){
+    while(iter.hasNext()) {
         deviceList << iter.next().value();
     }
     return deviceList;
@@ -269,42 +307,58 @@ QList<CAndroidDevice *> CAndroidContext::getDevices()
 
 void CAndroidContext::startListenAdb()
 {
-    if(!isRunning){
+    if(!isRunning) {
         isRunning = true;
-        QtConcurrent::run([this](){
-            while(this->isRunning){
+        QtConcurrent::run([this]() {
+            while(this->isRunning) {
+                emit updateStateChanged(tr("update devices"));
                 ProcessResult result = processCmd(tr("%1 devices").arg(CAndroidContext::androidAdbPath));
-                if(result.exitCode == 0){
+                if(result.exitCode == 0) {
                     QStringList deviceStrList = result.resultStr.trimmed().split("\n");
-                    if(deviceStrList.size() > 0){
+                    if(deviceStrList.size() > 0) {
                         deviceStrList.removeAt(0);
                     }
                     bool needUpdate = (deviceStrList.size() != this->deviceMap.size());
                     this->deviceMapMutex.lock();
-                    if(needUpdate){
-                        this->deviceMap.clear();
-                        this->cleanupHandler.clear();
-                    }
+                    QMap<QString,CAndroidDevice *> tmpDeviceMap;
                     for(int i = 0; i < deviceStrList.size(); i++) {
                         QString line = deviceStrList.at(i);
                         line = line.trimmed();
                         if(line.endsWith("device")) {
                             QString serialNumber = line.left(line.length() - 6).trimmed();
-                            if(this->deviceMap.contains(serialNumber)){
-                                continue;
-                            }else{
+                            emit updateStateChanged(tr("update device:[%1]").arg(serialNumber));
+                            if(this->deviceMap.contains(serialNumber)) {
+                                CAndroidDevice * tmpDevice = this->deviceMap.take(serialNumber);
+                                tmpDeviceMap.insert(serialNumber,tmpDevice);
+                                this->cleanupHandler.remove(tmpDevice);
+                            } else {
                                 CAndroidDevice * device = new CAndroidDevice(serialNumber);
-                                device->initBaseInfo();
-                                this->cleanupHandler.add(device);
-                                this->deviceMap.insert(serialNumber,device);
+                                emit updateStateChanged(tr("udpate device[%1]'s name").arg(serialNumber));
+                                device->updateModel();
+                                emit updateStateChanged(tr("udpate device[%1]'s wm density").arg(serialNumber));
+                                device->updateWmDensity();
+                                emit updateStateChanged(tr("udpate device[%1]'s wm size").arg(serialNumber));
+                                device->updateWmSize();
+                                emit updateStateChanged(tr("udpate device[%1]'s android id").arg(serialNumber));
+                                device->updateAndroidId();
+                                emit updateStateChanged(tr("udpate device[%1]'s android version").arg(serialNumber));
+                                device->updateAndroidVersion();
+                                tmpDeviceMap.insert(serialNumber,device);
                             }
                         }
                     }
+                    this->deviceMap.clear();
+                    this->deviceMap = tmpDeviceMap;
+                    this->cleanupHandler.clear();
+                    QMapIterator<QString,CAndroidDevice *> iter(this->deviceMap);
+                    while(iter.hasNext()){
+                        this->cleanupHandler.add(iter.next().value());
+                    }
                     this->deviceMapMutex.unlock();
-                    if(needUpdate){
+                    if(needUpdate) {
                         emit deviceListUpdated();
                     }
-                }else{
+                } else {
                     //TODO error
                 }
                 QThread::sleep(1);
