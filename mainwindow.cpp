@@ -11,13 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->leftDockWidget->titleBarWidget()->setFixedHeight(0);
     this->ui->rightDockWidget->setTitleBarWidget(new QWidget(this));
     this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
-    this->ui->bottomDockWidget->setTitleBarWidget(new QWidget(this));
-    this->ui->bottomDockWidget->titleBarWidget()->setFixedHeight(0);
 
     initToolBar();
     initFileWidget();
     initDeviceWidget();
-    initConsoleWidget();
 }
 
 MainWindow::~MainWindow()
@@ -69,12 +66,6 @@ void MainWindow::initDeviceWidget()
     });
 }
 
-void MainWindow::initConsoleWidget()
-{
-    ui->bottomDockWidget->setWidget(new CConsoleForm(this));
-    //TODO
-}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     CAndroidContext::getInstance()->stopListenAdb();
@@ -124,6 +115,18 @@ void MainWindow::showFileRequestMenu(const QPoint &pos,const QModelIndex &index,
 void MainWindow::showDeviceRequestMenu(CAndroidDevice *device)
 {
     QMenu menu;
+    menu.addAction(tr("open detail"),[this,device](){
+        if(this->deviceTabMap.contains(device->serialNumber)){
+            this->ui->detailTabWidget->setCurrentWidget(this->deviceTabMap.value(device->serialNumber));
+        }else{
+            QTabWidget *widget = new QTabWidget(this->ui->detailTabWidget);
+            widget->setTabPosition(QTabWidget::South);
+            widget->addTab(new QWidget(widget),tr("detail"));//TODO
+            widget->addTab(new CConsoleForm(device,widget),tr("log"));
+            this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
+            this->deviceTabMap.insert(device->serialNumber,widget);
+        }
+    });
     menu.addAction(tr("record screen"),[this]() {
         //TODO
     });

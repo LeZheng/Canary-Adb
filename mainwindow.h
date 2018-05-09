@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDockWidget>
 #include <QDesktopServices>
+#include <QLabel>
 #include <QUrl>
 
 #include "cdeviceform.h"
@@ -27,11 +28,11 @@ public:
 private:
     Ui::MainWindow *ui;
     CFileForm *fileForm;
+    QMap<QString,QTabWidget *> deviceTabMap;
 
     void initToolBar();
     void initFileWidget();
     void initDeviceWidget();
-    void initConsoleWidget();
 protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
