@@ -22,7 +22,15 @@ int main(int argc, char *argv[])
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::updateStateChanged,splash,[splash](const QString &msg){
         splash->showMessage(msg,Qt::AlignBottom,Qt::white);
     });
+    a.connect(CAndroidContext::getInstance(),&CAndroidContext::findNewDevice,splash,[splash](CAndroidDevice *device){
+        splash->showMessage(splash->tr("init device:%1 ...").arg(device->serialNumber),Qt::AlignBottom,Qt::white);
+    });
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,splash,[splash,window](){
+        window->show();
+        splash->finish(window);
+        delete splash;
+    });
+    a.connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListNotUpdated,splash,[splash,window](){
         window->show();
         splash->finish(window);
         delete splash;

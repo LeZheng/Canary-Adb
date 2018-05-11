@@ -326,13 +326,14 @@ void CAndroidContext::startListenAdb()
                         line = line.trimmed();
                         if(line.endsWith("device")) {
                             QString serialNumber = line.left(line.length() - 6).trimmed();
-                            emit updateStateChanged(tr("update device:[%1]").arg(serialNumber));
                             if(this->deviceMap.contains(serialNumber)) {
                                 CAndroidDevice * tmpDevice = this->deviceMap.take(serialNumber);
                                 tmpDeviceMap.insert(serialNumber,tmpDevice);
                                 this->cleanupHandler.remove(tmpDevice);
                             } else {
                                 CAndroidDevice * device = new CAndroidDevice(serialNumber);
+                                emit findNewDevice(device);
+
                                 emit updateStateChanged(tr("udpate device[%1]'s name").arg(serialNumber));
                                 device->updateModel();
                                 emit updateStateChanged(tr("udpate device[%1]'s wm density").arg(serialNumber));
@@ -357,6 +358,8 @@ void CAndroidContext::startListenAdb()
                     this->deviceMapMutex.unlock();
                     if(needUpdate) {
                         emit deviceListUpdated();
+                    }else{
+                        emit deviceListNotUpdated();
                     }
                 } else {
                     //TODO error
