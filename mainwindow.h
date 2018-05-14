@@ -11,6 +11,7 @@
 #include "cconsoleform.h"
 #include "cfileform.h"
 #include "candroiddevice.h"
+#include "cdeviceeditform.h"
 
 namespace Ui
 {

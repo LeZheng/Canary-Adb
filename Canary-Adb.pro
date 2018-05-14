@@ -29,20 +29,23 @@ SOURCES += \
     cfileform.cpp \
     cconsoleform.cpp \
     cdeviceform.cpp \
-    candroiddevice.cpp
+    candroiddevice.cpp \
+    cdeviceeditform.cpp
 
 HEADERS += \
         mainwindow.h \
     cfileform.h \
     cconsoleform.h \
     cdeviceform.h \
-    candroiddevice.h
+    candroiddevice.h \
+    cdeviceeditform.h
 
 FORMS += \
         mainwindow.ui \
     cfileform.ui \
     cconsoleform.ui \
-    cdeviceform.ui
+    cdeviceform.ui \
+    cdeviceeditform.ui
 
 RESOURCES += \
     canary-img.qrc

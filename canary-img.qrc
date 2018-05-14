@@ -3,5 +3,18 @@
         <file alias="phone">img/smartphone.png</file>
         <file alias="phone_small">img/smartphone_small.png</file>
         <file alias="startup_bg">img/startup_bg.jpg</file>
+        <file alias="icon_add">img/list-add.png</file>
+        <file alias="icon_cut_down">img/list-remove.png</file>
+        <file alias="screen_record">img/camera-web.png</file>
+        <file alias="screen_shot">img/camera-photo.png</file>
+        <file alias="key_back">img/key-back.png</file>
+        <file alias="key_menu">img/key-menu.png</file>
+        <file alias="key_power">img/key-power.png</file>
+        <file alias="turn_off_screen">img/turn-off-screen.png</file>
+        <file alias="turn_on_screen">img/turn-on-screen.png</file>
+        <file alias="volume_high">img/audio-volume-high.png</file>
+        <file alias="volume_low">img/audio-volume-low.png</file>
+        <file alias="volume_muted">img/audio-volume-muted.png</file>
+        <file alias="key_home">img/key-home.png</file>
     </qresource>
 </RCC>

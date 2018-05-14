@@ -121,7 +121,7 @@ void MainWindow::showDeviceRequestMenu(CAndroidDevice *device)
         }else{
             QTabWidget *widget = new QTabWidget(this->ui->detailTabWidget);
             widget->setTabPosition(QTabWidget::South);
-            widget->addTab(new QWidget(widget),tr("detail"));//TODO
+            widget->addTab(new CDeviceEditForm(widget),tr("detail"));
             widget->addTab(new CConsoleForm(device,widget),tr("log"));
             this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
             this->deviceTabMap.insert(device->serialNumber,widget);
