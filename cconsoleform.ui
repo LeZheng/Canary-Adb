@@ -35,87 +35,211 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <item row="1" column="0" colspan="7">
-    <widget class="QTextEdit" name="textEdit"/>
-   </item>
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>3</number>
      </property>
-     <property name="text">
-      <string>日志级别:</string>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>日志级别:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="logLevelComboBox">
+       <item>
+        <property name="text">
+         <string>Verbose</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Debug</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Info</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Warn</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Error</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Assert</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>进程:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="processComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>No Debuggable Processes</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>日志格式:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="logFormatComboBox">
+       <item>
+        <property name="text">
+         <string>brief</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>process</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tag</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>thread</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>raw</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>time</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>long</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTextEdit" name="logContentTextEdit">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QComboBox" name="comboBox">
-     <item>
-      <property name="text">
-       <string>Verbose</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Debug</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Info</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Warn</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Error</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Assert</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="0" column="5">
-    <widget class="QLineEdit" name="lineEdit"/>
-   </item>
-   <item row="0" column="3">
-    <widget class="QComboBox" name="comboBox_2">
-     <property name="minimumSize">
-      <size>
-       <width>200</width>
-       <height>0</height>
-      </size>
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>3</number>
      </property>
      <item>
-      <property name="text">
-       <string>No Debuggable Processes</string>
-      </property>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Tag过滤:</string>
+       </property>
+      </widget>
      </item>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>进程:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="4">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>过滤Tag:</string>
-     </property>
-    </widget>
+     <item>
+      <widget class="QLineEdit" name="filterTagLineEdit">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>内容过滤:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="filterContentLineEdit">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>进程过滤:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="filterPIDLineEdit">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

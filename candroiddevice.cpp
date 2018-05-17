@@ -266,7 +266,7 @@ QList<CAndroidApp *> CAndroidDevice::getApplications()
 {
     QList<CAndroidApp *> applicationList;
     QMapIterator<QString,CAndroidApp *> iter(this->applicationMap);
-    while(iter.hasNext()){
+    while(iter.hasNext()) {
         applicationList << iter.next().value();
     }
     return applicationList;
@@ -289,9 +289,28 @@ QString CAndroidDevice::getRunningService()
     return result.resultStr;
 }
 
-QProcess *CAndroidDevice::logcat(QString patterns)
+QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, QString content, QString pid)
 {
-    return nullptr;//TODO
+    QString cmd = tr("%1 -s %2 logcat")
+                  .arg(CAndroidContext::androidAdbPath)
+                  .arg(serialNumber);
+    if(!format.isEmpty())
+        cmd.append(" -v ").append(format);
+    if(tag.isEmpty())
+        tag = "*";
+    if(logLevel.size() > 1)
+        logLevel = logLevel.left(1);
+    if(!logLevel.isEmpty())
+        cmd.append(tr(" -s \"%1:%2\"").arg(tag).arg(logLevel));
+    if(!content.isEmpty())
+        cmd.append(" -e \"").append(content).append("\"");
+    if(!pid.isEmpty())
+        cmd.append(" --pid ").append(pid);
+
+    qDebug() << cmd;
+    QProcess * process = new QProcess();
+    process->start(cmd);
+    return process;
 }
 
 QList<CAndroidDevice *> CAndroidContext::getDevices()
@@ -352,13 +371,13 @@ void CAndroidContext::startListenAdb()
                     this->deviceMap = tmpDeviceMap;
                     this->cleanupHandler.clear();
                     QMapIterator<QString,CAndroidDevice *> iter(this->deviceMap);
-                    while(iter.hasNext()){
+                    while(iter.hasNext()) {
                         this->cleanupHandler.add(iter.next().value());
                     }
                     this->deviceMapMutex.unlock();
                     if(needUpdate) {
                         emit deviceListUpdated();
-                    }else{
+                    } else {
                         emit deviceListNotUpdated();
                     }
                 } else {
