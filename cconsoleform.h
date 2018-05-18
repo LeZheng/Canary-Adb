@@ -2,8 +2,11 @@
 #define CCONSOLEFORM_H
 
 #include <QWidget>
-
+#include <QMenu>
+#include <QClipboard>
+#include <QFileDialog>
 #include "candroiddevice.h"
+
 
 namespace Ui
 {
@@ -24,7 +27,9 @@ signals:
 private:
     Ui::CConsoleForm *ui;
     QPointer<CAndroidDevice> devicePointer;
+    QString deviceSerialNumber;
     QObjectCleanupHandler cleaner;
+    bool isDeviceConnected;
 
     QProcess * logProcess;
 };

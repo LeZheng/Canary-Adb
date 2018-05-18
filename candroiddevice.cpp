@@ -383,7 +383,7 @@ void CAndroidContext::startListenAdb()
                 } else {
                     //TODO error
                 }
-                QThread::sleep(1);
+                QThread::msleep(500);
             }
         });
     }

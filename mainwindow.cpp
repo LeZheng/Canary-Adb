@@ -12,6 +12,18 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->rightDockWidget->setTitleBarWidget(new QWidget(this));
     this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
 
+    connect(this->ui->detailTabWidget,&QTabWidget::tabBarDoubleClicked,[this](int index){
+        QWidget * widget = this->ui->detailTabWidget->widget(index);
+        QString tabText = this->ui->detailTabWidget->tabText(index);
+        tabText = tabText.right(tabText.lastIndexOf(" [") + 2);
+        tabText = tabText.left(tabText.size() - 1);
+        if(this->deviceTabMap.contains(tabText)){
+            this->deviceTabMap.remove(tabText);
+        }
+        this->ui->detailTabWidget->removeTab(index);
+        widget->deleteLater();
+    });
+
     initToolBar();
     initFileWidget();
     initDeviceWidget();
