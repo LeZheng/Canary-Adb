@@ -6,6 +6,7 @@
 #include <QDesktopServices>
 #include <QLabel>
 #include <QUrl>
+#include <QProgressDialog>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"
@@ -30,6 +31,8 @@ private:
     Ui::MainWindow *ui;
     CFileForm *fileForm;
     QMap<QString,QTabWidget *> deviceTabMap;
+    QProgressDialog * loadingDialog;
+    QPropertyAnimation *loadAnimation;
 
     void initToolBar();
     void initFileWidget();
@@ -37,8 +40,8 @@ private:
 protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
-    void showFileRequestMenu(const QPoint &pos,const QModelIndex &index,QString path);
-    void showDeviceRequestMenu(CAndroidDevice *device);
+    void openDeviceDetailView(CAndroidDevice *device);
+    void showLoadingDialog(const QString &title,const QString &content);
 };
 
 #endif // MAINWINDOW_H

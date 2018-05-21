@@ -5,6 +5,10 @@
 #include <QFileSystemModel>
 #include <QStack>
 #include <QTreeView>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QMenu>
+#include "candroiddevice.h"
 
 namespace Ui
 {
@@ -23,8 +27,8 @@ public:
     QTreeView * getTreeView(){return fileTreeView;}
 
 signals:
-    void itemDoubleClicked(QString path);
-    void itemMenuRequested(const QPoint &pos,const QModelIndex &index,QString path);
+    void processStart(const QString &title,const QString &content);
+    void processEnd(int exitCode,const QString &msg);
 
 private:
     Ui::CFileForm *ui;
@@ -32,6 +36,8 @@ private:
     QTreeView * fileTreeView;
     QString workPath;
     QStack<QModelIndex> historyPathStack;
+
+    void showFileRequestMenu(const QPoint &pos);
 };
 
 #endif // CFILEFORM_H
