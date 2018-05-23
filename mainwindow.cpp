@@ -101,10 +101,14 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device)
     } else {
         QTabWidget *widget = new QTabWidget(this->ui->detailTabWidget);
         widget->setTabPosition(QTabWidget::South);
-        widget->addTab(new CDeviceEditForm(widget),tr("detail"));
+        CDeviceEditForm * editForm = new CDeviceEditForm(device,widget);
+        widget->addTab(editForm,tr("detail"));
         widget->addTab(new CConsoleForm(device,widget),tr("log"));
         this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
         this->deviceTabMap.insert(device->serialNumber,widget);
+
+        connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
+        connect(editForm,&CDeviceEditForm::processEnd,this->loadingDialog,&QProgressDialog::hide);
     }
 }
 

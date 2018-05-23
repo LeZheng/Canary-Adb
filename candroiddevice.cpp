@@ -289,6 +289,14 @@ QString CAndroidDevice::getRunningService()
     return result.resultStr;
 }
 
+void CAndroidDevice::inputKeyEvent(int keyCode)
+{
+    processCmd(tr("%1 -s %2 shell input keyevent %3")
+               .arg(CAndroidContext::androidAdbPath)
+               .arg(serialNumber)
+               .arg(keyCode));
+}
+
 QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, QString content, QString pid)
 {
     QString cmd = tr("%1 -s %2 logcat")
