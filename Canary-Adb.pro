@@ -30,7 +30,8 @@ SOURCES += \
     cconsoleform.cpp \
     cdeviceform.cpp \
     candroiddevice.cpp \
-    cdeviceeditform.cpp
+    cdeviceeditform.cpp \
+    screenrecordoptiondialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,14 +39,16 @@ HEADERS += \
     cconsoleform.h \
     cdeviceform.h \
     candroiddevice.h \
-    cdeviceeditform.h
+    cdeviceeditform.h \
+    screenrecordoptiondialog.h
 
 FORMS += \
         mainwindow.ui \
     cfileform.ui \
     cconsoleform.ui \
     cdeviceform.ui \
-    cdeviceeditform.ui
+    cdeviceeditform.ui \
+    screenrecordoptiondialog.ui
 
 RESOURCES += \
     canary-img.qrc

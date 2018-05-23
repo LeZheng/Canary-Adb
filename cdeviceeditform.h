@@ -4,7 +4,10 @@
 #include <QWidget>
 #include <QFileDialog>
 #include <QFutureWatcher>
+#include <QProgressDialog>
+#include <QTimer>
 #include "candroiddevice.h"
+#include "screenrecordoptiondialog.h"
 
 namespace Ui {
 class CDeviceEditForm;

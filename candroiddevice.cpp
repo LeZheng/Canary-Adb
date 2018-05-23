@@ -232,15 +232,22 @@ void  CAndroidDevice::push(QString srcPath, QString desPath)
                                       .arg(desPath));
 }
 
-QProcess * CAndroidDevice::screenRecord(QString recordPath, int timeLimit)
+QProcess * CAndroidDevice::screenRecord(QString recordPath,QString size,int bitRate)
 {
-    QProcess * process = new QProcess(this);
-    process->start(tr("%1 -s %2 shell screenrecord %3 --time-limit %4")
-                   .arg(CAndroidContext::androidAdbPath)
-                   .arg(serialNumber)
-                   .arg(recordPath)
-                   .arg(timeLimit));
-    return process;//TODO
+    QString cmd = tr("%1 -s %2 shell screenrecord ")
+            .arg(CAndroidContext::androidAdbPath)
+            .arg(serialNumber);
+    if(!size.isEmpty()){
+        cmd.append(tr(" --size %1 ").arg(size));
+    }
+    if(bitRate > 0){
+        cmd.append(tr(" --bit-rate %1 ").arg(bitRate));
+    }
+    cmd.append(recordPath);
+
+    QProcess * process = new QProcess();
+    process->start(cmd);
+    return process;
 }
 
 void CAndroidDevice::reboot()

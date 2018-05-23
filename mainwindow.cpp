@@ -54,7 +54,7 @@ void MainWindow::initFileWidget()
     fileForm = new CFileForm(this);
     ui->leftDockWidget->setWidget(fileForm);
     connect(fileForm,&CFileForm::processStart,this,&MainWindow::showLoadingDialog);
-    connect(fileForm,&CFileForm::processEnd,this->loadingDialog,&QProgressDialog::hide);
+    connect(fileForm,&CFileForm::processEnd,this,&MainWindow::hideLoadingDialog);
 }
 
 void MainWindow::initDeviceWidget()
@@ -82,7 +82,7 @@ void MainWindow::initDeviceWidget()
                 this->ui->deviceStackedWidget->addWidget(deviceForm);
                 connect(deviceForm,&CDeviceForm::requestOpenDetail,this,&MainWindow::openDeviceDetailView);
                 connect(deviceForm,&CDeviceForm::processStart,this,&MainWindow::showLoadingDialog);
-                connect(deviceForm,&CDeviceForm::processEnd,this->loadingDialog,&QProgressDialog::hide);
+                connect(deviceForm,&CDeviceForm::processEnd,this,&MainWindow::hideLoadingDialog);
             }
             this->ui->deviceComboBox->addItems(deviceNameList);
         }
@@ -108,7 +108,7 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device)
         this->deviceTabMap.insert(device->serialNumber,widget);
 
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
-        connect(editForm,&CDeviceEditForm::processEnd,this->loadingDialog,&QProgressDialog::hide);
+        connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
     }
 }
 
@@ -118,4 +118,10 @@ void MainWindow::showLoadingDialog(const QString &title, const QString &content)
     this->loadingDialog->setLabelText(content);
     this->loadingDialog->show();
     this->loadAnimation->start();
+}
+
+void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
+{
+    this->loadAnimation->stop();
+    this->loadingDialog->hide();
 }

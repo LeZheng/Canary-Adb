@@ -42,6 +42,7 @@ protected:
 private slots:
     void openDeviceDetailView(CAndroidDevice *device);
     void showLoadingDialog(const QString &title,const QString &content);
+    void hideLoadingDialog(int exitCode,const QString &msg);
 };
 
 #endif // MAINWINDOW_H
