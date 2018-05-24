@@ -27,7 +27,8 @@ void CDeviceForm::updateDevices()
         ui->androidVersionLineEdit->setText(device->getAndroidVersion());
         ui->deviceNameLineEdit->setText(device->getModel());
         ui->wmDensityLineEdit->setText(device->getWmDensity());
-        ui->wmSizeLineEdit->setText(device->getWmSize());
+        QSize wmSize = device->getWmSize();
+        ui->wmSizeLineEdit->setText(tr("%1 x %2").arg(wmSize.width()).arg(wmSize.height()));
         ui->deviceIconLabel->setPixmap(QPixmap(":/img/phone"));
     }
 }

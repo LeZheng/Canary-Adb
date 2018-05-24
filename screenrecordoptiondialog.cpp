@@ -7,33 +7,19 @@ ScreenRecordOptionDialog::ScreenRecordOptionDialog(CAndroidDevice * device,QWidg
 {
     ui->setupUi(this);
 
-    QString wmSize = device->getWmSize();
-    wmSize = wmSize.right(wmSize.size() - wmSize.lastIndexOf(':') - 1).trimmed();
-    if(wmSize.contains('x')) {
-        int width,height;
-        int xIndex = wmSize.indexOf('x');
-        bool ok;
-        width = wmSize.left(xIndex).toInt(&ok);
-        if(ok) {
-            height = wmSize.right(wmSize.size() - xIndex - 1).toInt(&ok);
-        }
-        if(ok) {
-            ui->widthLineEdit->setValidator(new QIntValidator(0, width, this));
-            ui->heightLineEdit->setValidator(new QIntValidator(0, height, this));
-            ui->widthLineEdit->setText(tr("%1").arg(width));
-            ui->heightLineEdit->setText(tr("%1").arg(height));
-        } else {
-            ui->widthLineEdit->setValidator(new QIntValidator(0, 720, this));
-            ui->heightLineEdit->setValidator(new QIntValidator(0, 1280, this));
-            ui->widthLineEdit->setText(tr("%1").arg(0));
-            ui->heightLineEdit->setText(tr("%1").arg(0));
-        }
-    } else {
-        ui->widthLineEdit->setValidator(new QIntValidator(0, 720, this));
-        ui->heightLineEdit->setValidator(new QIntValidator(0, 1280, this));
-        ui->widthLineEdit->setText(tr("%1").arg(0));
-        ui->heightLineEdit->setText(tr("%1").arg(0));
+    QSize wmSize = device->getWmSize();
+    if(wmSize.height() <= 0){
+        wmSize.setHeight(640);
     }
+    if(wmSize.width() <= 0){
+        wmSize.setWidth(360);
+    }
+
+    ui->widthLineEdit->setValidator(new QIntValidator(0, wmSize.width(), this));
+    ui->heightLineEdit->setValidator(new QIntValidator(0, wmSize.height(), this));
+    ui->widthLineEdit->setText(tr("%1").arg(wmSize.width()));
+    ui->heightLineEdit->setText(tr("%1").arg(wmSize.height()));
+
 
     ui->bitRateLineEdit->setValidator(new QIntValidator(0,6,this));
 

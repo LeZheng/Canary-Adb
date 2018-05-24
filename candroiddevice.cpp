@@ -49,16 +49,31 @@ void CAndroidDevice::updateBattery()
                                .arg(serialNumber)).resultStr.trimmed();
 }
 
-QString CAndroidDevice::getWmSize()
+QSize CAndroidDevice::getWmSize()
 {
     return this->wmSize;
 }
 
 void CAndroidDevice::updateWmSize()
 {
-    this->wmSize = processCmd(tr("%1 -s %2 shell wm size")
+    QString wmSizeStr = processCmd(tr("%1 -s %2 shell wm size")
                               .arg(CAndroidContext::androidAdbPath)
                               .arg(serialNumber)).resultStr.trimmed();
+
+    wmSizeStr = wmSizeStr.right(wmSizeStr.size() - wmSizeStr.lastIndexOf(':') - 1).trimmed();
+    if(wmSizeStr.contains('x')) {
+        int width,height;
+        int xIndex = wmSizeStr.indexOf('x');
+        bool ok;
+        width = wmSizeStr.left(xIndex).toInt(&ok);
+        if(ok) {
+            height = wmSizeStr.right(wmSizeStr.size() - xIndex - 1).toInt(&ok);
+        }
+        if(ok) {
+            this->wmSize.setHeight(height);
+            this->wmSize.setWidth(width);
+        }
+    }
 }
 
 void CAndroidDevice::setWmSize(int width, int height)
@@ -212,6 +227,16 @@ void CAndroidDevice::screenShot(QString path)
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(path));
+}
+
+QByteArray CAndroidDevice::screenShot()
+{
+    QProcess process;
+    process.start(tr("%1 -s %2 shell screencap -p")
+                  .arg(CAndroidContext::androidAdbPath)
+                  .arg(serialNumber));
+    process.waitForFinished(-1);
+    return process.readAll();
 }
 
 void  CAndroidDevice::pull(QString srcPath, QString desPath)

@@ -7,6 +7,24 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
 {
     ui->setupUi(this);
     devicePointer = device;
+    this->deviceSerialNumber = device->serialNumber;
+    screenSyncProcess = new QProcess(this);
+
+    connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
+        QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
+        QListIterator<CAndroidDevice *> deviceIter(deviceList);
+        while(deviceIter.hasNext()) {
+            CAndroidDevice * device = deviceIter.next();
+            if(device->serialNumber == this->deviceSerialNumber) {
+                this->setEnabled(true);
+                this->devicePointer = device;
+                return;
+            }
+        }
+        this->setDisabled(true);
+        this->ui->syncScreenCheckBox->setChecked(false);
+        this->ui->syncTouchCheckBox->setChecked(false);
+    });
 
     connect(ui->powerButton,&QToolButton::clicked,this,[this]() {
         this->inputKeyEvent(26);
@@ -98,10 +116,59 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
             dialog->show();
         }
     });
+    scene = new QGraphicsScene(ui->graphicsView);
+    ui->graphicsView->setScene(scene);
+    this->scene->setSceneRect(0,0,360,640);
+    screenItem = new QGraphicsPixmapItem();
+    this->scene->addItem(screenItem);
+
+    connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state){
+        if(state == Qt::Checked){
+            QtConcurrent::run([this]() {
+                while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull()) {
+                    QByteArray imgBuf = this->devicePointer->screenShot();
+                    bool loadOk = this->screenPixmap.loadFromData(imgBuf,"PNG");
+                    if(loadOk) {
+                        emit screenUpdated();
+                    } else {
+                        qDebug() << "load failed";
+                    }
+                }
+            });
+        }
+    });
+
+    connect(this,&CDeviceEditForm::screenUpdated,this,[this]() {
+        this->screenItem->setPixmap(this->screenPixmap);
+    });
+
+    connect(ui->zoomInButton,&QToolButton::clicked,this,[this]() {
+        this->scenePercent = this->scenePercent + 25;
+        this->ui->zoomLabel->setText(tr("%1%").arg(this->scenePercent));
+        QSize wmSize = this->devicePointer->getWmSize();
+        this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
+    });
+    connect(ui->zoomOutButton,&QToolButton::clicked,this,[this]() {
+        this->scenePercent = this->scenePercent - 25;
+        this->ui->zoomLabel->setText(tr("%1%").arg(this->scenePercent));
+        QSize wmSize = this->devicePointer->getWmSize();
+        this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
+    });
+    connect(this->scene,&QGraphicsScene::sceneRectChanged,this,[this](const QRectF &rect) {
+        if(this->scenePercent <= 25) {
+            this->ui->zoomOutButton->setDisabled(true);
+        } else {
+            this->ui->zoomOutButton->setEnabled(true);
+        }
+        this->screenItem->setScale(this->scenePercent / 100.0f);
+    });
+    this->ui->zoomOutButton->setDisabled(true);
+    this->screenItem->setScale(this->scenePercent / 100.0f);
 }
 
 CDeviceEditForm::~CDeviceEditForm()
 {
+    this->disconnect();
     delete ui;
 }
 
