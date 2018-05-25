@@ -59,6 +59,18 @@ CFileForm::CFileForm(QWidget *parent) :
                 this->ui->nextBtn->setEnabled(false);
         }
     });
+    connect(ui->browserBtn,&QPushButton::clicked,[this](){
+        QString path = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                         QDir::rootPath(),
+                                                         QFileDialog::ShowDirsOnly
+                                                         | QFileDialog::DontResolveSymlinks);
+        if(!path.isEmpty()){
+            this->ui->pathLineEdit->setText(path);
+            this->fileTreeView->setRootIndex(this->model->index(path));
+            this->historyPathStack.clear();
+            this->ui->nextBtn->setEnabled(false);
+        }
+    });
 }
 
 CFileForm::~CFileForm()

@@ -8,6 +8,7 @@
 #include <QUrl>
 #include <QDesktopServices>
 #include <QMenu>
+#include <QFileDialog>
 #include "candroiddevice.h"
 
 namespace Ui
