@@ -91,6 +91,8 @@ public:
     QString getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
     //TODO 按键模拟和输入
     void inputKeyEvent(int keyCode);
+    void inputSwipe(const QPoint &startPos,const QPoint &endPos,int duration);
+    void inputClick(const QPoint &pos);
     QProcess * logcat(QString format = "",QString patterns = "",QString tag = "",QString content = "",QString pid = 0);// (method "查看日志" "adb logcat -v long ActivityManager:I *:S")
 
 private:

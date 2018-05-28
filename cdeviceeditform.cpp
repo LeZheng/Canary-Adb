@@ -118,12 +118,43 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     });
     scene = new QGraphicsScene(ui->graphicsView);
     ui->graphicsView->setScene(scene);
-    this->scene->setSceneRect(0,0,360,640);
-    screenItem = new QGraphicsPixmapItem();
+    QSize wmSize = this->devicePointer->getWmSize();
+    this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
+    screenItem = new CScreenPixmapItem();
     this->scene->addItem(screenItem);
 
-    connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state){
-        if(state == Qt::Checked){
+    connect(screenItem,&CScreenPixmapItem::itemClick,this,[this](const QPoint &pos) {
+        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+            emit processStart(tr("input..."),tr("input click event to %1").arg(this->devicePointer->serialNumber));
+            QtConcurrent::run([=]() {
+                this->devicePointer->inputClick(pos);
+                emit processEnd(0,"");
+            });
+        }
+    });
+
+    connect(screenItem,&CScreenPixmapItem::itemLongClick,this,[this](const QPoint &pos,int duration) {
+        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+            emit processStart(tr("input..."),tr("input long click event to %1").arg(this->devicePointer->serialNumber));
+            QtConcurrent::run([=]() {
+                this->devicePointer->inputSwipe(pos,pos,duration > 0 ? duration * 1000 : 1000);
+                emit processEnd(0,"");
+            });
+        }
+    });
+
+    connect(screenItem,&CScreenPixmapItem::itemSwipe,this,[this](const QPoint &startPos,const QPoint &endPos,int duration) {
+        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+            emit processStart(tr("input..."),tr("input swipe event to %1").arg(this->devicePointer->serialNumber));
+            QtConcurrent::run([=]() {
+                this->devicePointer->inputSwipe(startPos,endPos,duration > 0 ? duration * 1000 : 1000);
+                emit processEnd(0,"");
+            });
+        }
+    });
+
+    connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state) {
+        if(state == Qt::Checked) {
             QtConcurrent::run([this]() {
                 while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull()) {
                     QByteArray imgBuf = this->devicePointer->screenShot();
@@ -168,8 +199,16 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
 
 CDeviceEditForm::~CDeviceEditForm()
 {
+    this->ui->syncScreenCheckBox->setChecked(false);
+    this->ui->syncTouchCheckBox->setChecked(false);
     this->disconnect();
     delete ui;
+}
+
+void CDeviceEditForm::closeEvent(QCloseEvent *event)
+{
+    this->ui->syncScreenCheckBox->setChecked(false);
+    this->ui->syncTouchCheckBox->setChecked(false);
 }
 
 void CDeviceEditForm::inputKeyEvent(int keyCode)
@@ -179,4 +218,29 @@ void CDeviceEditForm::inputKeyEvent(int keyCode)
         this->devicePointer->inputKeyEvent(keyCode);
         emit processEnd(0,"");
     });
+}
+
+void CScreenPixmapItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+
+}
+
+void CScreenPixmapItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    pressTime = QTime::currentTime();
+    pressPoint = event->pos().toPoint();
+}
+
+void CScreenPixmapItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    QTime releaseTime = QTime::currentTime();
+    if((event->pos().toPoint() - this->pressPoint).manhattanLength() > 2) {
+        emit itemSwipe(this->pressPoint,event->pos().toPoint(),this->pressTime.secsTo(releaseTime));
+    } else {
+        if(this->pressTime.secsTo(releaseTime) >= 1) {
+            emit itemLongClick(event->pos().toPoint(),this->pressTime.secsTo(releaseTime));
+        } else {
+            emit itemClick(event->pos().toPoint());
+        }
+    }
 }

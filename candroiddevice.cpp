@@ -329,6 +329,22 @@ void CAndroidDevice::inputKeyEvent(int keyCode)
                .arg(keyCode));
 }
 
+void CAndroidDevice::inputSwipe(const QPoint &startPos, const QPoint &endPos, int duration)
+{
+    processCmd(tr("%1 -s %2 shell input swipe %3 %4 %5 %6 %7")
+               .arg(CAndroidContext::androidAdbPath)
+               .arg(serialNumber)
+               .arg(startPos.x()).arg(startPos.y()).arg(endPos.x()).arg(endPos.y()).arg(duration));
+}
+
+void CAndroidDevice::inputClick(const QPoint &pos)
+{
+    processCmd(tr("%1 -s %2 shell input tap %3 %4")
+               .arg(CAndroidContext::androidAdbPath)
+               .arg(serialNumber)
+               .arg(pos.x()).arg(pos.y()));
+}
+
 QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, QString content, QString pid)
 {
     QString cmd = tr("%1 -s %2 logcat")

@@ -8,12 +8,33 @@
 #include <QTimer>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include "candroiddevice.h"
 #include "screenrecordoptiondialog.h"
 
-namespace Ui {
+namespace Ui
+{
 class CDeviceEditForm;
+class CScreenPixmapItem;
 }
+
+class CScreenPixmapItem : public QObject,public QGraphicsPixmapItem
+{
+    Q_OBJECT
+
+signals:
+    void itemLongClick(const QPoint &pos,int duration);
+    void itemClick(const QPoint &pos);
+    void itemSwipe(const QPoint &startPos,const QPoint &endPos,int duration);
+protected:
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+private:
+    QTime pressTime;
+    QPoint pressPoint;
+};
 
 class CDeviceEditForm : public QWidget
 {
@@ -22,7 +43,8 @@ class CDeviceEditForm : public QWidget
 public:
     explicit CDeviceEditForm(CAndroidDevice * device,QWidget *parent = 0);
     ~CDeviceEditForm();
-
+protected:
+    virtual void closeEvent(QCloseEvent *event);
 signals:
     void processStart(const QString &title,const QString &content);
     void processEnd(int exitCode,const QString &msg);
@@ -34,7 +56,7 @@ private:
     QPointer<CAndroidDevice> devicePointer;
     QProcess *screenSyncProcess;
     QGraphicsScene *scene;
-    QGraphicsPixmapItem * screenItem;
+    CScreenPixmapItem * screenItem;
     QPixmap screenPixmap;
     int scenePercent = 25;
 
