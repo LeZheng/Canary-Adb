@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->detailTabWidget,&QTabWidget::tabBarDoubleClicked,[this](int index) {
         QWidget * widget = this->ui->detailTabWidget->widget(index);
         QString tabText = this->ui->detailTabWidget->tabText(index);
-        tabText = tabText.right(tabText.lastIndexOf(" [") + 2);
+        tabText = tabText.right(tabText.size() - tabText.lastIndexOf(" [") - 2);
         tabText = tabText.left(tabText.size() - 1);
         if(this->deviceTabMap.contains(tabText)) {
             this->deviceTabMap.remove(tabText);

@@ -156,7 +156,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state) {
         if(state == Qt::Checked) {
             QtConcurrent::run([this]() {
-                while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull()) {
+                while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull() && this->isVisible()) {
                     QByteArray imgBuf = this->devicePointer->screenShot();
                     bool loadOk = this->screenPixmap.loadFromData(imgBuf,"PNG");
                     if(loadOk) {
