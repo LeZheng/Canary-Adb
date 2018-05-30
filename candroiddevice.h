@@ -118,6 +118,7 @@ public:
     static QString androidSdkPath;
     static QString androidAdbPath;
     static QList<CAndroidDevice *> getDevices();
+    static CAndroidDevice * getDevice(const QString &serialNumber);
     static CAndroidContext * getInstance()
     {
         return config;

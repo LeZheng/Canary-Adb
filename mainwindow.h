@@ -26,7 +26,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+signals:
+    void processStart(const QString &title,const QString &content);
+    void processEnd(int exitCode,const QString &msg);
 private:
     Ui::MainWindow *ui;
     CFileForm *fileForm;
@@ -43,6 +45,10 @@ private slots:
     void openDeviceDetailView(CAndroidDevice *device);
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);
+    void requestContextMenu(const QString &serialNumber,const QString &path);
+    void installApk(const QString &serialNumber,const QString &path);
+    void screenShot(const QString &serialNumber);
+    void screenRecord(const QString &serialNumber);
 };
 
 #endif // MAINWINDOW_H

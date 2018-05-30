@@ -38,7 +38,14 @@ CFileForm::CFileForm(QWidget *parent) :
             QDesktopServices::openUrl(QUrl(urlStr.append(clickPath), QUrl::TolerantMode));
         }
     });
-    connect(ui->fileTreeView,&QTreeView::customContextMenuRequested,this,&CFileForm::showFileRequestMenu);
+    connect(ui->fileTreeView,&QTreeView::customContextMenuRequested,this,[this](const QPoint &pos){
+        QModelIndex index = this->ui->fileTreeView->indexAt(pos);
+        if(!index.isValid()) {
+            return;
+        }
+        QString path = this->model->filePath(index);
+        emit menuRequested(path);
+    });
     connect(this->ui->prevBtn,&QPushButton::clicked,[this]() {
         QModelIndex pIndex = this->ui->fileTreeView->rootIndex();
         QModelIndex index = pIndex.parent();
@@ -76,61 +83,4 @@ CFileForm::CFileForm(QWidget *parent) :
 CFileForm::~CFileForm()
 {
     delete ui;
-}
-
-void CFileForm::showFileRequestMenu(const QPoint &pos)
-{
-    QModelIndex index = this->ui->fileTreeView->indexAt(pos);
-    if(!index.isValid()) {
-        return;
-    }
-    QString path = this->model->filePath(index);
-
-    QMenu menu;
-    menu.addAction(tr("rename"),[this,index]() {
-        this->getTreeView()->edit(index);
-    });
-    menu.addAction(tr("delete"),[this,index,path]() {
-        QFile::remove(path);
-    });
-    menu.addAction(tr("open in folder"),[this,path]() {
-        QString fileDir = QFileInfo(path).absoluteDir().absolutePath();
-        QString urlStr = "file:";
-        QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
-    });
-    menu.addAction(tr("open default"),[this,path]() {
-        QString urlStr = "file:";
-        QDesktopServices::openUrl(QUrl(urlStr.append(path), QUrl::TolerantMode));
-    });
-    if(QFileInfo(path).isDir()) {
-        //TODO dir
-    } else if(QFileInfo(path).isFile()) {
-        QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
-        if(!deviceList.isEmpty()) {
-            QMenu *installApkMenu = menu.addMenu(path.endsWith(".apk") ? tr("install apk to...") : tr("push file to..."));
-            for(int i = 0; i < deviceList.size(); i++) {
-                CAndroidDevice * device = deviceList.at(i);
-                if(path.endsWith(".apk")) {
-                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,path,this]() {
-                        emit processStart(tr("installing..."),tr("install %1 to %2").arg(path).arg(device->getModel()));
-                        QtConcurrent::run([device,path,this]() {
-                            device->install(path);
-                            emit processEnd(0,"");
-                        });
-                    });
-                } else {
-                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,path,this]() {
-                        //TODO choose push path
-                        QString desPath;
-                        emit processStart(tr("pushing..."),tr("push %1 to %2").arg(path).arg(device->getModel()));
-                        QtConcurrent::run([device,path,desPath,this]() {
-                            device->push(path,desPath);
-                            emit processEnd(0,"");
-                        });
-                    });
-                }
-            }
-        }
-    }
-    menu.exec(QCursor::pos());
 }

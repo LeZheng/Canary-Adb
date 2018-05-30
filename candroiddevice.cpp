@@ -380,6 +380,15 @@ QList<CAndroidDevice *> CAndroidContext::getDevices()
     return deviceList;
 }
 
+CAndroidDevice *CAndroidContext::getDevice(const QString &serialNumber)
+{
+    if(CAndroidContext::getInstance()->deviceMap.contains(serialNumber)){
+        return CAndroidContext::getInstance()->deviceMap.value(serialNumber);
+    }else{
+        return nullptr;
+    }
+}
+
 void CAndroidContext::startListenAdb()
 {
     if(!isRunning) {

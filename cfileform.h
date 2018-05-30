@@ -28,8 +28,7 @@ public:
     QTreeView * getTreeView(){return fileTreeView;}
 
 signals:
-    void processStart(const QString &title,const QString &content);
-    void processEnd(int exitCode,const QString &msg);
+    void menuRequested(const QString &path);
 
 private:
     Ui::CFileForm *ui;
@@ -37,8 +36,6 @@ private:
     QTreeView * fileTreeView;
     QString workPath;
     QStack<QModelIndex> historyPathStack;
-
-    void showFileRequestMenu(const QPoint &pos);
 };
 
 #endif // CFILEFORM_H

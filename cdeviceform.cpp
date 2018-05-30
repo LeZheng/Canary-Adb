@@ -11,7 +11,10 @@ CDeviceForm::CDeviceForm(CAndroidDevice * device,QWidget *parent) :
 
     setAcceptDrops(true);
 
-    connect(ui->deviceIconLabel,&QLabel::customContextMenuRequested,this,&CDeviceForm::showDeviceRequestMenu);
+    connect(ui->deviceIconLabel,&QLabel::customContextMenuRequested,this,[this]() {
+        if(!this->devicePointer.isNull())
+            emit menuRequested(this->devicePointer->serialNumber,QString());
+    });
 }
 
 CDeviceForm::~CDeviceForm()
@@ -30,44 +33,6 @@ void CDeviceForm::updateDevices()
         QSize wmSize = device->getWmSize();
         ui->wmSizeLineEdit->setText(tr("%1 x %2").arg(wmSize.width()).arg(wmSize.height()));
         ui->deviceIconLabel->setPixmap(QPixmap(":/img/phone"));
-    }
-}
-
-void CDeviceForm::showDeviceRequestMenu()
-{
-    if(!this->devicePointer.isNull()) {
-        QMenu menu;
-        menu.addAction(tr("open detail"),[this]() {
-            emit requestOpenDetail(this->devicePointer);
-        });
-        menu.addAction(tr("record screen"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("screen shot"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("set wm size"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("set wm density"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("get file"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("add file"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("reboot"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("install app"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("logcat"),[this]() {
-            //TODO
-        });
-        menu.exec(QCursor::pos());
     }
 }
 
@@ -93,21 +58,8 @@ void CDeviceForm::dropEvent(QDropEvent *event)
         QList<QUrl> urls = event->mimeData()->urls();
         if(urls.at(0).isLocalFile()) {
             QString filePath = urls.at(0).toLocalFile();
-            QMenu menu;
-            if(filePath.endsWith(".apk")) {
-                menu.addAction(tr("install"),[this,filePath]() {
-                    emit processStart(tr("installing..."),tr("install %1 to %2").arg(filePath).arg(this->devicePointer->getModel()));
-                    QtConcurrent::run([filePath,this]() {
-                        this->devicePointer->install(filePath);
-                        emit processEnd(0,"");
-                    });
-                });
-            } else {
-                menu.addAction(tr("push"),[this]() {
-                    //TODO push
-                });
-            }
-            menu.exec(QCursor::pos());
+            if(!this->devicePointer.isNull())
+                emit menuRequested(this->devicePointer->serialNumber,filePath);
         }
     }
 }

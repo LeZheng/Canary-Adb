@@ -30,9 +30,6 @@ private:
     QPointer<CAndroidDevice> devicePointer;
     QPoint mStartPoint;
 
-private slots:
-    void showDeviceRequestMenu();
-
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dropEvent(QDropEvent *event);
@@ -40,9 +37,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event);
 
 signals:
-    void processStart(const QString &title,const QString &content);
-    void processEnd(int exitCode,const QString &msg);
-    void requestOpenDetail(CAndroidDevice *device);
+    void menuRequested(const QString &serialNumber, const QString &path);
 };
 
 #endif // CDEVICEFORM_H
