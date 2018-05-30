@@ -156,13 +156,41 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state) {
         if(state == Qt::Checked) {
             QtConcurrent::run([this]() {
+                bool canLoadFromOutput = true;
+                bool needHandleNewLine = false;
                 while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull() && this->isVisible()) {
-                    QByteArray imgBuf = this->devicePointer->screenShot();
-                    bool loadOk = this->screenPixmap.loadFromData(imgBuf,"PNG");
-                    if(loadOk) {
+                    if(canLoadFromOutput) {
+                        QByteArray imgBuf = this->devicePointer->screenShot();
+                        if(this->isVisible()) {
+                            if(!needHandleNewLine) {
+                                canLoadFromOutput = this->screenPixmap.loadFromData(imgBuf,"PNG");
+                                needHandleNewLine = !canLoadFromOutput;
+                            }
+                            if(needHandleNewLine) {
+                                imgBuf.replace("\r\n","\n");
+                                canLoadFromOutput = this->screenPixmap.loadFromData(imgBuf,"PNG");
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+                    if(canLoadFromOutput) {
                         emit screenUpdated();
                     } else {
-                        qDebug() << "load failed";
+                        QString tmpPhonePath = "/sdcard/canary-screen-tmp.png";
+                        QString destPath = QDir::temp().absoluteFilePath("canary-screen-tmp.png");
+                        this->devicePointer->screenShot(tmpPhonePath);
+                        this->devicePointer->pull(tmpPhonePath,destPath);
+                        if(this->isVisible()) {
+                            bool loadOk = this->screenPixmap.load(destPath,"PNG");
+                            if(loadOk) {
+                                emit screenUpdated();
+                            } else {
+                                qDebug() << "load failed again!";
+                            }
+                        } else {
+                            return;
+                        }
                     }
                 }
             });

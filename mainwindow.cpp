@@ -123,5 +123,5 @@ void MainWindow::showLoadingDialog(const QString &title, const QString &content)
 void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
 {
     this->loadAnimation->stop();
-    this->loadingDialog->hide();
+    this->loadingDialog->close();
 }
