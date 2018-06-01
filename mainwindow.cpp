@@ -97,19 +97,40 @@ void MainWindow::closeEvent(QCloseEvent *event)
     CAndroidContext::getInstance()->stopListenAdb();
 }
 
-void MainWindow::openDeviceDetailView(CAndroidDevice *device)
+void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type)
 {
+    QTabWidget *widget = nullptr;
     if(this->deviceTabMap.contains(device->serialNumber)) {
         this->ui->detailTabWidget->setCurrentWidget(this->deviceTabMap.value(device->serialNumber));
+        widget = this->deviceTabMap.value(device->serialNumber);
     } else {
-        QTabWidget *widget = new QTabWidget(this->ui->detailTabWidget);
+        widget = new QTabWidget(this->ui->detailTabWidget);
         widget->setTabPosition(QTabWidget::South);
-        CDeviceEditForm * editForm = new CDeviceEditForm(device,widget);
-        widget->addTab(editForm,tr("detail"));
-        widget->addTab(new CConsoleForm(device,widget),tr("log"));
+        widget->setTabsClosable(true);
         this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
         this->deviceTabMap.insert(device->serialNumber,widget);
+    }
+    QString tabName = "none";
+    if(type == DetailViewType::LOG) {
+        tabName = tr("log");
+    } else if(type == DetailViewType::SCREEN) {
+        tabName = tr("screen");
+    }
 
+    for(int i = 0; i < widget->count(); i++) {
+        if(widget->tabText(i) == tabName) {
+            widget->setCurrentIndex(i);
+            return;
+        }
+    }
+
+    if(type == DetailViewType::LOG) {
+        CConsoleForm * logForm = new CConsoleForm(device,widget);
+        widget->addTab(logForm,tabName);
+        widget->setCurrentWidget(logForm);
+    } else if(type == DetailViewType::SCREEN) {
+        CDeviceEditForm * editForm = new CDeviceEditForm(device,widget);
+        widget->addTab(editForm,tabName);
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
     }
@@ -172,10 +193,10 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
     }
 
     if(!serialNumber.isEmpty() && path.isEmpty()) {
-        menu.addAction(tr("open detail"),[this,serialNumber]() {
+        menu.addAction(tr("open screen"),[this,serialNumber]() {
             CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
             if(device != nullptr)
-                openDeviceDetailView(device);
+                openDeviceDetailView(device,DetailViewType::SCREEN);
         });
         menu.addAction(tr("screen record"),[this,serialNumber]() {
             screenRecord(serialNumber);
@@ -206,8 +227,10 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         menu.addAction(tr("reboot"),[this]() {
             //TODO
         });
-        menu.addAction(tr("logcat"),[this]() {
-            //TODO
+        menu.addAction(tr("logcat"),[this,serialNumber]() {
+            CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+            if(device != nullptr)
+                openDeviceDetailView(device,DetailViewType::LOG);
         });
     }
 

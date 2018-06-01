@@ -19,6 +19,8 @@ namespace Ui
 class MainWindow;
 }
 
+enum class DetailViewType{LOG,SCREEN};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -42,7 +44,7 @@ private:
 protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
-    void openDeviceDetailView(CAndroidDevice *device);
+    void openDeviceDetailView(CAndroidDevice *device,DetailViewType type);
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);
     void requestContextMenu(const QString &serialNumber,const QString &path);
