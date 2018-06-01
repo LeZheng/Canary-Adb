@@ -33,6 +33,17 @@ void CDeviceForm::updateDevices()
         QSize wmSize = device->getWmSize();
         ui->wmSizeLineEdit->setText(tr("%1 x %2").arg(wmSize.width()).arg(wmSize.height()));
         ui->deviceIconLabel->setPixmap(QPixmap(":/img/phone"));
+        ui->networkInfoLabel->setText(device->getNetworkInfo());
+        ui->cpuInfoLabel->setText(device->getCpuInfo());
+        ui->memInfoLabel->setText(device->getMemInfo());
+        QStringList packageList;
+        QListIterator<CAndroidApp*> appIter(device->getApplications());
+        while(appIter.hasNext()){
+            packageList << appIter.next()->getName();
+        }
+
+        ui->packageListWidget->clear();
+        ui->packageListWidget->addItems(packageList);
     }
 }
 
@@ -73,7 +84,9 @@ void CDeviceForm::mousePressEvent(QMouseEvent *event)
 void CDeviceForm::mouseMoveEvent(QMouseEvent *event)
 {
     QWidget::mouseMoveEvent(event);
-    if ((event->pos() - mStartPoint).manhattanLength() > QApplication::startDragDistance()
+    if (ui->deviceIconLabel->rect().contains(mStartPoint) &&
+            ui->tabWidget->currentIndex() == 0 &&
+            (event->pos() - mStartPoint).manhattanLength() > QApplication::startDragDistance()
         && !devicePointer.isNull()) { //判断是否执行拖动
         QDrag *drag = new QDrag(this);
         QMimeData *mimeData = new QMimeData;

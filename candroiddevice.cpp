@@ -282,7 +282,7 @@ void CAndroidDevice::reboot()
                                       .arg(serialNumber));
 }
 
-void CAndroidDevice::pmListPackage()
+void CAndroidDevice::updatePackageList()
 {
     ProcessResult result = processCmd(tr("%1 -s %2 shell pm list packages")
                                       .arg(CAndroidContext::androidAdbPath)
@@ -428,6 +428,14 @@ void CAndroidContext::startListenAdb()
                                 device->updateAndroidId();
                                 emit updateStateChanged(tr("udpate device[%1]'s android version").arg(serialNumber));
                                 device->updateAndroidVersion();
+                                emit updateStateChanged(tr("udpate device[%1]'s memory info").arg(serialNumber));
+                                device->updateMemInfo();
+                                emit updateStateChanged(tr("udpate device[%1]'s cpu info").arg(serialNumber));
+                                device->updateCpuInfo();
+                                emit updateStateChanged(tr("udpate device[%1]'s network info").arg(serialNumber));
+                                device->updateNetworkInfo();
+                                emit updateStateChanged(tr("udpate device[%1]'s package list").arg(serialNumber));
+                                device->updatePackageList();
                                 tmpDeviceMap.insert(serialNumber,device);
                             }
                         }
@@ -467,7 +475,7 @@ CAndroidApp::CAndroidApp(QString package,CAndroidDevice *parent):
 
 QString CAndroidApp::getName()
 {
-    return "";//TODO
+    return package;
 }
 
 void CAndroidApp::uninstall()
