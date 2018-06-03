@@ -33,7 +33,7 @@ signals:
     void processEnd(int exitCode,const QString &msg);
 private:
     Ui::MainWindow *ui;
-    CFileForm *fileForm;
+    QList<CFileForm *> fileFormList;
     QMap<QString,QTabWidget *> deviceTabMap;
     QProgressDialog * loadingDialog;
     QPropertyAnimation *loadAnimation;

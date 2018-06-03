@@ -55,11 +55,40 @@ void MainWindow::initToolBar()
 
 void MainWindow::initFileWidget()
 {
-    fileForm = new CFileForm(this);
-    ui->leftDockWidget->setWidget(fileForm);
-    connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
-        requestContextMenu(QString(),path);
+    QToolButton *addButton = new QToolButton();
+    addButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_FileDialogNewFolder));
+    ui->fileTabWidget->setCornerWidget(addButton,Qt::TopRightCorner);
+    connect(addButton,&QToolButton::clicked,this,[this](){
+        CFileForm *fileForm = new CFileForm(this->ui->fileTabWidget);
+        this->fileFormList.append(fileForm);
+        this->ui->fileTabWidget->addTab(fileForm,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
+        connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
+            requestContextMenu(QString(),path);
+        });
+        connect(fileForm,&CFileForm::basePathChanged,this,[this,fileForm](const QString &path) {
+            QFileInfo file(path);
+            int index = this->ui->fileTabWidget->indexOf(fileForm);
+            if(index >= 0) {
+                this->ui->fileTabWidget->setTabText(index,file.fileName());
+            }
+        });
+        if(this->ui->fileTabWidget->count() > 1){
+            this->ui->fileTabWidget->setTabBarAutoHide(false);
+        }
     });
+    connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);
+    connect(ui->fileTabWidget,&QTabWidget::tabCloseRequested,this,[this](int index){
+        QWidget *widget = this->ui->fileTabWidget->widget(index);
+        if(widget->inherits("CFileForm")){
+            this->ui->fileTabWidget->removeTab(index);
+            this->fileFormList.removeOne(qobject_cast<CFileForm *>(widget));
+            widget->deleteLater();
+        }
+        if(this->ui->fileTabWidget->count() <= 1){
+            this->ui->fileTabWidget->setTabBarAutoHide(true);
+        }
+    });
+    emit addButton->clicked(true);
 }
 
 void MainWindow::initDeviceWidget()
@@ -100,13 +129,27 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type)
 {
     QTabWidget *widget = nullptr;
-    if(this->deviceTabMap.contains(device->serialNumber)) {
+    QString serialNumber = device->serialNumber;
+    if(this->deviceTabMap.contains(serialNumber)) {
         this->ui->detailTabWidget->setCurrentWidget(this->deviceTabMap.value(device->serialNumber));
-        widget = this->deviceTabMap.value(device->serialNumber);
+        widget = this->deviceTabMap.value(serialNumber);
     } else {
         widget = new QTabWidget(this->ui->detailTabWidget);
         widget->setTabPosition(QTabWidget::South);
         widget->setTabsClosable(true);
+        connect(widget,&QTabWidget::tabCloseRequested,this,[this,widget,serialNumber](int index){
+            QWidget *tempWidget = widget->widget(index);
+            widget->removeTab(index);
+            tempWidget->deleteLater();
+            if(widget->count() == 0){
+                int index = this->ui->detailTabWidget->indexOf(widget);
+                if(index >= 0){
+                    this->ui->detailTabWidget->removeTab(index);
+                    this->deviceTabMap.remove(serialNumber);
+                    widget->deleteLater();
+                }
+            }
+        });
         this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
         this->deviceTabMap.insert(device->serialNumber,widget);
     }
@@ -157,9 +200,12 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
         if(!deviceList.isEmpty()) {
             menu.addAction(tr("rename"),[this,path]() {
-                QModelIndex index = this->fileForm->getModel()->index(path);
-                if(index.isValid())
-                    this->fileForm->getTreeView()->edit(index);
+                if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")){
+                    CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
+                    QModelIndex index = fileForm->getModel()->index(path);
+                    if(index.isValid())
+                        fileForm->getTreeView()->edit(index);
+                }
             });
             menu.addAction(tr("delete"),[this,path]() {
                 QFile::remove(path);

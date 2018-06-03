@@ -29,6 +29,7 @@ public:
 
 signals:
     void menuRequested(const QString &path);
+    void basePathChanged(const QString &path);
 
 private:
     Ui::CFileForm *ui;

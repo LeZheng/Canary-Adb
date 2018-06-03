@@ -33,6 +33,7 @@ CFileForm::CFileForm(QWidget *parent) :
             this->ui->nextBtn->setEnabled(false);
             this->ui->fileTreeView->setRootIndex(index);
             this->ui->pathLineEdit->setText(clickPath);
+            emit basePathChanged(this->model->filePath(index));
         } else {
             QString urlStr = "file:";
             QDesktopServices::openUrl(QUrl(urlStr.append(clickPath), QUrl::TolerantMode));
@@ -55,6 +56,7 @@ CFileForm::CFileForm(QWidget *parent) :
             this->ui->fileTreeView->setRootIndex(index);
             this->historyPathStack.push(pIndex);
             this->ui->nextBtn->setEnabled(true);
+            emit basePathChanged(this->model->filePath(index));
         }
     });
     connect(ui->nextBtn,&QPushButton::clicked,[this]() {
@@ -62,6 +64,7 @@ CFileForm::CFileForm(QWidget *parent) :
             QModelIndex index = this->historyPathStack.pop();
             this->ui->fileTreeView->setRootIndex(index);
             this->ui->pathLineEdit->setText(this->model->filePath(index));
+            emit basePathChanged(this->model->filePath(index));
             if(this->historyPathStack.isEmpty())
                 this->ui->nextBtn->setEnabled(false);
         }
@@ -72,10 +75,12 @@ CFileForm::CFileForm(QWidget *parent) :
                                                          QFileDialog::ShowDirsOnly
                                                          | QFileDialog::DontResolveSymlinks);
         if(!path.isEmpty()){
+            QModelIndex index = this->model->index(path);
             this->ui->pathLineEdit->setText(path);
-            this->fileTreeView->setRootIndex(this->model->index(path));
+            this->fileTreeView->setRootIndex(index);
             this->historyPathStack.clear();
             this->ui->nextBtn->setEnabled(false);
+            emit basePathChanged(this->model->filePath(index));
         }
     });
 }
