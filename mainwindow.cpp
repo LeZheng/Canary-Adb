@@ -7,8 +7,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->ui->leftDockWidget->setTitleBarWidget(new QWidget(this));
-    this->ui->leftDockWidget->titleBarWidget()->setFixedHeight(0);
     this->ui->rightDockWidget->setTitleBarWidget(new QWidget(this));
     this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
 
@@ -55,10 +53,10 @@ void MainWindow::initToolBar()
 
 void MainWindow::initFileWidget()
 {
+    QToolBar *titleWidget = new QToolBar(this->ui->leftDockWidget);
     QToolButton *addButton = new QToolButton();
-    addButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_FileDialogNewFolder));
-    ui->fileTabWidget->setCornerWidget(addButton,Qt::TopRightCorner);
-    connect(addButton,&QToolButton::clicked,this,[this](){
+    addButton->setIcon(QIcon(":/img/tab_new"));
+    connect(addButton,&QToolButton::clicked,this,[this]() {
         CFileForm *fileForm = new CFileForm(this->ui->fileTabWidget);
         this->fileFormList.append(fileForm);
         this->ui->fileTabWidget->addTab(fileForm,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
@@ -72,22 +70,26 @@ void MainWindow::initFileWidget()
                 this->ui->fileTabWidget->setTabText(index,file.fileName());
             }
         });
-        if(this->ui->fileTabWidget->count() > 1){
+        if(this->ui->fileTabWidget->count() > 1) {
             this->ui->fileTabWidget->setTabBarAutoHide(false);
         }
     });
+    titleWidget->addWidget(addButton);
+    this->ui->leftDockWidget->setTitleBarWidget(titleWidget);
+
     connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);
-    connect(ui->fileTabWidget,&QTabWidget::tabCloseRequested,this,[this](int index){
+    connect(ui->fileTabWidget,&QTabWidget::tabCloseRequested,this,[this](int index) {
         QWidget *widget = this->ui->fileTabWidget->widget(index);
-        if(widget->inherits("CFileForm")){
+        if(widget->inherits("CFileForm")) {
             this->ui->fileTabWidget->removeTab(index);
             this->fileFormList.removeOne(qobject_cast<CFileForm *>(widget));
             widget->deleteLater();
         }
-        if(this->ui->fileTabWidget->count() <= 1){
+        if(this->ui->fileTabWidget->count() <= 1) {
             this->ui->fileTabWidget->setTabBarAutoHide(true);
         }
     });
+    this->ui->fileTabWidget->setTabBarAutoHide(true);
     emit addButton->clicked(true);
 }
 
@@ -137,13 +139,13 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         widget = new QTabWidget(this->ui->detailTabWidget);
         widget->setTabPosition(QTabWidget::South);
         widget->setTabsClosable(true);
-        connect(widget,&QTabWidget::tabCloseRequested,this,[this,widget,serialNumber](int index){
+        connect(widget,&QTabWidget::tabCloseRequested,this,[this,widget,serialNumber](int index) {
             QWidget *tempWidget = widget->widget(index);
             widget->removeTab(index);
             tempWidget->deleteLater();
-            if(widget->count() == 0){
+            if(widget->count() == 0) {
                 int index = this->ui->detailTabWidget->indexOf(widget);
-                if(index >= 0){
+                if(index >= 0) {
                     this->ui->detailTabWidget->removeTab(index);
                     this->deviceTabMap.remove(serialNumber);
                     widget->deleteLater();
@@ -200,7 +202,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
         if(!deviceList.isEmpty()) {
             menu.addAction(tr("rename"),[this,path]() {
-                if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")){
+                if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")) {
                     CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
                     QModelIndex index = fileForm->getModel()->index(path);
                     if(index.isValid())

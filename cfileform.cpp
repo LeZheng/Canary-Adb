@@ -21,7 +21,6 @@ CFileForm::CFileForm(QWidget *parent) :
     ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));
     ui->nextBtn->setIcon(style->standardIcon(QStyle::SP_ArrowRight));
     ui->browserBtn->setIcon(style->standardIcon(QStyle::SP_DirOpenIcon));
-    ui->fileTreeView->header()->setVisible(false);
     ui->pathLineEdit->setReadOnly(true);
     for(int i = 1; i < model->columnCount(); i++) {
         ui->fileTreeView->hideColumn(i);

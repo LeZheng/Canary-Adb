@@ -25,7 +25,7 @@ public:
     ~CFileForm();
 
     QFileSystemModel * getModel(){return model;}
-    QTreeView * getTreeView(){return fileTreeView;}
+    QAbstractItemView * getTreeView(){return fileTreeView;}
 
 signals:
     void menuRequested(const QString &path);
@@ -34,7 +34,7 @@ signals:
 private:
     Ui::CFileForm *ui;
     QFileSystemModel * model;
-    QTreeView * fileTreeView;
+    QAbstractItemView * fileTreeView;
     QString workPath;
     QStack<QModelIndex> historyPathStack;
 };

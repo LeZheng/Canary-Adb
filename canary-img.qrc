@@ -16,5 +16,6 @@
         <file alias="volume_low">img/audio-volume-low.png</file>
         <file alias="volume_muted">img/audio-volume-muted.png</file>
         <file alias="key_home">img/key-home.png</file>
+        <file alias="tab_new">img/tab_new.png</file>
     </qresource>
 </RCC>
