@@ -44,6 +44,7 @@ private:
 protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
+    void changeFileViewMode(FileItemMode mode);
     void openDeviceDetailView(CAndroidDevice *device,DetailViewType type);
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);

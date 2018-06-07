@@ -54,9 +54,9 @@ void MainWindow::initToolBar()
 void MainWindow::initFileWidget()
 {
     QToolBar *titleWidget = new QToolBar(this->ui->leftDockWidget);
-    QToolButton *addButton = new QToolButton();
-    addButton->setIcon(QIcon(":/img/tab_new"));
-    connect(addButton,&QToolButton::clicked,this,[this]() {
+    QToolButton *addTabButton = new QToolButton(titleWidget);
+    addTabButton->setIcon(QIcon(":/img/tab_new"));
+    connect(addTabButton,&QToolButton::clicked,this,[this]() {
         CFileForm *fileForm = new CFileForm(this->ui->fileTabWidget);
         this->fileFormList.append(fileForm);
         this->ui->fileTabWidget->addTab(fileForm,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
@@ -74,7 +74,44 @@ void MainWindow::initFileWidget()
             this->ui->fileTabWidget->setTabBarAutoHide(false);
         }
     });
-    titleWidget->addWidget(addButton);
+    QToolButton *gridViewButton = new QToolButton(titleWidget);
+    gridViewButton->setIcon(QIcon(":/img/view_grid"));
+    gridViewButton->setCheckable(true);
+    QToolButton *listViewButton = new QToolButton(titleWidget);
+    listViewButton->setIcon(QIcon(":/img/view_list"));
+    listViewButton->setCheckable(true);
+    QToolButton *treeViewButton = new QToolButton(titleWidget);
+    treeViewButton->setIcon(QIcon(":/img/view_tree"));
+    treeViewButton->setCheckable(true);
+    connect(listViewButton,&QToolButton::clicked,[=]() {
+        changeFileViewMode(FileItemMode::LIST);
+        emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
+    });
+    connect(gridViewButton,&QToolButton::clicked,[=]() {
+        changeFileViewMode(FileItemMode::GRID);
+        emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
+    });
+    connect(treeViewButton,&QToolButton::clicked,[=]() {
+        changeFileViewMode(FileItemMode::TREE);
+        emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
+    });
+
+    QToolButton *splitButton = new QToolButton(titleWidget);
+    splitButton->setIcon(QIcon(":/img/view_split"));
+    splitButton->setText(tr("split"));
+    splitButton->setToolButtonStyle(Qt::ToolButtonFollowStyle);
+    connect(splitButton,&QToolButton::clicked,[this]() {
+        //TODO
+    });
+
+    titleWidget->addWidget(addTabButton);
+    titleWidget->addSeparator();
+    titleWidget->addWidget(gridViewButton);
+    titleWidget->addWidget(listViewButton);
+    titleWidget->addWidget(treeViewButton);
+    titleWidget->addSeparator();
+    titleWidget->addWidget(splitButton);
+
     this->ui->leftDockWidget->setTitleBarWidget(titleWidget);
 
     connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);
@@ -89,8 +126,18 @@ void MainWindow::initFileWidget()
             this->ui->fileTabWidget->setTabBarAutoHide(true);
         }
     });
+    connect(ui->fileTabWidget,&QTabWidget::currentChanged,this,[=](int index){
+        QWidget *widget = this->ui->fileTabWidget->widget(index);
+        if(widget->inherits("CFileForm")) {
+            FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
+            gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
+            listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
+            treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
+        }
+    });
     this->ui->fileTabWidget->setTabBarAutoHide(true);
-    emit addButton->clicked(true);
+    emit addTabButton->clicked(true);
+    emit treeViewButton->clicked(true);
 }
 
 void MainWindow::initDeviceWidget()
@@ -126,6 +173,14 @@ void MainWindow::initDeviceWidget()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     CAndroidContext::getInstance()->stopListenAdb();
+}
+
+void MainWindow::changeFileViewMode(FileItemMode mode)
+{
+    if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")) {
+        CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
+        fileForm->setViewMode(mode);
+    }
 }
 
 void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type)
@@ -206,7 +261,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                     CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
                     QModelIndex index = fileForm->getModel()->index(path);
                     if(index.isValid())
-                        fileForm->getTreeView()->edit(index);
+                        fileForm->getCurrentItemView()->edit(index);
                 }
             });
             menu.addAction(tr("delete"),[this,path]() {

@@ -17,5 +17,11 @@
         <file alias="volume_muted">img/audio-volume-muted.png</file>
         <file alias="key_home">img/key-home.png</file>
         <file alias="tab_new">img/tab_new.png</file>
+        <file alias="view_grid">img/view-group.png</file>
+        <file alias="view_list">img/view-list-details.png</file>
+        <file alias="view_tree">img/view-list-tree.png</file>
+        <file alias="view_split">img/view-right-new.png</file>
+        <file alias="view_right_close">img/view-right-close.png</file>
+        <file alias="view_left_close">img/view-left-close.png</file>
     </qresource>
 </RCC>

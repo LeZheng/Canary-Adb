@@ -16,6 +16,8 @@ namespace Ui
 class CFileForm;
 }
 
+enum class FileItemMode{GRID,LIST,TREE};
+
 class CFileForm : public QWidget
 {
     Q_OBJECT
@@ -25,13 +27,15 @@ public:
     ~CFileForm();
 
     QFileSystemModel * getModel(){return model;}
-    QAbstractItemView * getTreeView(){return fileTreeView;}
-
+    QAbstractItemView * getCurrentItemView();
+    void setViewMode(FileItemMode mode);
+    FileItemMode viewMode();
 signals:
     void menuRequested(const QString &path);
     void basePathChanged(const QString &path);
 
 private:
+    FileItemMode mode = FileItemMode::GRID;
     Ui::CFileForm *ui;
     QFileSystemModel * model;
     QAbstractItemView * fileTreeView;

@@ -128,6 +128,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="leftDockWidget">
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>35</height>
+    </size>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetMovable</set>
    </property>
