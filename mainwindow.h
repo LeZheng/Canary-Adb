@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QUrl>
 #include <QProgressDialog>
+#include <QSplitter>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"
@@ -33,7 +34,6 @@ signals:
     void processEnd(int exitCode,const QString &msg);
 private:
     Ui::MainWindow *ui;
-    QList<CFileForm *> fileFormList;
     QMap<QString,QTabWidget *> deviceTabMap;
     QProgressDialog * loadingDialog;
     QPropertyAnimation *loadAnimation;

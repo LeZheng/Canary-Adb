@@ -57,19 +57,35 @@ void MainWindow::initFileWidget()
     QToolButton *addTabButton = new QToolButton(titleWidget);
     addTabButton->setIcon(QIcon(":/img/tab_new"));
     connect(addTabButton,&QToolButton::clicked,this,[this]() {
-        CFileForm *fileForm = new CFileForm(this->ui->fileTabWidget);
-        this->fileFormList.append(fileForm);
-        this->ui->fileTabWidget->addTab(fileForm,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
-        connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
-            requestContextMenu(QString(),path);
-        });
-        connect(fileForm,&CFileForm::basePathChanged,this,[this,fileForm](const QString &path) {
-            QFileInfo file(path);
-            int index = this->ui->fileTabWidget->indexOf(fileForm);
-            if(index >= 0) {
-                this->ui->fileTabWidget->setTabText(index,file.fileName());
-            }
-        });
+        QSplitter *splitter = new QSplitter(this->ui->fileTabWidget);
+        splitter->setOrientation(Qt::Vertical);
+        for(int i = 0; i < 2; i++) {
+            CFileForm *fileForm = new CFileForm(splitter);
+            connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
+                requestContextMenu(QString(),path);
+            });
+            connect(fileForm,&CFileForm::basePathChanged,this,[this,fileForm](const QString &path) {
+                QFileInfo file(path);
+                int index = this->ui->fileTabWidget->indexOf(fileForm->parentWidget());
+                if(index >= 0) {
+                    this->ui->fileTabWidget->setTabText(index,file.fileName());
+                }
+            });
+            connect(fileForm,&CFileForm::selected,this,[this,fileForm,splitter]() {
+                for(int i = 0; i < splitter->count(); i++) {
+                    QWidget *widget = splitter->widget(i);
+                    if(widget->inherits("CFileForm")) {
+                        if(fileForm != widget) {
+                            qobject_cast<CFileForm *>(widget)->setSelect(false);
+                            FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
+                            //TODO
+                        }
+                    }
+                }
+            });
+        }
+        splitter->widget(1)->hide();
+        this->ui->fileTabWidget->addTab(splitter,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
         if(this->ui->fileTabWidget->count() > 1) {
             this->ui->fileTabWidget->setTabBarAutoHide(false);
         }
@@ -100,8 +116,30 @@ void MainWindow::initFileWidget()
     splitButton->setIcon(QIcon(":/img/view_split"));
     splitButton->setText(tr("split"));
     splitButton->setToolButtonStyle(Qt::ToolButtonFollowStyle);
-    connect(splitButton,&QToolButton::clicked,[this]() {
-        //TODO
+    connect(splitButton,&QToolButton::clicked,[this,splitButton]() {
+        QWidget *widget = this->ui->fileTabWidget->currentWidget();
+        if(widget->inherits("QSplitter")) {
+            QSplitter *splitter = qobject_cast<QSplitter *>(widget);
+            if(splitter->widget(0)->isVisible() && splitter->widget(1)->isVisible()) {
+                for(int i = 0; i < splitter->count(); i++) {
+                    QWidget *fileWidget = splitter->widget(i);
+                    if(fileWidget->inherits("CFileForm") && qobject_cast<CFileForm *>(fileWidget)->isSelect()) {
+                        splitter->widget(i)->hide();
+                        qobject_cast<CFileForm *>(splitter->widget(i % 1))->setSelect(true);
+                        return;
+                    }
+                }
+            } else {
+                for(int i = 0; i < splitter->count(); i++) {
+                    if(!splitter->widget(i)->isVisible()) {
+                        splitter->widget(i)->show();
+                        qobject_cast<CFileForm *>(splitter->widget(i))->setSelect(true);
+                    }else{
+                        qobject_cast<CFileForm *>(splitter->widget(i))->setSelect(false);
+                    }
+                }
+            }
+        }
     });
 
     titleWidget->addWidget(addTabButton);
@@ -117,22 +155,23 @@ void MainWindow::initFileWidget()
     connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);
     connect(ui->fileTabWidget,&QTabWidget::tabCloseRequested,this,[this](int index) {
         QWidget *widget = this->ui->fileTabWidget->widget(index);
-        if(widget->inherits("CFileForm")) {
-            this->ui->fileTabWidget->removeTab(index);
-            this->fileFormList.removeOne(qobject_cast<CFileForm *>(widget));
-            widget->deleteLater();
-        }
+        this->ui->fileTabWidget->removeTab(index);
+        widget->deleteLater();
         if(this->ui->fileTabWidget->count() <= 1) {
             this->ui->fileTabWidget->setTabBarAutoHide(true);
         }
     });
-    connect(ui->fileTabWidget,&QTabWidget::currentChanged,this,[=](int index){
+    connect(ui->fileTabWidget,&QTabWidget::currentChanged,this,[=](int index) {
         QWidget *widget = this->ui->fileTabWidget->widget(index);
-        if(widget->inherits("CFileForm")) {
-            FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
-            gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
-            listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
-            treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
+        if(widget->inherits("QSplitter")) {
+            QSplitter *splitter = qobject_cast<QSplitter *>(widget);
+            widget = splitter->widget(0);//TODO
+            if(widget->inherits("CFileForm")) {
+                FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
+                gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
+                listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
+                treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
+            }
         }
     });
     this->ui->fileTabWidget->setTabBarAutoHide(true);
@@ -177,9 +216,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::changeFileViewMode(FileItemMode mode)
 {
-    if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")) {
-        CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
-        fileForm->setViewMode(mode);
+    if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
+        QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
+        if(splitter->widget(0)->inherits("CFileForm")) {
+            CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
+            fileForm->setViewMode(mode);
+        }
     }
 }
 
@@ -257,11 +299,14 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
         if(!deviceList.isEmpty()) {
             menu.addAction(tr("rename"),[this,path]() {
-                if(this->ui->fileTabWidget->currentWidget()->inherits("CFileForm")) {
-                    CFileForm *fileForm = qobject_cast<CFileForm *>(this->ui->fileTabWidget->currentWidget());
-                    QModelIndex index = fileForm->getModel()->index(path);
-                    if(index.isValid())
-                        fileForm->getCurrentItemView()->edit(index);
+                if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
+                    QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
+                    if(splitter->widget(0)->inherits("CFileForm")) {
+                        CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
+                        QModelIndex index = fileForm->getModel()->index(path);
+                        if(index.isValid())
+                            fileForm->getCurrentItemView()->edit(index);
+                    }
                 }
             });
             menu.addAction(tr("delete"),[this,path]() {

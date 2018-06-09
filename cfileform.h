@@ -30,11 +30,21 @@ public:
     QAbstractItemView * getCurrentItemView();
     void setViewMode(FileItemMode mode);
     FileItemMode viewMode();
+    void setSelect(bool selected);
+    bool isSelect(){return isSelected;}
+
+protected:
+    void enterEvent(QEvent *event);
+    void leaveEvent(QEvent *event);
+    bool eventFilter(QObject *watched, QEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 signals:
     void menuRequested(const QString &path);
     void basePathChanged(const QString &path);
+    void selected();
 
 private:
+    bool isSelected = false;
     FileItemMode mode = FileItemMode::GRID;
     Ui::CFileForm *ui;
     QFileSystemModel * model;

@@ -11,6 +11,10 @@ CFileForm::CFileForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QPalette p = palette();
+    p.setColor(QPalette::Window,Qt::darkGray);
+    setPalette(p);
+
     fileTreeView = ui->fileTreeView;
     workPath = QDir::rootPath();
     model = new QFileSystemModel(this);
@@ -91,19 +95,26 @@ CFileForm::CFileForm(QWidget *parent) :
         }
     });
 
-    connect(this,&CFileForm::basePathChanged,this,[this](){
+    connect(this,&CFileForm::basePathChanged,this,[this]() {
         QModelIndex pIndex = this->ui->fileTreeView->rootIndex().parent();
         if(pIndex.isValid()) {
             this->ui->prevBtn->setEnabled(true);
-        }else{
+        } else {
             this->ui->prevBtn->setDisabled(true);
         }
-        if(this->historyPathStack.isEmpty()){
+        if(this->historyPathStack.isEmpty()) {
             this->ui->nextBtn->setDisabled(true);
-        }else{
+        } else {
             this->ui->nextBtn->setEnabled(true);
         }
     });
+
+    ui->fileListView->installEventFilter(this);
+    ui->fileTreeView->installEventFilter(this);
+    ui->prevBtn->installEventFilter(this);
+    ui->nextBtn->installEventFilter(this);
+    ui->browserBtn->installEventFilter(this);
+    ui->pathLineEdit->installEventFilter(this);
 }
 
 CFileForm::~CFileForm()
@@ -144,4 +155,46 @@ void CFileForm::setViewMode(FileItemMode mode)
 FileItemMode CFileForm::viewMode()
 {
     return mode;
+}
+
+void CFileForm::setSelect(bool selected)
+{
+    isSelected = selected;
+    QPalette p = palette();
+    p.setColor(QPalette::Window,isSelected ? Qt::lightGray : Qt::darkGray);
+    setPalette(p);
+}
+
+void CFileForm::enterEvent(QEvent *event)
+{
+    QPalette p = palette();
+    p.setColor(QPalette::Window,Qt::lightGray);
+    setPalette(p);
+    QWidget::enterEvent(event);
+}
+
+void CFileForm::leaveEvent(QEvent *event)
+{
+    if(!isSelected) {
+        QPalette p = palette();
+        p.setColor(QPalette::Window,Qt::darkGray);
+        setPalette(p);
+    }
+    QWidget::leaveEvent(event);
+}
+
+bool CFileForm::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::FocusIn || event->type() == QEvent::MouseButtonPress) {
+        setSelect(true);
+        emit selected();
+    }
+    QWidget::eventFilter(watched, event);
+}
+
+void CFileForm::mousePressEvent(QMouseEvent *event)
+{
+    setSelect(true);
+    emit selected();
+    QWidget::mousePressEvent(event);
 }
