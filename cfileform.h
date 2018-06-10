@@ -48,8 +48,6 @@ private:
     FileItemMode mode = FileItemMode::GRID;
     Ui::CFileForm *ui;
     QFileSystemModel * model;
-    QAbstractItemView * fileTreeView;
-    QString workPath;
     QStack<QModelIndex> historyPathStack;
 };
 

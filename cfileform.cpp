@@ -15,19 +15,15 @@ CFileForm::CFileForm(QWidget *parent) :
     p.setColor(QPalette::Window,Qt::darkGray);
     setPalette(p);
 
-    fileTreeView = ui->fileTreeView;
-    workPath = QDir::rootPath();
     model = new QFileSystemModel(this);
-    model->setRootPath(workPath);
+    model->setRootPath(QDir::rootPath());
     model->setReadOnly(false);
     ui->fileTreeView->setModel(model);
     ui->fileListView->setModel(model);
     QStyle * style = QApplication::style();
 
     ui->pathLineEdit->setReadOnly(true);
-    for(int i = 1; i < model->columnCount(); i++) {
-        ui->fileTreeView->hideColumn(i);
-    }
+
     connect(ui->fileListView,&QListView::doubleClicked,ui->fileTreeView,&QTreeView::doubleClicked);
     connect(ui->fileTreeView,&QTreeView::doubleClicked,[this](const QModelIndex &index) {
         QString clickPath = this->model->filePath(index);
@@ -88,7 +84,7 @@ CFileForm::CFileForm(QWidget *parent) :
         if(!path.isEmpty()) {
             QModelIndex index = this->model->index(path);
             this->ui->pathLineEdit->setText(path);
-            this->fileTreeView->setRootIndex(index);
+            this->ui->fileTreeView->setRootIndex(index);
             this->ui->fileListView->setRootIndex(index);
             this->historyPathStack.clear();
             emit basePathChanged(this->model->filePath(index));

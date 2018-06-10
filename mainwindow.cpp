@@ -77,14 +77,23 @@ void MainWindow::initFileWidget()
                     if(widget->inherits("CFileForm")) {
                         if(fileForm != widget) {
                             qobject_cast<CFileForm *>(widget)->setSelect(false);
-                            FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
-                            //TODO
+                        } else {
+                            qobject_cast<CFileForm *>(widget)->setSelect(true);
+                            emit currentFileFormChanged(qobject_cast<CFileForm *>(widget));
                         }
                     }
                 }
             });
+            fileForm->setViewMode(FileItemMode::TREE);
         }
         splitter->widget(1)->hide();
+        connect(ui->leftDockWidget,&QDockWidget::dockLocationChanged,this,[this,splitter](Qt::DockWidgetArea area) {
+            if(area == Qt::LeftDockWidgetArea) {
+                splitter->setOrientation(Qt::Vertical);
+            } else if(area == Qt::BottomDockWidgetArea) {
+                splitter->setOrientation(Qt::Horizontal);
+            }
+        });
         this->ui->fileTabWidget->addTab(splitter,QApplication::style()->standardIcon(QStyle::SP_DirIcon),QDir::rootPath());
         if(this->ui->fileTabWidget->count() > 1) {
             this->ui->fileTabWidget->setTabBarAutoHide(false);
@@ -126,6 +135,8 @@ void MainWindow::initFileWidget()
                     if(fileWidget->inherits("CFileForm") && qobject_cast<CFileForm *>(fileWidget)->isSelect()) {
                         splitter->widget(i)->hide();
                         qobject_cast<CFileForm *>(splitter->widget(i % 1))->setSelect(true);
+                        splitButton->setIcon(QIcon(":/img/view_split"));
+                        splitButton->setText(tr("split"));
                         return;
                     }
                 }
@@ -134,10 +145,12 @@ void MainWindow::initFileWidget()
                     if(!splitter->widget(i)->isVisible()) {
                         splitter->widget(i)->show();
                         qobject_cast<CFileForm *>(splitter->widget(i))->setSelect(true);
-                    }else{
+                    } else {
                         qobject_cast<CFileForm *>(splitter->widget(i))->setSelect(false);
                     }
                 }
+                splitButton->setText(tr("close"));
+                splitButton->setIcon(QIcon(":/img/view_right_close"));
             }
         }
     });
@@ -165,14 +178,23 @@ void MainWindow::initFileWidget()
         QWidget *widget = this->ui->fileTabWidget->widget(index);
         if(widget->inherits("QSplitter")) {
             QSplitter *splitter = qobject_cast<QSplitter *>(widget);
-            widget = splitter->widget(0);//TODO
-            if(widget->inherits("CFileForm")) {
-                FileItemMode mode = qobject_cast<CFileForm *>(widget)->viewMode();
-                gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
-                listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
-                treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
+            for(int i = 0; i < splitter->count(); i++) {
+                widget = splitter->widget(i);//TODO
+                if(widget->inherits("CFileForm")) {
+                    CFileForm *fileForm = qobject_cast<CFileForm *>(widget);
+                    if(fileForm->isSelect()) {
+                        emit currentFileFormChanged(fileForm);
+                    }
+                }
             }
+
         }
+    });
+    connect(this,&MainWindow::currentFileFormChanged,this,[=](CFileForm *form) {
+        FileItemMode mode = form->viewMode();
+        gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
+        listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
+        treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
     });
     this->ui->fileTabWidget->setTabBarAutoHide(true);
     emit addTabButton->clicked(true);
@@ -297,30 +319,30 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
     QMenu menu;
     if(serialNumber.isEmpty() && !path.isEmpty()) {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
-        if(!deviceList.isEmpty()) {
-            menu.addAction(tr("rename"),[this,path]() {
-                if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
-                    QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
-                    if(splitter->widget(0)->inherits("CFileForm")) {
-                        CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
-                        QModelIndex index = fileForm->getModel()->index(path);
-                        if(index.isValid())
-                            fileForm->getCurrentItemView()->edit(index);
-                    }
+        menu.addAction(tr("rename"),[this,path]() {
+            if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
+                QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
+                if(splitter->widget(0)->inherits("CFileForm")) {
+                    CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
+                    QModelIndex index = fileForm->getModel()->index(path);
+                    if(index.isValid())
+                        fileForm->getCurrentItemView()->edit(index);
                 }
-            });
-            menu.addAction(tr("delete"),[this,path]() {
-                QFile::remove(path);
-            });
-            menu.addAction(tr("open in folder"),[this,path]() {
-                QString fileDir = QFileInfo(path).absoluteDir().absolutePath();
-                QString urlStr = "file:";
-                QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
-            });
-            menu.addAction(tr("open default"),[this,path]() {
-                QString urlStr = "file:";
-                QDesktopServices::openUrl(QUrl(urlStr.append(path), QUrl::TolerantMode));
-            });
+            }
+        });
+        menu.addAction(tr("delete"),[this,path]() {
+            QFile::remove(path);
+        });
+        menu.addAction(tr("open in folder"),[this,path]() {
+            QString fileDir = QFileInfo(path).absoluteDir().absolutePath();
+            QString urlStr = "file:";
+            QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
+        });
+        menu.addAction(tr("open default"),[this,path]() {
+            QString urlStr = "file:";
+            QDesktopServices::openUrl(QUrl(urlStr.append(path), QUrl::TolerantMode));
+        });
+        if(!deviceList.isEmpty()) {
             if(path.endsWith(".apk")) {
                 QMenu *installApkMenu = menu.addMenu(tr("install apk to..."));
                 for(int i = 0; i < deviceList.size(); i++) {

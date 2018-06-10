@@ -30,6 +30,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 signals:
+    void currentFileFormChanged(CFileForm *form);
     void processStart(const QString &title,const QString &content);
     void processEnd(int exitCode,const QString &msg);
 private:
