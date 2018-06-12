@@ -369,6 +369,26 @@ QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, 
     return process;
 }
 
+QList<CAndroidFile> CAndroidDevice::listDir(const QString &path)
+{
+    QList<CAndroidFile> fileList;
+    ProcessResult result = processCmd(tr("%1 -s %2 shell ls -l %3")
+               .arg(CAndroidContext::androidAdbPath)
+               .arg(serialNumber)
+               .arg(path));
+    if(result.exitCode == 0){
+        QStringList lines = result.resultStr.split("\n");
+        QListIterator<QString> iterator(lines);
+        while(iterator.hasNext()){
+            QString line = iterator.next();
+            if(line.startsWith('d') || line.startsWith('-')){
+                fileList.append(CAndroidFile(path,line.trimmed(),this));
+            }
+        }
+    }
+    return fileList;
+}
+
 QList<CAndroidDevice *> CAndroidContext::getDevices()
 {
     QMutexLocker locker(&(CAndroidContext::getInstance()->deviceMapMutex));
@@ -525,4 +545,37 @@ ProcessResult::ProcessResult(int exitCode, QString resultStr):
     exitCode(exitCode),resultStr(resultStr)
 {
 
+}
+
+CAndroidFile::CAndroidFile(const QString &basePath,const QString &info, CAndroidDevice *device):
+    device(device)
+{
+    if(info.isEmpty()){
+        this->fileName = device->tr("unnamed");
+        this->path = device->tr("unknown");
+        this->owner = device->tr("unknown");
+        this->group = device->tr("unknown");
+        this->size = device->tr("unknown");
+        this->privilege = device->tr("unknown");
+        this->time = device->tr("unknown");
+    }else{
+        QStringList infoList = info.split(QRegExp("\\s+"));
+        if(infoList.size() == 8){
+            infoList.removeAt(1);
+        }
+        if(infoList.size() == 7){
+            this->size = infoList.at(3);
+            infoList.removeAt(3);
+        }else{
+            this->size = "0";
+        }
+        if(infoList.size() == 6){
+            this->fileName = infoList.at(5);
+            this->time = infoList.at(3) + " " + infoList.at(4);
+            this->privilege = infoList.at(0);
+            this->owner = infoList.at(1);
+            this->group = infoList.at(2);
+            this->path = basePath + "/" + this->fileName;
+        }
+    }
 }

@@ -61,6 +61,9 @@ void MainWindow::initFileWidget()
         splitter->setOrientation(Qt::Vertical);
         for(int i = 0; i < 2; i++) {
             CFileForm *fileForm = new CFileForm(splitter);
+            if(i == 0){
+                fileForm->setSelect(true);
+            }
             connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
                 requestContextMenu(QString(),path);
             });

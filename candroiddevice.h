@@ -12,6 +12,7 @@ namespace candroid
 class CAndroidApp;
 class CAndroidDevice;
 class CAndroidConfig;
+class CAndroidFile;
 }
 
 class CAndroidDevice;
@@ -22,6 +23,21 @@ public:
     const int exitCode;
     const QString resultStr;
     explicit ProcessResult(int exitCode,QString resultStr);
+};
+
+class CAndroidFile
+{
+
+public:
+    explicit CAndroidFile(const QString &basePath,const QString &info,CAndroidDevice *device);
+    QString path;
+    QString fileName;
+    QString privilege;
+    QString owner;
+    QString group;
+    QString size;
+    QString time;
+    const CAndroidDevice * device;
 };
 
 class CAndroidApp : public QObject
@@ -94,7 +110,7 @@ public:
     void inputSwipe(const QPoint &startPos,const QPoint &endPos,int duration);
     void inputClick(const QPoint &pos);
     QProcess * logcat(QString format = "",QString patterns = "",QString tag = "",QString content = "",QString pid = 0);// (method "查看日志" "adb logcat -v long ActivityManager:I *:S")
-
+    QList<CAndroidFile> listDir(const QString &path);
 private:
     QString model;//(field "型号" :read "adb shell getprop ro.product.model")
     QString battery;//(field "电池状况" :read "adb shell dumpsys battery")
