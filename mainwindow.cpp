@@ -264,7 +264,6 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         connect(widget,&QTabWidget::tabCloseRequested,this,[this,widget,serialNumber](int index) {
             QWidget *tempWidget = widget->widget(index);
             widget->removeTab(index);
-            tempWidget->deleteLater();
             if(widget->count() == 0) {
                 int index = this->ui->detailTabWidget->indexOf(widget);
                 if(index >= 0) {
@@ -272,6 +271,8 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
                     this->deviceTabMap.remove(serialNumber);
                     widget->deleteLater();
                 }
+            }else{
+                tempWidget->deleteLater();
             }
         });
         this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
@@ -282,6 +283,8 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         tabName = tr("log");
     } else if(type == DetailViewType::SCREEN) {
         tabName = tr("screen");
+    } else if(type == DetailViewType::FILE){
+        tabName = tr("file");
     }
 
     for(int i = 0; i < widget->count(); i++) {
@@ -298,8 +301,13 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
     } else if(type == DetailViewType::SCREEN) {
         CDeviceEditForm * editForm = new CDeviceEditForm(device,widget);
         widget->addTab(editForm,tabName);
+        widget->setCurrentWidget(editForm);
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
+    } else if(type == DetailViewType::FILE){
+        CDeviceFileForm * fileForm = new CDeviceFileForm(device,widget);
+        widget->addTab(fileForm,tabName);
+        widget->setCurrentWidget(fileForm);
     }
 }
 
@@ -404,6 +412,11 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
             CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
             if(device != nullptr)
                 openDeviceDetailView(device,DetailViewType::LOG);
+        });
+        menu.addAction(tr("file"),[this,serialNumber]() {
+            CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+            if(device != nullptr)
+                openDeviceDetailView(device,DetailViewType::FILE);
         });
     }
 

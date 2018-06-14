@@ -422,7 +422,6 @@ void CAndroidContext::startListenAdb()
                     if(deviceStrList.size() > 0) {
                         deviceStrList.removeAt(0);
                     }
-                    bool needUpdate = (deviceStrList.size() != this->deviceMap.size());
                     this->deviceMapMutex.lock();
                     QMap<QString,CAndroidDevice *> tmpDeviceMap;
                     for(int i = 0; i < deviceStrList.size(); i++) {
@@ -431,7 +430,7 @@ void CAndroidContext::startListenAdb()
                         if(line.endsWith("device")) {
                             QString serialNumber = line.left(line.length() - 6).trimmed();
                             if(this->deviceMap.contains(serialNumber)) {
-                                CAndroidDevice * tmpDevice = this->deviceMap.take(serialNumber);
+                                CAndroidDevice * tmpDevice = this->deviceMap.value(serialNumber);
                                 tmpDeviceMap.insert(serialNumber,tmpDevice);
                                 this->cleanupHandler.remove(tmpDevice);
                             } else {
@@ -460,6 +459,7 @@ void CAndroidContext::startListenAdb()
                             }
                         }
                     }
+                    bool needUpdate = (tmpDeviceMap.size() != this->deviceMap.size());
                     this->deviceMap.clear();
                     this->deviceMap = tmpDeviceMap;
                     this->cleanupHandler.clear();
