@@ -38,7 +38,7 @@ void CDeviceForm::updateDevices()
         ui->memInfoLabel->setText(device->getMemInfo());
         QStringList packageList;
         QListIterator<CAndroidApp*> appIter(device->getApplications());
-        while(appIter.hasNext()){
+        while(appIter.hasNext()) {
             packageList << appIter.next()->getName();
         }
 
@@ -69,8 +69,7 @@ void CDeviceForm::dropEvent(QDropEvent *event)
         QList<QUrl> urls = event->mimeData()->urls();
         if(urls.at(0).isLocalFile()) {
             QString filePath = urls.at(0).toLocalFile();
-            if(!this->devicePointer.isNull())
-                emit menuRequested(this->devicePointer->serialNumber,filePath);
+            emit menuRequested(this->devicePointer->serialNumber,filePath);
         }
     }
 }
@@ -85,8 +84,8 @@ void CDeviceForm::mouseMoveEvent(QMouseEvent *event)
 {
     QWidget::mouseMoveEvent(event);
     if (ui->deviceIconLabel->rect().contains(mStartPoint) &&
-            ui->tabWidget->currentIndex() == 0 &&
-            (event->pos() - mStartPoint).manhattanLength() > QApplication::startDragDistance()
+        ui->tabWidget->currentIndex() == 0 &&
+        (event->pos() - mStartPoint).manhattanLength() > QApplication::startDragDistance()
         && !devicePointer.isNull()) { //判断是否执行拖动
         QDrag *drag = new QDrag(this);
         QMimeData *mimeData = new QMimeData;

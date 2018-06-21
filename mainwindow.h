@@ -50,7 +50,7 @@ private slots:
     void openDeviceDetailView(CAndroidDevice *device,DetailViewType type);
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);
-    void requestContextMenu(const QString &serialNumber,const QString &path);
+    void requestContextMenu(const QString &serialNumber,const QString &localPath,const QString &devicePath);
     void installApk(const QString &serialNumber,const QString &path);
     void screenShot(const QString &serialNumber);
     void screenRecord(const QString &serialNumber);

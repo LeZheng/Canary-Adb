@@ -23,5 +23,12 @@
         <file alias="view_split">img/view-right-new.png</file>
         <file alias="view_right_close">img/view-right-close.png</file>
         <file alias="view_left_close">img/view-left-close.png</file>
+        <file alias="edit_clear">img/edit-clear.png</file>
+        <file alias="edit_copy">img/edit-copy.png</file>
+        <file alias="edit_cut">img/edit-cut.png</file>
+        <file alias="edit_delete">img/edit-delete.png</file>
+        <file alias="edit_rename">img/edit-rename.png</file>
+        <file alias="edit_select_all">img/edit-select-all.png</file>
+        <file alias="document_save">img/document-save.png</file>
     </qresource>
 </RCC>

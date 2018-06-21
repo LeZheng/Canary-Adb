@@ -78,18 +78,18 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     connect(this->ui->logContentTextEdit,&QTextEdit::customContextMenuRequested,[this]() {
         QMenu menu;
         if(!this->ui->logContentTextEdit->textCursor().selectedText().isEmpty()) {
-            menu.addAction(tr("copy"),[this]() {
+            menu.addAction(QIcon(":/img/edit_copy"),tr("copy"),[this]() {
                 QClipboard *clipboard = QGuiApplication::clipboard();
                 clipboard->setText(this->ui->logContentTextEdit->textCursor().selectedText());
             });
         }
-        menu.addAction(tr("select all"),[this]() {
+        menu.addAction(QIcon(":/img/edit_select_all"),tr("select all"),[this]() {
             this->ui->logContentTextEdit->selectAll();
         });
-        menu.addAction(tr("clear"),[this]() {
+        menu.addAction(QIcon(":/img/edit_clear"),tr("clear"),[this]() {
             this->ui->logContentTextEdit->clear();
         });
-        menu.addAction(tr("export to file"),[this]() {
+        menu.addAction(QIcon(":/img/document_save"),tr("export to file"),[this]() {
             QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
                                QDir::homePath(),
                                tr("Text files (*.txt)"));

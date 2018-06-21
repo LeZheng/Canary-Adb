@@ -61,11 +61,11 @@ void MainWindow::initFileWidget()
         splitter->setOrientation(Qt::Vertical);
         for(int i = 0; i < 2; i++) {
             CFileForm *fileForm = new CFileForm(splitter);
-            if(i == 0){
+            if(i == 0) {
                 fileForm->setSelect(true);
             }
             connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
-                requestContextMenu(QString(),path);
+                requestContextMenu(QString(),path,"");
             });
             connect(fileForm,&CFileForm::basePathChanged,this,[this,fileForm](const QString &path) {
                 QFileInfo file(path);
@@ -227,7 +227,9 @@ void MainWindow::initDeviceWidget()
                 deviceNameList << tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
                 CDeviceForm *deviceForm = new CDeviceForm(device,this->ui->deviceStackedWidget);
                 this->ui->deviceStackedWidget->addWidget(deviceForm);
-                connect(deviceForm,&CDeviceForm::menuRequested,this,&MainWindow::requestContextMenu);
+                connect(deviceForm,&CDeviceForm::menuRequested,this,[this](const QString &serialNumber, const QString &path) {
+                    this->requestContextMenu(serialNumber,path,"");
+                });
             }
             this->ui->deviceComboBox->addItems(deviceNameList);
         }
@@ -271,7 +273,7 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
                     this->deviceTabMap.remove(serialNumber);
                     widget->deleteLater();
                 }
-            }else{
+            } else {
                 tempWidget->deleteLater();
             }
         });
@@ -283,7 +285,7 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         tabName = tr("log");
     } else if(type == DetailViewType::SCREEN) {
         tabName = tr("screen");
-    } else if(type == DetailViewType::FILE){
+    } else if(type == DetailViewType::FILE) {
         tabName = tr("file");
     }
 
@@ -304,10 +306,13 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         widget->setCurrentWidget(editForm);
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
-    } else if(type == DetailViewType::FILE){
+    } else if(type == DetailViewType::FILE) {
         CDeviceFileForm * fileForm = new CDeviceFileForm(device,widget);
         widget->addTab(fileForm,tabName);
         widget->setCurrentWidget(fileForm);
+        connect(fileForm,&CDeviceFileForm::menuRequested,this,[this](const QString &serialNumber,const QString &localPath,const QString &devicePath) {
+            this->requestContextMenu(serialNumber,localPath,devicePath);
+        });
     }
 }
 
@@ -325,108 +330,137 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
     this->loadingDialog->close();
 }
 
-void MainWindow::requestContextMenu(const QString &serialNumber, const QString &path)
+void MainWindow::requestContextMenu(const QString &serialNumber, const QString &localPath,const QString &devicePath)
 {
     QMenu menu;
-    if(serialNumber.isEmpty() && !path.isEmpty()) {
+    if(serialNumber.isEmpty() && !localPath.isEmpty()) {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
-        menu.addAction(tr("rename"),[this,path]() {
+        menu.addAction(QIcon(":/img/edit_rename"),tr("rename"),[this,localPath]() {
             if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
                 QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
                 if(splitter->widget(0)->inherits("CFileForm")) {
                     CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
-                    QModelIndex index = fileForm->getModel()->index(path);
+                    QModelIndex index = fileForm->getModel()->index(localPath);
                     if(index.isValid())
                         fileForm->getCurrentItemView()->edit(index);
                 }
             }
         });
-        menu.addAction(tr("delete"),[this,path]() {
-            QFile::remove(path);
+        menu.addAction(QIcon(":/img/edit_delete"),tr("delete"),[this,localPath]() {
+            QFile::remove(localPath);
         });
-        menu.addAction(tr("open in folder"),[this,path]() {
-            QString fileDir = QFileInfo(path).absoluteDir().absolutePath();
+        menu.addAction(tr("open in folder"),[this,localPath]() {
+            QString fileDir = QFileInfo(localPath).absoluteDir().absolutePath();
             QString urlStr = "file:";
             QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
         });
-        menu.addAction(tr("open default"),[this,path]() {
+        menu.addAction(tr("open default"),[this,localPath]() {
             QString urlStr = "file:";
-            QDesktopServices::openUrl(QUrl(urlStr.append(path), QUrl::TolerantMode));
+            QDesktopServices::openUrl(QUrl(urlStr.append(localPath), QUrl::TolerantMode));
         });
         if(!deviceList.isEmpty()) {
-            if(path.endsWith(".apk")) {
+            if(localPath.endsWith(".apk")) {
                 QMenu *installApkMenu = menu.addMenu(tr("install apk to..."));
                 for(int i = 0; i < deviceList.size(); i++) {
                     CAndroidDevice * device = deviceList.at(i);
-                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,path,this]() {
-                        installApk(device->serialNumber,path);
+                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
+                        installApk(device->serialNumber,localPath);
                     });
                 }
             }
             QMenu *pushFileMenu = menu.addMenu(tr("push file to..."));
             for(int i = 0; i < deviceList.size(); i++) {
                 CAndroidDevice * device = deviceList.at(i);
-                pushFileMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,path,this]() {
+                pushFileMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
                     //TODO
                 });
             }
         }
     }
 
-    if(!serialNumber.isEmpty() && path.isEmpty()) {
-        menu.addAction(tr("open screen"),[this,serialNumber]() {
-            CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-            if(device != nullptr)
-                openDeviceDetailView(device,DetailViewType::SCREEN);
-        });
-        menu.addAction(tr("screen record"),[this,serialNumber]() {
-            screenRecord(serialNumber);
-        });
-        menu.addAction(tr("screen shot"),[this,serialNumber]() {
-            screenShot(serialNumber);
-        });
-        menu.addAction(tr("set wm size"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("set wm density"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("get file"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("push"),this,[this,serialNumber]() {
-            //TODO
-        });
-        menu.addAction(tr("install"),this,[this,serialNumber]() {
-            QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
-                                  QDir::rootPath(),
-                                  tr("Android Application File (*.apk)"));
-            if(!apkFilePath.isEmpty()) {
-                installApk(serialNumber,apkFilePath);
+    if(!serialNumber.isEmpty()) {
+        if(localPath.isEmpty() && devicePath.isEmpty()) {
+            menu.addAction(tr("open screen"),[this,serialNumber]() {
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                if(device != nullptr)
+                    openDeviceDetailView(device,DetailViewType::SCREEN);
+            });
+            menu.addAction(tr("screen record"),[this,serialNumber]() {
+                screenRecord(serialNumber);
+            });
+            menu.addAction(tr("screen shot"),[this,serialNumber]() {
+                screenShot(serialNumber);
+            });
+            menu.addAction(tr("reboot"),[this,serialNumber]() {
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                if(device != nullptr)
+                    device->reboot();
+            });
+            menu.addAction(tr("logcat"),[this,serialNumber]() {
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                if(device != nullptr)
+                    openDeviceDetailView(device,DetailViewType::LOG);
+            });
+            menu.addAction(tr("file"),[this,serialNumber]() {
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                if(device != nullptr)
+                    openDeviceDetailView(device,DetailViewType::FILE);
+            });
+            menu.addAction(tr("pull"),[this]() {
+                //TODO
+            });
+            menu.addAction(tr("push"),this,[this,serialNumber]() {
+                //TODO
+            });
+            menu.addAction(tr("install"),this,[this,serialNumber]() {
+                QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
+                                      QDir::rootPath(),
+                                      tr("Android Application File (*.apk)"));
+                if(!apkFilePath.isEmpty()) {
+                    installApk(serialNumber,apkFilePath);
+                }
+            });
+        } else if(!localPath.isEmpty() && devicePath.isEmpty()) {
+            menu.addAction(tr("push"),this,[this,serialNumber]() {
+                //TODO
+            });
+            if(localPath.endsWith(".apk")) {
+                menu.addAction(tr("install"),this,[this,serialNumber]() {
+                    QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
+                                          QDir::rootPath(),
+                                          tr("Android Application File (*.apk)"));
+                    if(!apkFilePath.isEmpty()) {
+                        installApk(serialNumber,apkFilePath);
+                    }
+                });
             }
-        });
-        menu.addAction(tr("reboot"),[this]() {
-            //TODO
-        });
-        menu.addAction(tr("logcat"),[this,serialNumber]() {
-            CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-            if(device != nullptr)
-                openDeviceDetailView(device,DetailViewType::LOG);
-        });
-        menu.addAction(tr("file"),[this,serialNumber]() {
-            CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-            if(device != nullptr)
-                openDeviceDetailView(device,DetailViewType::FILE);
-        });
-    }
-
-    if(!serialNumber.isEmpty() && !path.isEmpty()) {
-        menu.addAction(tr("install"),this,[this,serialNumber,path]() {
-            installApk(serialNumber,path);
-        });
-        menu.addAction(tr("push"),this,[this,serialNumber,path]() {
-            //TODO
-        });
+        } else if(localPath.isEmpty() && !devicePath.isEmpty()) {
+            menu.addAction(tr("pull"),[this]() {
+                //TODO
+            });
+            menu.addAction(QIcon(":/img/edit_rename"),tr("rename"),[this,localPath]() {
+                //TODO
+            });
+            menu.addAction(QIcon(":/img/edit_delete"),tr("delete"),[this,localPath]() {
+                //TODO
+            });
+        } else {
+            qDebug() << this->ui->centralWidget->geometry() << " - " << QCursor::pos();
+            if(this->ui->centralWidget->rect().contains(this->ui->centralWidget->mapFromGlobal(QCursor::pos()))) {
+                menu.addAction(tr("push"),this,[this,serialNumber,localPath]() {
+                    //TODO
+                });
+                if(localPath.endsWith(".apk")) {
+                    menu.addAction(tr("install"),this,[this,serialNumber,localPath]() {
+                        installApk(serialNumber,localPath);
+                    });
+                }
+            } else {
+                menu.addAction(tr("pull"),[this]() {
+                    //TODO
+                });
+            }
+        }
     }
 
     if(menu.actions().size() > 0) {
