@@ -54,6 +54,8 @@ private slots:
     void installApk(const QString &serialNumber,const QString &path);
     void screenShot(const QString &serialNumber);
     void screenRecord(const QString &serialNumber);
+    void pushFile(const QString &serialNumber,const QString &localPath,const QString &devicePath);
+    void pullFile(const QString &serialNumber,const QString &localPath,const QString &devicePath);
 };
 
 #endif // MAINWINDOW_H

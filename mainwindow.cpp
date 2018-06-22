@@ -447,8 +447,8 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         } else {
             qDebug() << this->ui->centralWidget->geometry() << " - " << QCursor::pos();
             if(this->ui->centralWidget->rect().contains(this->ui->centralWidget->mapFromGlobal(QCursor::pos()))) {
-                menu.addAction(tr("push"),this,[this,serialNumber,localPath]() {
-                    //TODO
+                menu.addAction(tr("push"),this,[this,serialNumber,localPath,devicePath]() {
+                    pushFile(serialNumber,localPath,devicePath);
                 });
                 if(localPath.endsWith(".apk")) {
                     menu.addAction(tr("install"),this,[this,serialNumber,localPath]() {
@@ -555,5 +555,33 @@ void MainWindow::screenRecord(const QString &serialNumber)
             });
             dialog->show();
         }
+    }
+}
+
+void MainWindow::pushFile(const QString &serialNumber, const QString &localPath, const QString &devicePath)
+{
+    CAndroidDevice *device = CAndroidContext::getDevice(serialNumber);
+    if(device != nullptr) {
+        emit processStart(tr("push..."),tr("push %1 to %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
+        QtConcurrent::run([device,localPath,devicePath,this]() {
+            device->push(localPath,devicePath);
+            emit processEnd(0,"");
+        });
+    } else {
+        //TODO
+    }
+}
+
+void MainWindow::pullFile(const QString &serialNumber, const QString &localPath, const QString &devicePath)
+{
+    CAndroidDevice *device = CAndroidContext::getDevice(serialNumber);
+    if(device != nullptr) {
+        emit processStart(tr("pull..."),tr("push %1 from %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
+        QtConcurrent::run([device,localPath,devicePath,this]() {
+            device->pull(devicePath,localPath);
+            emit processEnd(0,"");
+        });
+    } else {
+        //TODO
     }
 }

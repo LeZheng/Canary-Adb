@@ -100,6 +100,8 @@ void CDeviceFileForm::dropEvent(QDropEvent *event)
             if(row >= 0) {
                 CAndroidFile deviceFile = currentFiles.at(row);
                 emit menuRequested(this->devicePointer->serialNumber,localPath,deviceFile.path);
+            }else{
+                emit menuRequested(this->devicePointer->serialNumber,localPath,currentDir);
             }
         }
     }
