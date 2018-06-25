@@ -57,8 +57,8 @@ QSize CAndroidDevice::getWmSize()
 void CAndroidDevice::updateWmSize()
 {
     QString wmSizeStr = processCmd(tr("%1 -s %2 shell wm size")
-                              .arg(CAndroidContext::androidAdbPath)
-                              .arg(serialNumber)).resultStr.trimmed();
+                                   .arg(CAndroidContext::androidAdbPath)
+                                   .arg(serialNumber)).resultStr.trimmed();
 
     wmSizeStr = wmSizeStr.right(wmSizeStr.size() - wmSizeStr.lastIndexOf(':') - 1).trimmed();
     if(wmSizeStr.contains('x')) {
@@ -260,12 +260,12 @@ void  CAndroidDevice::push(QString srcPath, QString desPath)
 QProcess * CAndroidDevice::screenRecord(QString recordPath,QString size,int bitRate)
 {
     QString cmd = tr("%1 -s %2 shell screenrecord ")
-            .arg(CAndroidContext::androidAdbPath)
-            .arg(serialNumber);
-    if(!size.isEmpty()){
+                  .arg(CAndroidContext::androidAdbPath)
+                  .arg(serialNumber);
+    if(!size.isEmpty()) {
         cmd.append(tr(" --size %1 ").arg(size));
     }
-    if(bitRate > 0){
+    if(bitRate > 0) {
         cmd.append(tr(" --bit-rate %1 ").arg(bitRate));
     }
     cmd.append(recordPath);
@@ -373,17 +373,15 @@ QList<CAndroidFile> CAndroidDevice::listDir(const QString &path)
 {
     QList<CAndroidFile> fileList;
     ProcessResult result = processCmd(tr("%1 -s %2 shell ls -l %3")
-               .arg(CAndroidContext::androidAdbPath)
-               .arg(serialNumber)
-               .arg(path));
-    if(result.exitCode == 0){
-        QStringList lines = result.resultStr.split("\n");
-        QListIterator<QString> iterator(lines);
-        while(iterator.hasNext()){
-            QString line = iterator.next();
-            if(line.startsWith('d') || line.startsWith('-')){
-                fileList.append(CAndroidFile(path,line.trimmed(),this));
-            }
+                                      .arg(CAndroidContext::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(path));
+    QStringList lines = result.resultStr.split("\n");
+    QListIterator<QString> iterator(lines);
+    while(iterator.hasNext()) {
+        QString line = iterator.next();
+        if(line.startsWith('d') || line.startsWith('-')) {
+            fileList.append(CAndroidFile(path,line.trimmed(),this));
         }
     }
     return fileList;
@@ -402,9 +400,9 @@ QList<CAndroidDevice *> CAndroidContext::getDevices()
 
 CAndroidDevice *CAndroidContext::getDevice(const QString &serialNumber)
 {
-    if(CAndroidContext::getInstance()->deviceMap.contains(serialNumber)){
+    if(CAndroidContext::getInstance()->deviceMap.contains(serialNumber)) {
         return CAndroidContext::getInstance()->deviceMap.value(serialNumber);
-    }else{
+    } else {
         return nullptr;
     }
 }
@@ -550,7 +548,7 @@ ProcessResult::ProcessResult(int exitCode, QString resultStr):
 CAndroidFile::CAndroidFile(const QString &basePath,const QString &info, CAndroidDevice *device):
     device(device)
 {
-    if(info.isEmpty()){
+    if(info.isEmpty()) {
         this->fileName = device->tr("unnamed");
         this->path = device->tr("unknown");
         this->owner = device->tr("unknown");
@@ -558,19 +556,20 @@ CAndroidFile::CAndroidFile(const QString &basePath,const QString &info, CAndroid
         this->size = device->tr("unknown");
         this->privilege = device->tr("unknown");
         this->time = device->tr("unknown");
-    }else{
+    } else {
         QStringList infoList = info.split(QRegExp("\\s+"));
-        if(infoList.size() == 8){
+        if(infoList.size() >= 8) {
             infoList.removeAt(1);
         }
-        if(infoList.size() == 7){
+        if(infoList.size() >= 7) {
             this->size = infoList.at(3);
             infoList.removeAt(3);
-        }else{
+        } else {
             this->size = "0";
         }
-        if(infoList.size() == 6){
-            this->fileName = infoList.at(5);
+        if(infoList.size() >= 6) {
+            int index = info.indexOf(infoList.at(4));
+            this->fileName = info.right(info.size() - index - infoList.at(4).size()).trimmed();
             this->time = infoList.at(3) + " " + infoList.at(4);
             this->privilege = infoList.at(0);
             this->owner = infoList.at(1);

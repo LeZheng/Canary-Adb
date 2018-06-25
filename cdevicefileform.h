@@ -9,7 +9,24 @@
 
 namespace Ui {
 class CDeviceFileForm;
+class CDeviceFileTableWidget;
 }
+
+class CDeviceFileTableWidget : public QTableWidget
+{
+public:
+    explicit CDeviceFileTableWidget(QWidget *parent = 0);
+    QString getBasePath(){return basePath;}
+    void setBasePath(const QString &path){this->basePath = path;}
+    QString getSerialNumber(){return this->serialNumber;}
+    void setSerialNumber(const QString &number){this->serialNumber = number;}
+protected:
+    virtual QMimeData *mimeData(const QList<QTableWidgetItem *> items) const;
+
+private:
+    QString basePath;
+    QString serialNumber;
+};
 
 class CDeviceFileForm : public QWidget
 {

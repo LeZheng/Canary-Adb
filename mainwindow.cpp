@@ -64,9 +64,7 @@ void MainWindow::initFileWidget()
             if(i == 0) {
                 fileForm->setSelect(true);
             }
-            connect(fileForm,&CFileForm::menuRequested,this,[this](const QString &path) {
-                requestContextMenu(QString(),path,"");
-            });
+            connect(fileForm,&CFileForm::menuRequested,this,&MainWindow::requestContextMenu);
             connect(fileForm,&CFileForm::basePathChanged,this,[this,fileForm](const QString &path) {
                 QFileInfo file(path);
                 int index = this->ui->fileTabWidget->indexOf(fileForm->parentWidget());

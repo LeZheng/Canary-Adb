@@ -10,6 +10,7 @@ CFileForm::CFileForm(QWidget *parent) :
     ui(new Ui::CFileForm)
 {
     ui->setupUi(this);
+    setAcceptDrops(true);
 
     QPalette p = palette();
     p.setColor(QPalette::Window,Qt::darkGray);
@@ -46,7 +47,7 @@ CFileForm::CFileForm(QWidget *parent) :
             return;
         }
         QString path = this->model->filePath(index);
-        emit menuRequested(path);
+        emit menuRequested("",path,"");
     });
 
     ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));
@@ -193,4 +194,42 @@ void CFileForm::mousePressEvent(QMouseEvent *event)
     setSelect(true);
     emit selected();
     QWidget::mousePressEvent(event);
+}
+
+void CFileForm::dragEnterEvent(QDragEnterEvent *event)
+{
+    if(event->mimeData()->hasUrls() && event->mimeData()->hasText()
+            && event->mimeData()->text().startsWith("android:")
+            && getCurrentItemView()->rootIndex().isValid()) {
+        event->accept();
+    }else{
+        QWidget::dragEnterEvent(event);
+    }
+}
+
+void CFileForm::dropEvent(QDropEvent *event)
+{
+    if(event->mimeData()->hasUrls() && event->mimeData()->hasText()
+            && event->mimeData()->text().startsWith("android:")) {
+        QString deviceNumber = event->mimeData()->text();
+        deviceNumber = deviceNumber.right(deviceNumber.size() - 8);
+        QUrl url = event->mimeData()->urls().at(0);
+        QString localPath;
+        QPoint pos = QCursor::pos();
+        if(this->viewMode() == FileItemMode::TREE){
+            pos.setY(pos.y() - ui->fileTreeView->header()->height());
+        }
+        QModelIndex index = getCurrentItemView()->indexAt(getCurrentItemView()->mapFromGlobal(pos));
+        if(index.isValid()){
+            localPath = this->model->filePath(index);
+        }else{
+            QModelIndex rootIndex = getCurrentItemView()->rootIndex();
+            if(rootIndex.isValid()){
+                localPath = this->model->filePath(rootIndex);
+            }else{
+                localPath = QDir::rootPath();
+            }
+        }
+        emit menuRequested(deviceNumber,localPath,url.path());
+    }
 }

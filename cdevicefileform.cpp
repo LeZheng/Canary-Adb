@@ -11,6 +11,7 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
 
     devicePointer = device;
     this->deviceSerialNumber = device->serialNumber;
+    this->ui->fileTableWidget->setSerialNumber(device->serialNumber);
 
     this->ui->fileTableWidget->setColumnCount(5);
     QStringList headers;
@@ -148,6 +149,29 @@ void CDeviceFileForm::openDir(const QString &path)
         this->ui->fileTableWidget->setItem(i,3,sizeItem);
         this->ui->fileTableWidget->setItem(i,4,timeItem);
         this->currentDir = path;
+        this->ui->fileTableWidget->setBasePath(currentDir);
         ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
     }
+}
+
+CDeviceFileTableWidget::CDeviceFileTableWidget(QWidget *parent):QTableWidget(parent)
+{
+
+}
+
+QMimeData *CDeviceFileTableWidget::mimeData(const QList<QTableWidgetItem *> items) const
+{
+    QMimeData *data = new QMimeData;
+    QListIterator<QTableWidgetItem *> iter(items);
+    while(iter.hasNext()){
+        QTableWidgetItem *item = iter.next();
+        if(item->column() == 0){
+            data->setText("android:" + serialNumber);
+            QList<QUrl> urls;
+            urls.append(QUrl(basePath + "/" + item->text()));
+            data->setUrls(urls);
+            break;
+        }
+    }
+    return data;
 }

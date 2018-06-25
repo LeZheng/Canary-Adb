@@ -47,7 +47,7 @@
     <widget class="QLineEdit" name="pathLineEdit"/>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="QTableWidget" name="fileTableWidget">
+    <widget class="CDeviceFileTableWidget" name="fileTableWidget">
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
      </property>
@@ -76,6 +76,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CDeviceFileTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>cdevicefileform.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

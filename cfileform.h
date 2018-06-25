@@ -9,6 +9,7 @@
 #include <QDesktopServices>
 #include <QMenu>
 #include <QFileDialog>
+#include <QDragEnterEvent>
 #include "candroiddevice.h"
 
 namespace Ui
@@ -38,8 +39,10 @@ protected:
     void leaveEvent(QEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);
     void mousePressEvent(QMouseEvent *event);
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dropEvent(QDropEvent *event);
 signals:
-    void menuRequested(const QString &path);
+    void menuRequested(const QString &serialNumber,const QString &localPath,const QString &devicePath);
     void basePathChanged(const QString &path);
     void selected();
 
