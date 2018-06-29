@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QDrag>
 #include "candroiddevice.h"
+#include "cdevicefileform.h"
 
 namespace Ui
 {
@@ -29,6 +30,7 @@ private:
     Ui::CDeviceForm *ui;
     QPointer<CAndroidDevice> devicePointer;
     QPoint mStartPoint;
+    CDeviceFileForm *fileForm;
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -37,7 +39,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event);
 
 signals:
-    void menuRequested(const QString &serialNumber, const QString &path);
+    void menuRequested(const QString &serialNumber, const QString &localPath,const QString &devicePath);
 };
 
 #endif // CDEVICEFORM_H

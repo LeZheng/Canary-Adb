@@ -12,9 +12,9 @@ CFileForm::CFileForm(QWidget *parent) :
     ui->setupUi(this);
     setAcceptDrops(true);
 
-    QPalette p = palette();
-    p.setColor(QPalette::Window,Qt::darkGray);
-    setPalette(p);
+//    QPalette p = palette();
+//    p.setColor(QPalette::Window,Qt::darkGray);
+//    setPalette(p);
 
     model = new QFileSystemModel(this);
     model->setRootPath(QDir::rootPath());
@@ -158,14 +158,14 @@ void CFileForm::setSelect(bool selected)
 {
     isSelected = selected;
     QPalette p = palette();
-    p.setColor(QPalette::Window,isSelected ? Qt::lightGray : Qt::darkGray);
+    p.setColor(QPalette::Window, p.color(isSelected ? QPalette::Active : QPalette::Disabled,QPalette::WindowText));
     setPalette(p);
 }
 
 void CFileForm::enterEvent(QEvent *event)
 {
     QPalette p = palette();
-    p.setColor(QPalette::Window,Qt::lightGray);
+    p.setColor(QPalette::Window,p.color(QPalette::Active,QPalette::WindowText));
     setPalette(p);
     QWidget::enterEvent(event);
 }
@@ -174,7 +174,7 @@ void CFileForm::leaveEvent(QEvent *event)
 {
     if(!isSelected) {
         QPalette p = palette();
-        p.setColor(QPalette::Window,Qt::darkGray);
+        p.setColor(QPalette::Window,p.color(QPalette::Disabled,QPalette::WindowText));
         setPalette(p);
     }
     QWidget::leaveEvent(event);

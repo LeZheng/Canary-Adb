@@ -283,8 +283,6 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         tabName = tr("log");
     } else if(type == DetailViewType::SCREEN) {
         tabName = tr("screen");
-    } else if(type == DetailViewType::FILE) {
-        tabName = tr("file");
     }
 
     for(int i = 0; i < widget->count(); i++) {
@@ -304,13 +302,6 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         widget->setCurrentWidget(editForm);
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
-    } else if(type == DetailViewType::FILE) {
-        CDeviceFileForm * fileForm = new CDeviceFileForm(device,widget);
-        widget->addTab(fileForm,tabName);
-        widget->setCurrentWidget(fileForm);
-        connect(fileForm,&CDeviceFileForm::menuRequested,this,[this](const QString &serialNumber,const QString &localPath,const QString &devicePath) {
-            this->requestContextMenu(serialNumber,localPath,devicePath);
-        });
     }
 }
 
@@ -399,16 +390,29 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 if(device != nullptr)
                     openDeviceDetailView(device,DetailViewType::LOG);
             });
-            menu.addAction(tr("file"),[this,serialNumber]() {
+            menu.addAction(tr("pull"),this,[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-                if(device != nullptr)
-                    openDeviceDetailView(device,DetailViewType::FILE);
-            });
-            menu.addAction(tr("pull"),[this]() {
-                //TODO
+                CDeviceFileDialog dialog(device);
+                if(dialog.exec() == QDialog::Accepted) {
+                    QString dPath = dialog.getChoosePath();
+                    QString lPath = QFileDialog::getSaveFileName(this, tr("Choose Local File"),
+                                    QDir::homePath() + QDir::separator() + dPath.right(dPath.size() - dPath.lastIndexOf('/')),
+                                    tr("All File (*.*)"));
+                    pullFile(serialNumber,lPath,dPath);
+                }
             });
             menu.addAction(tr("push"),this,[this,serialNumber]() {
-                //TODO
+                QString lPath = QFileDialog::getOpenFileName(this, tr("Choose Local File"),
+                                QDir::rootPath(),
+                                tr("All File (*.*)"));
+                if(!lPath.isEmpty()) {
+                    CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                    CDeviceFileDialog dialog(device,QFileInfo(lPath).fileName());
+                    if(dialog.exec() == QDialog::Accepted) {
+                        QString dPath = dialog.getChoosePath();
+                        pushFile(serialNumber,lPath,dPath);
+                    }
+                }
             });
             menu.addAction(tr("install"),this,[this,serialNumber]() {
                 QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
@@ -419,8 +423,13 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 }
             });
         } else if(!localPath.isEmpty() && devicePath.isEmpty()) {
-            menu.addAction(tr("push"),this,[this,serialNumber]() {
-                //TODO
+            menu.addAction(tr("push"),this,[this,localPath,serialNumber]() {
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                CDeviceFileDialog dialog(device,QFileInfo(localPath).fileName());
+                if(dialog.exec() == QDialog::Accepted) {
+                    QString dPath = dialog.getChoosePath();
+                    pushFile(serialNumber,localPath,dPath);
+                }
             });
             if(localPath.endsWith(".apk")) {
                 menu.addAction(tr("install"),this,[this,serialNumber]() {
@@ -433,8 +442,11 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 });
             }
         } else if(localPath.isEmpty() && !devicePath.isEmpty()) {
-            menu.addAction(tr("pull"),[this]() {
-                //TODO
+            menu.addAction(tr("pull"),[this,serialNumber,devicePath]() {
+                QString lPath = QFileDialog::getSaveFileName(this, tr("Choose Local File"),
+                                QDir::homePath() + QDir::separator() + devicePath.right(devicePath.size() - devicePath.lastIndexOf('/')),
+                                tr("All File (*.*)"));
+                pullFile(serialNumber,lPath,devicePath);
             });
             menu.addAction(QIcon(":/img/edit_rename"),tr("rename"),[this,localPath]() {
                 //TODO
@@ -443,7 +455,6 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 //TODO
             });
         } else {
-            qDebug() << this->ui->centralWidget->geometry() << " - " << QCursor::pos();
             if(this->ui->centralWidget->rect().contains(this->ui->centralWidget->mapFromGlobal(QCursor::pos()))) {
                 menu.addAction(tr("push"),this,[this,serialNumber,localPath,devicePath]() {
                     pushFile(serialNumber,localPath,devicePath);
@@ -454,8 +465,8 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                     });
                 }
             } else {
-                menu.addAction(tr("pull"),[this]() {
-                    //TODO
+                menu.addAction(tr("pull"),[this,serialNumber,localPath,devicePath]() {
+                    pullFile(serialNumber,localPath,devicePath);
                 });
             }
         }

@@ -1,18 +1,17 @@
-#include "cdevicefileform.h"
-#include "ui_cdevicefileform.h"
+#include "cdevicefiledialog.h"
+#include "ui_cdevicefiledialog.h"
 
-CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::CDeviceFileForm)
+CDeviceFileDialog::CDeviceFileDialog(CAndroidDevice * device,const QString &defaultName,QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::CDeviceFileDialog)
 {
     ui->setupUi(this);
 
-    setAcceptDrops(true);
-
+    setWindowTitle(tr("choose path"));
     devicePointer = device;
     this->deviceSerialNumber = device->serialNumber;
-    this->ui->fileTableWidget->setSerialNumber(device->serialNumber);
 
+    this->ui->nameLineEdit->setText(defaultName);
     this->ui->fileTableWidget->setColumnCount(5);
     QStringList headers;
     headers << tr("file name") << tr("group") << tr("owner") << tr("size") << tr("time");
@@ -22,7 +21,7 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         openDir(currentDir);
     }
 
-    connect(ui->fileTableWidget,&QTableWidget::cellDoubleClicked,this,[this](int row, int column) {
+    connect(ui->fileTableWidget,&QTableWidget::cellDoubleClicked,this,[this,defaultName](int row, int column) {
         if(row < this->currentFiles.size()) {
             CAndroidFile file = this->currentFiles.at(row);
             if(file.privilege.startsWith('d')) {
@@ -30,14 +29,23 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
                 prevPathStack.push(currentDir);
                 nextPathStack.clear();
                 openDir(nextPath);
+                currentFileName = "";
+                this->ui->nameLineEdit->setText(defaultName);
+            } else {
+                this->currentFileName = file.fileName;
+                this->ui->nameLineEdit->setText(file.fileName);
+                accept();
             }
         }
     });
 
-    connect(ui->fileTableWidget,&QTableWidget::customContextMenuRequested,this,[this](const QPoint &pos){
-        int row = ui->fileTableWidget->rowAt(pos.y());
-        if(row < currentFiles.size()){
-            emit menuRequested(this->deviceSerialNumber,"",currentFiles.at(row).path);
+    connect(ui->fileTableWidget,&QTableWidget::cellClicked,this,[this](int row, int column) {
+        if(row < this->currentFiles.size()) {
+            CAndroidFile file = this->currentFiles.at(row);
+            this->currentFileName = file.fileName;
+            if(!file.privilege.startsWith("d")){
+                this->ui->nameLineEdit->setText(file.fileName);
+            }
         }
     });
 
@@ -65,65 +73,33 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         this->ui->prevToolButton->setDisabled(prevPathStack.isEmpty());
         this->ui->nextToolButton->setDisabled(nextPathStack.isEmpty());
     });
+
+    connect(ui->nameLineEdit,&QLineEdit::textChanged,this,[this](){
+        if(this->ui->nameLineEdit->text().isEmpty()){
+            this->ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+            this->ui->nameLineEdit->setClearButtonEnabled(false);
+        }else{
+            this->ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+            this->ui->nameLineEdit->setClearButtonEnabled(true);
+        }
+    });
 }
 
-CDeviceFileForm::~CDeviceFileForm()
+CDeviceFileDialog::~CDeviceFileDialog()
 {
     delete ui;
 }
 
-void CDeviceFileForm::dragEnterEvent(QDragEnterEvent *event)
+QString CDeviceFileDialog::getChoosePath()
 {
-    if(event->mimeData()->hasUrls()) {
-        QList<QUrl> urls = event->mimeData()->urls();
-        if(urls.size() == 1) { //TODO larger than 1 ??
-            QListIterator<QUrl> iter(urls);
-            while(iter.hasNext()) {
-                if(iter.next().isLocalFile()) {
-                    event->accept();
-                    return;
-                }
-            }
-        }
+    if(currentFileName != ui->nameLineEdit->text()){
+        return currentDir + "/" + currentFileName + "/" + ui->nameLineEdit->text();
+    }else{
+        return currentDir + "/" + currentFileName;
     }
 }
 
-void CDeviceFileForm::dropEvent(QDropEvent *event)
-{
-    if(event->mimeData()->hasUrls() && !this->devicePointer.isNull()) {
-        QList<QUrl> urls = event->mimeData()->urls();
-        if(urls.at(0).isLocalFile()) {
-            QString localPath = urls.at(0).toLocalFile();
-            int dy = event->pos().y() - (ui->fileTableWidget->y() - this->y() + ui->fileTableWidget->horizontalHeader()->height());
-            int row = ui->fileTableWidget->rowAt(dy);
-            if(row >= 0) {
-                CAndroidFile deviceFile = currentFiles.at(row);
-                emit menuRequested(this->devicePointer->serialNumber,localPath,deviceFile.path);
-            }else{
-                emit menuRequested(this->devicePointer->serialNumber,localPath,currentDir);
-            }
-        }
-    }
-}
-
-void CDeviceFileForm::mousePressEvent(QMouseEvent *event)
-{
-    QWidget::mousePressEvent(event);
-    mStartPoint = event->pos();
-}
-
-void CDeviceFileForm::mouseMoveEvent(QMouseEvent *event)
-{
-    QWidget::mouseMoveEvent(event);
-
-    if (ui->fileTableWidget->rect().contains(mStartPoint) &&
-        (event->pos() - mStartPoint).manhattanLength() > QApplication::startDragDistance()
-        && !devicePointer.isNull()) { //判断是否执行拖动
-        //TODO drag out
-    }
-}
-
-void CDeviceFileForm::openDir(const QString &path)
+void CDeviceFileDialog::openDir(const QString &path)
 {
     currentFiles = this->devicePointer->listDir(path);
 
@@ -147,29 +123,6 @@ void CDeviceFileForm::openDir(const QString &path)
         this->ui->fileTableWidget->setItem(i,3,sizeItem);
         this->ui->fileTableWidget->setItem(i,4,timeItem);
         this->currentDir = path;
-        this->ui->fileTableWidget->setBasePath(currentDir);
         ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
     }
-}
-
-CDeviceFileTableWidget::CDeviceFileTableWidget(QWidget *parent):QTableWidget(parent)
-{
-
-}
-
-QMimeData *CDeviceFileTableWidget::mimeData(const QList<QTableWidgetItem *> items) const
-{
-    QMimeData *data = new QMimeData;
-    QListIterator<QTableWidgetItem *> iter(items);
-    while(iter.hasNext()){
-        QTableWidgetItem *item = iter.next();
-        if(item->column() == 0){
-            data->setText("android:" + serialNumber);
-            QList<QUrl> urls;
-            urls.append(QUrl(basePath + "/" + item->text()));
-            data->setUrls(urls);
-            break;
-        }
-    }
-    return data;
 }

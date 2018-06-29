@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QSplashScreen>
 #include <QDesktopWidget>
+#include <QStyleFactory>
 #include <QDebug>
 
 #include "candroiddevice.h"
@@ -9,6 +10,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
     MainWindow *window = new MainWindow;
     window->move((a.desktop()->width() - window->width()) / 2, (a.desktop()->height() - window->height()) / 2);
 

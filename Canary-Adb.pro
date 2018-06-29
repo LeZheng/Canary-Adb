@@ -32,7 +32,8 @@ SOURCES += \
     candroiddevice.cpp \
     cdeviceeditform.cpp \
     screenrecordoptiondialog.cpp \
-    cdevicefileform.cpp
+    cdevicefileform.cpp \
+    cdevicefiledialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     candroiddevice.h \
     cdeviceeditform.h \
     screenrecordoptiondialog.h \
-    cdevicefileform.h
+    cdevicefileform.h \
+    cdevicefiledialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -51,7 +53,8 @@ FORMS += \
     cdeviceform.ui \
     cdeviceeditform.ui \
     screenrecordoptiondialog.ui \
-    cdevicefileform.ui
+    cdevicefileform.ui \
+    cdevicefiledialog.ui
 
 RESOURCES += \
     canary-img.qrc

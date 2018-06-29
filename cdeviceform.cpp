@@ -11,10 +11,15 @@ CDeviceForm::CDeviceForm(CAndroidDevice * device,QWidget *parent) :
 
     setAcceptDrops(true);
 
+    fileForm = new CDeviceFileForm(device,this);
+    ui->gridLayout_4->addWidget(fileForm);
+
     connect(ui->deviceIconLabel,&QLabel::customContextMenuRequested,this,[this]() {
         if(!this->devicePointer.isNull())
-            emit menuRequested(this->devicePointer->serialNumber,QString());
+            emit menuRequested(this->devicePointer->serialNumber,QString(),QString());
     });
+
+    connect(fileForm,&CDeviceFileForm::menuRequested,this,&CDeviceForm::menuRequested);
 }
 
 CDeviceForm::~CDeviceForm()
@@ -33,9 +38,6 @@ void CDeviceForm::updateDevices()
         QSize wmSize = device->getWmSize();
         ui->wmSizeLineEdit->setText(tr("%1 x %2").arg(wmSize.width()).arg(wmSize.height()));
         ui->deviceIconLabel->setPixmap(QPixmap(":/img/phone"));
-        ui->networkInfoLabel->setText(device->getNetworkInfo());
-        ui->cpuInfoLabel->setText(device->getCpuInfo());
-        ui->memInfoLabel->setText(device->getMemInfo());
         QStringList packageList;
         QListIterator<CAndroidApp*> appIter(device->getApplications());
         while(appIter.hasNext()) {
@@ -69,7 +71,7 @@ void CDeviceForm::dropEvent(QDropEvent *event)
         QList<QUrl> urls = event->mimeData()->urls();
         if(urls.at(0).isLocalFile()) {
             QString filePath = urls.at(0).toLocalFile();
-            emit menuRequested(this->devicePointer->serialNumber,filePath);
+            emit menuRequested(this->devicePointer->serialNumber,filePath,QString());
         }
     }
 }

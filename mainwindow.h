@@ -15,13 +15,14 @@
 #include "candroiddevice.h"
 #include "cdeviceeditform.h"
 #include "cdevicefileform.h"
+#include "cdevicefiledialog.h"
 
 namespace Ui
 {
 class MainWindow;
 }
 
-enum class DetailViewType{LOG,SCREEN,FILE};
+enum class DetailViewType{LOG,SCREEN};
 
 class MainWindow : public QMainWindow
 {
