@@ -11,6 +11,11 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QTranslator translator;
+    translator.load("canary_zh_CN.qm");
+    a.installTranslator(&translator);
+
+
     MainWindow *window = new MainWindow;
     window->move((a.desktop()->width() - window->width()) / 2, (a.desktop()->height() - window->height()) / 2);
 
@@ -18,7 +23,7 @@ int main(int argc, char *argv[])
     QSplashScreen *splash = new QSplashScreen(pixmap.scaled(400,270));
     splash->resize(400,270);
     splash->show();
-    splash->showMessage("start init...",Qt::AlignBottom,Qt::white);
+    splash->showMessage(splash->tr("start init..."),Qt::AlignBottom,Qt::white);
     a.processEvents();
     CAndroidContext::getInstance()->startListenAdb();
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::updateStateChanged,splash,[splash](const QString &msg){

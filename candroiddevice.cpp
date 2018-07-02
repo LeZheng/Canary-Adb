@@ -32,7 +32,7 @@ QString CAndroidDevice::getModel()
 
 void CAndroidDevice::updateModel()
 {
-    this->model = processCmd(tr("%1 -s %2 shell getprop ro.product.model")
+    this->model = processCmd(QString("%1 -s %2 shell getprop ro.product.model")
                              .arg(CAndroidContext::androidAdbPath)
                              .arg(serialNumber)).resultStr.trimmed();
 }
@@ -44,7 +44,7 @@ QString CAndroidDevice::getBattery()
 
 void CAndroidDevice::updateBattery()
 {
-    this->battery = processCmd(tr("%1 -s %2 shell dumpsys battery")
+    this->battery = processCmd(QString("%1 -s %2 shell dumpsys battery")
                                .arg(CAndroidContext::androidAdbPath)
                                .arg(serialNumber)).resultStr.trimmed();
 }
@@ -56,7 +56,7 @@ QSize CAndroidDevice::getWmSize()
 
 void CAndroidDevice::updateWmSize()
 {
-    QString wmSizeStr = processCmd(tr("%1 -s %2 shell wm size")
+    QString wmSizeStr = processCmd(QString("%1 -s %2 shell wm size")
                                    .arg(CAndroidContext::androidAdbPath)
                                    .arg(serialNumber)).resultStr.trimmed();
 
@@ -78,7 +78,7 @@ void CAndroidDevice::updateWmSize()
 
 void CAndroidDevice::setWmSize(int width, int height)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell wm size %2x%3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell wm size %2x%3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(width)
@@ -87,7 +87,7 @@ void CAndroidDevice::setWmSize(int width, int height)
 
 void CAndroidDevice::resetWmSize()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell wm size reset")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell wm size reset")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
 }
@@ -99,14 +99,14 @@ QString CAndroidDevice::getWmDensity()
 
 void CAndroidDevice::updateWmDensity()
 {
-    this->wmDensity = processCmd(tr("%1 -s %2 shell wm density")
+    this->wmDensity = processCmd(QString("%1 -s %2 shell wm density")
                                  .arg(CAndroidContext::androidAdbPath)
                                  .arg(serialNumber)).resultStr.trimmed();
 }
 
 void CAndroidDevice::setWmDensity(int density)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell wm density %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell wm density %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(density));
@@ -114,7 +114,7 @@ void CAndroidDevice::setWmDensity(int density)
 
 void CAndroidDevice::resetWmDensity()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell wm density reset")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell wm density reset")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
 }
@@ -126,7 +126,7 @@ QString CAndroidDevice::getWindowDisplay()
 
 void CAndroidDevice::updateWindowDiaplay()
 {
-    this->windownDisplay = processCmd(tr("%1 -s %2 shell dumpsys window displays")
+    this->windownDisplay = processCmd(QString("%1 -s %2 shell dumpsys window displays")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)).resultStr.trimmed();
 }
@@ -138,7 +138,7 @@ QString CAndroidDevice::getAndroidId()
 
 void CAndroidDevice::updateAndroidId()
 {
-    this->androidId = processCmd(tr("%1 -s %2 shell settings get secure android_id")
+    this->androidId = processCmd(QString("%1 -s %2 shell settings get secure android_id")
                                  .arg(CAndroidContext::androidAdbPath)
                                  .arg(serialNumber)).resultStr.trimmed();
 }
@@ -150,7 +150,7 @@ QString CAndroidDevice::getAndroidVersion()
 
 void CAndroidDevice::updateAndroidVersion()
 {
-    this->androidVersion = processCmd(tr("%1 -s %2 shell getprop ro.build.version.release")
+    this->androidVersion = processCmd(QString("%1 -s %2 shell getprop ro.build.version.release")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)).resultStr.trimmed();
 }
@@ -162,7 +162,7 @@ QString CAndroidDevice::getNetworkInfo()
 
 void CAndroidDevice::updateNetworkInfo()
 {
-    this->networkInfo = processCmd(tr("%1 -s %2 shell ifconfig")
+    this->networkInfo = processCmd(QString("%1 -s %2 shell ifconfig")
                                    .arg(CAndroidContext::androidAdbPath)
                                    .arg(serialNumber)).resultStr.trimmed();
 }
@@ -174,7 +174,7 @@ QString CAndroidDevice::getCpuInfo()
 
 void CAndroidDevice::updateCpuInfo()
 {
-    this->cpuInfo = processCmd(tr("%1 -s %2 shell cat /proc/cpuinfo")
+    this->cpuInfo = processCmd(QString("%1 -s %2 shell cat /proc/cpuinfo")
                                .arg(CAndroidContext::androidAdbPath)
                                .arg(serialNumber)).resultStr.trimmed();
 }
@@ -187,7 +187,7 @@ QString CAndroidDevice::getMemInfo()
 
 void CAndroidDevice::updateMemInfo()
 {
-    this->memInfo = processCmd(tr("%1 -s %2 shell cat /proc/meminfo")
+    this->memInfo = processCmd(QString("%1 -s %2 shell cat /proc/meminfo")
                                .arg(CAndroidContext::androidAdbPath)
                                .arg(serialNumber)).resultStr.trimmed();
 }
@@ -207,7 +207,7 @@ QString CAndroidDevice::getSystemProp(QString key)
 
 void CAndroidDevice::updateSystemProps()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell cat /system/build.prop")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell cat /system/build.prop")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
 
@@ -223,7 +223,7 @@ void CAndroidDevice::updateSystemProps()
 
 void CAndroidDevice::screenShot(QString path)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell screencap -p %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell screencap -p %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(path));
@@ -232,7 +232,7 @@ void CAndroidDevice::screenShot(QString path)
 QByteArray CAndroidDevice::screenShot()
 {
     QProcess process;
-    process.start(tr("%1 -s %2 shell screencap -p")
+    process.start(QString("%1 -s %2 shell screencap -p")
                   .arg(CAndroidContext::androidAdbPath)
                   .arg(serialNumber));
     process.waitForFinished(-1);
@@ -241,7 +241,7 @@ QByteArray CAndroidDevice::screenShot()
 
 void  CAndroidDevice::pull(QString srcPath, QString desPath)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 pull %3 %4")
+    ProcessResult result = processCmd(QString("%1 -s %2 pull %3 %4")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(srcPath)
@@ -250,7 +250,7 @@ void  CAndroidDevice::pull(QString srcPath, QString desPath)
 
 void  CAndroidDevice::push(QString srcPath, QString desPath)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 push %3 %4")
+    ProcessResult result = processCmd(QString("%1 -s %2 push %3 %4")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(srcPath)
@@ -259,14 +259,14 @@ void  CAndroidDevice::push(QString srcPath, QString desPath)
 
 QProcess * CAndroidDevice::screenRecord(QString recordPath,QString size,int bitRate)
 {
-    QString cmd = tr("%1 -s %2 shell screenrecord ")
+    QString cmd = QString("%1 -s %2 shell screenrecord ")
                   .arg(CAndroidContext::androidAdbPath)
                   .arg(serialNumber);
     if(!size.isEmpty()) {
-        cmd.append(tr(" --size %1 ").arg(size));
+        cmd.append(QString(" --size %1 ").arg(size));
     }
     if(bitRate > 0) {
-        cmd.append(tr(" --bit-rate %1 ").arg(bitRate));
+        cmd.append(QString(" --bit-rate %1 ").arg(bitRate));
     }
     cmd.append(recordPath);
 
@@ -277,14 +277,14 @@ QProcess * CAndroidDevice::screenRecord(QString recordPath,QString size,int bitR
 
 void CAndroidDevice::reboot()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 reboot")
+    ProcessResult result = processCmd(QString("%1 -s %2 reboot")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
 }
 
 void CAndroidDevice::updatePackageList()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell pm list packages")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell pm list packages")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
     QListIterator<QString> packageIter(result.resultStr.split('\n'));
@@ -306,7 +306,7 @@ QList<CAndroidApp *> CAndroidDevice::getApplications()
 
 void CAndroidDevice::install(QString apkPath)
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 install -r %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 install -r %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(apkPath));
@@ -314,7 +314,7 @@ void CAndroidDevice::install(QString apkPath)
 
 QString CAndroidDevice::getRunningService()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys activity services")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell dumpsys activity services")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
 
@@ -323,7 +323,7 @@ QString CAndroidDevice::getRunningService()
 
 void CAndroidDevice::inputKeyEvent(int keyCode)
 {
-    processCmd(tr("%1 -s %2 shell input keyevent %3")
+    processCmd(QString("%1 -s %2 shell input keyevent %3")
                .arg(CAndroidContext::androidAdbPath)
                .arg(serialNumber)
                .arg(keyCode));
@@ -331,7 +331,7 @@ void CAndroidDevice::inputKeyEvent(int keyCode)
 
 void CAndroidDevice::inputSwipe(const QPoint &startPos, const QPoint &endPos, int duration)
 {
-    processCmd(tr("%1 -s %2 shell input swipe %3 %4 %5 %6 %7")
+    processCmd(QString("%1 -s %2 shell input swipe %3 %4 %5 %6 %7")
                .arg(CAndroidContext::androidAdbPath)
                .arg(serialNumber)
                .arg(startPos.x()).arg(startPos.y()).arg(endPos.x()).arg(endPos.y()).arg(duration));
@@ -339,7 +339,7 @@ void CAndroidDevice::inputSwipe(const QPoint &startPos, const QPoint &endPos, in
 
 void CAndroidDevice::inputClick(const QPoint &pos)
 {
-    processCmd(tr("%1 -s %2 shell input tap %3 %4")
+    processCmd(QString("%1 -s %2 shell input tap %3 %4")
                .arg(CAndroidContext::androidAdbPath)
                .arg(serialNumber)
                .arg(pos.x()).arg(pos.y()));
@@ -347,7 +347,7 @@ void CAndroidDevice::inputClick(const QPoint &pos)
 
 QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, QString content, QString pid)
 {
-    QString cmd = tr("%1 -s %2 logcat")
+    QString cmd = QString("%1 -s %2 logcat")
                   .arg(CAndroidContext::androidAdbPath)
                   .arg(serialNumber);
     if(!format.isEmpty())
@@ -357,7 +357,7 @@ QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, 
     if(logLevel.size() > 1)
         logLevel = logLevel.left(1);
     if(!logLevel.isEmpty())
-        cmd.append(tr(" -s \"%1:%2\"").arg(tag).arg(logLevel));
+        cmd.append(QString(" -s \"%1:%2\"").arg(tag).arg(logLevel));
     if(!content.isEmpty())
         cmd.append(" -e \"").append(content).append("\"");
     if(!pid.isEmpty())
@@ -372,7 +372,7 @@ QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, 
 QList<CAndroidFile> CAndroidDevice::listDir(const QString &path)
 {
     QList<CAndroidFile> fileList;
-    ProcessResult result = processCmd(tr("%1 -s %2 shell ls -l %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell ls -l %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber)
                                       .arg(path));
@@ -414,7 +414,7 @@ void CAndroidContext::startListenAdb()
         QtConcurrent::run([this]() {
             while(this->isRunning) {
                 emit updateStateChanged(tr("update devices"));
-                ProcessResult result = processCmd(tr("%1 devices").arg(CAndroidContext::androidAdbPath));
+                ProcessResult result = processCmd(QString("%1 devices").arg(CAndroidContext::androidAdbPath));
                 if(result.exitCode == 0) {
                     QStringList deviceStrList = result.resultStr.trimmed().split("\n");
                     if(deviceStrList.size() > 0) {
@@ -445,12 +445,6 @@ void CAndroidContext::startListenAdb()
                                 device->updateAndroidId();
                                 emit updateStateChanged(tr("udpate device[%1]'s android version").arg(serialNumber));
                                 device->updateAndroidVersion();
-                                emit updateStateChanged(tr("udpate device[%1]'s memory info").arg(serialNumber));
-                                device->updateMemInfo();
-                                emit updateStateChanged(tr("udpate device[%1]'s cpu info").arg(serialNumber));
-                                device->updateCpuInfo();
-                                emit updateStateChanged(tr("udpate device[%1]'s network info").arg(serialNumber));
-                                device->updateNetworkInfo();
                                 emit updateStateChanged(tr("udpate device[%1]'s package list").arg(serialNumber));
                                 device->updatePackageList();
                                 tmpDeviceMap.insert(serialNumber,device);
@@ -498,7 +492,7 @@ QString CAndroidApp::getName()
 
 void CAndroidApp::uninstall()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 uninstall %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 uninstall %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(device->serialNumber)
                                       .arg(package));
@@ -506,7 +500,7 @@ void CAndroidApp::uninstall()
 
 void CAndroidApp::pmClear()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell pm clear %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell pm clear %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(device->serialNumber)
                                       .arg(package));
@@ -514,7 +508,7 @@ void CAndroidApp::pmClear()
 
 QString CAndroidApp::getRunningService()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys activity services %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell dumpsys activity services %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(device->serialNumber)
                                       .arg(package));
@@ -523,7 +517,7 @@ QString CAndroidApp::getRunningService()
 
 QString CAndroidApp::getInfo()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell dumpsys package %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell dumpsys package %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(device->serialNumber)
                                       .arg(package));
@@ -532,7 +526,7 @@ QString CAndroidApp::getInfo()
 
 QString CAndroidApp::getInstallPath()
 {
-    ProcessResult result = processCmd(tr("%1 -s %2 shell pm path %3")
+    ProcessResult result = processCmd(QString("%1 -s %2 shell pm path %3")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(device->serialNumber)
                                       .arg(package));

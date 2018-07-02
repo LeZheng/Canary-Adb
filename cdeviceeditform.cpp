@@ -203,13 +203,13 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
 
     connect(ui->zoomInButton,&QToolButton::clicked,this,[this]() {
         this->scenePercent = this->scenePercent + 25;
-        this->ui->zoomLabel->setText(tr("%1%").arg(this->scenePercent));
+        this->ui->zoomLabel->setText(QString("%1%").arg(this->scenePercent));
         QSize wmSize = this->devicePointer->getWmSize();
         this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
     });
     connect(ui->zoomOutButton,&QToolButton::clicked,this,[this]() {
         this->scenePercent = this->scenePercent - 25;
-        this->ui->zoomLabel->setText(tr("%1%").arg(this->scenePercent));
+        this->ui->zoomLabel->setText(QString("%1%").arg(this->scenePercent));
         QSize wmSize = this->devicePointer->getWmSize();
         this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
     });

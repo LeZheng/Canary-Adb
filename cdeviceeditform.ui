@@ -370,14 +370,14 @@
      <item>
       <widget class="QCheckBox" name="syncScreenCheckBox">
        <property name="text">
-        <string>同步屏幕</string>
+        <string>sync screen</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="syncTouchCheckBox">
        <property name="text">
-        <string>同步触摸</string>
+        <string>sync touch</string>
        </property>
       </widget>
      </item>

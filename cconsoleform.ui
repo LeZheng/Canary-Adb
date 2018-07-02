@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>400</width>
     <height>237</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
+    <width>400</width>
     <height>200</height>
    </size>
   </property>
@@ -49,7 +49,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>日志级别:</string>
+        <string>log level:</string>
        </property>
       </widget>
      </item>
@@ -57,32 +57,32 @@
       <widget class="QComboBox" name="logLevelComboBox">
        <item>
         <property name="text">
-         <string>Verbose</string>
+         <string notr="true">Verbose</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Debug</string>
+         <string notr="true">Debug</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Info</string>
+         <string notr="true">Info</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Warn</string>
+         <string notr="true">Warn</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Error</string>
+         <string notr="true">Error</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Assert</string>
+         <string notr="true">Assert</string>
         </property>
        </item>
       </widget>
@@ -109,7 +109,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>日志格式:</string>
+        <string>log format:</string>
        </property>
       </widget>
      </item>
@@ -172,7 +172,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Tag过滤:</string>
+        <string>Tag filter:</string>
        </property>
       </widget>
      </item>
@@ -186,7 +186,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>内容过滤:</string>
+        <string>content filter:</string>
        </property>
       </widget>
      </item>
@@ -200,7 +200,7 @@
      <item>
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>进程过滤:</string>
+        <string>process filter:</string>
        </property>
       </widget>
      </item>

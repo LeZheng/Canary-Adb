@@ -8,6 +8,7 @@
 #include <QUrl>
 #include <QProgressDialog>
 #include <QSplitter>
+#include <QToolButton>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"

@@ -36,7 +36,7 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
 
     connect(ui->fileTableWidget,&QTableWidget::customContextMenuRequested,this,[this](const QPoint &pos){
         int row = ui->fileTableWidget->rowAt(pos.y());
-        if(row < currentFiles.size()){
+        if(row < currentFiles.size() && row >= 0){
             emit menuRequested(this->deviceSerialNumber,"",currentFiles.at(row).path);
         }
     });
@@ -64,6 +64,11 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
     connect(ui->pathLineEdit,&QLineEdit::textChanged,this,[this]() {
         this->ui->prevToolButton->setDisabled(prevPathStack.isEmpty());
         this->ui->nextToolButton->setDisabled(nextPathStack.isEmpty());
+    });
+
+    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+    connect(ui->refreshToolButton,&QToolButton::clicked,this,[this](){
+        openDir(currentDir);
     });
 }
 

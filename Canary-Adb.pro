@@ -58,3 +58,5 @@ FORMS += \
 
 RESOURCES += \
     canary-img.qrc
+
+TRANSLATIONS = canary_zh_CN.ts canary_EN.ts

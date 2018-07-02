@@ -204,10 +204,6 @@ void MainWindow::initFileWidget()
 
 void MainWindow::initDeviceWidget()
 {
-    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-    connect(ui->refreshToolButton,&QToolButton::clicked,[this]() {
-        //TODO
-    });
     connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
     connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
@@ -222,12 +218,10 @@ void MainWindow::initDeviceWidget()
             QStringList deviceNameList;
             for(int i = 0; i < deviceList.size(); i++) {
                 CAndroidDevice * device = deviceList.at(i);
-                deviceNameList << tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
+                deviceNameList << QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
                 CDeviceForm *deviceForm = new CDeviceForm(device,this->ui->deviceStackedWidget);
                 this->ui->deviceStackedWidget->addWidget(deviceForm);
-                connect(deviceForm,&CDeviceForm::menuRequested,this,[this](const QString &serialNumber, const QString &path) {
-                    this->requestContextMenu(serialNumber,path,"");
-                });
+                connect(deviceForm,&CDeviceForm::menuRequested,this,&MainWindow::requestContextMenu);
             }
             this->ui->deviceComboBox->addItems(deviceNameList);
         }
@@ -275,7 +269,7 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
                 tempWidget->deleteLater();
             }
         });
-        this->ui->detailTabWidget->addTab(widget,tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
+        this->ui->detailTabWidget->addTab(widget,QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
         this->deviceTabMap.insert(device->serialNumber,widget);
     }
     QString tabName = "none";
@@ -338,7 +332,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
         menu.addAction(QIcon(":/img/edit_delete"),tr("delete"),[this,localPath]() {
             QFile::remove(localPath);
         });
-        menu.addAction(tr("open in folder"),[this,localPath]() {
+        menu.addAction(QIcon(":/img/open_folder"),tr("open in folder"),[this,localPath]() {
             QString fileDir = QFileInfo(localPath).absoluteDir().absolutePath();
             QString urlStr = "file:";
             QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
@@ -352,7 +346,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 QMenu *installApkMenu = menu.addMenu(tr("install apk to..."));
                 for(int i = 0; i < deviceList.size(); i++) {
                     CAndroidDevice * device = deviceList.at(i);
-                    installApkMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
+                    installApkMenu->addAction(QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
                         installApk(device->serialNumber,localPath);
                     });
                 }
@@ -360,7 +354,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
             QMenu *pushFileMenu = menu.addMenu(tr("push file to..."));
             for(int i = 0; i < deviceList.size(); i++) {
                 CAndroidDevice * device = deviceList.at(i);
-                pushFileMenu->addAction(tr("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
+                pushFileMenu->addAction(QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
                     //TODO
                 });
             }
@@ -369,28 +363,28 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
 
     if(!serialNumber.isEmpty()) {
         if(localPath.isEmpty() && devicePath.isEmpty()) {
-            menu.addAction(tr("open screen"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/phone_small"),tr("open screen"),[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     openDeviceDetailView(device,DetailViewType::SCREEN);
             });
-            menu.addAction(tr("screen record"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/screen_record"),tr("screen record"),[this,serialNumber]() {
                 screenRecord(serialNumber);
             });
-            menu.addAction(tr("screen shot"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/screen_shot"),tr("screen shot"),[this,serialNumber]() {
                 screenShot(serialNumber);
             });
-            menu.addAction(tr("reboot"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/reboot"),tr("reboot"),[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     device->reboot();
             });
-            menu.addAction(tr("logcat"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/text-log"),tr("logcat"),[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     openDeviceDetailView(device,DetailViewType::LOG);
             });
-            menu.addAction(tr("pull"),this,[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/pull"),tr("pull file"),this,[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 CDeviceFileDialog dialog(device);
                 if(dialog.exec() == QDialog::Accepted) {
@@ -401,7 +395,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                     pullFile(serialNumber,lPath,dPath);
                 }
             });
-            menu.addAction(tr("push"),this,[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/push"),tr("push file"),this,[this,serialNumber]() {
                 QString lPath = QFileDialog::getOpenFileName(this, tr("Choose Local File"),
                                 QDir::rootPath(),
                                 tr("All File (*.*)"));
@@ -415,7 +409,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 }
             });
             menu.addAction(tr("install"),this,[this,serialNumber]() {
-                QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
+                QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Choose Apk File"),
                                       QDir::rootPath(),
                                       tr("Android Application File (*.apk)"));
                 if(!apkFilePath.isEmpty()) {
@@ -423,7 +417,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 }
             });
         } else if(!localPath.isEmpty() && devicePath.isEmpty()) {
-            menu.addAction(tr("push"),this,[this,localPath,serialNumber]() {
+            menu.addAction(QIcon(":/img/push"),tr("push file"),this,[this,localPath,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 CDeviceFileDialog dialog(device,QFileInfo(localPath).fileName());
                 if(dialog.exec() == QDialog::Accepted) {
@@ -433,7 +427,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
             });
             if(localPath.endsWith(".apk")) {
                 menu.addAction(tr("install"),this,[this,serialNumber]() {
-                    QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Get Apk File"),
+                    QString apkFilePath = QFileDialog::getOpenFileName(this, tr("Choose Apk File"),
                                           QDir::rootPath(),
                                           tr("Android Application File (*.apk)"));
                     if(!apkFilePath.isEmpty()) {
@@ -442,21 +436,15 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 });
             }
         } else if(localPath.isEmpty() && !devicePath.isEmpty()) {
-            menu.addAction(tr("pull"),[this,serialNumber,devicePath]() {
+            menu.addAction(QIcon(":/img/pull"),tr("pull file"),[this,serialNumber,devicePath]() {
                 QString lPath = QFileDialog::getSaveFileName(this, tr("Choose Local File"),
                                 QDir::homePath() + QDir::separator() + devicePath.right(devicePath.size() - devicePath.lastIndexOf('/')),
                                 tr("All File (*.*)"));
                 pullFile(serialNumber,lPath,devicePath);
             });
-            menu.addAction(QIcon(":/img/edit_rename"),tr("rename"),[this,localPath]() {
-                //TODO
-            });
-            menu.addAction(QIcon(":/img/edit_delete"),tr("delete"),[this,localPath]() {
-                //TODO
-            });
         } else {
-            if(this->ui->centralWidget->rect().contains(this->ui->centralWidget->mapFromGlobal(QCursor::pos()))) {
-                menu.addAction(tr("push"),this,[this,serialNumber,localPath,devicePath]() {
+            if(this->ui->rightDockWidget->rect().contains(this->ui->rightDockWidget->mapFromGlobal(QCursor::pos()))) {
+                menu.addAction(QIcon(":/img/push"),tr("push file"),this,[this,serialNumber,localPath,devicePath]() {
                     pushFile(serialNumber,localPath,devicePath);
                 });
                 if(localPath.endsWith(".apk")) {
@@ -465,7 +453,7 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                     });
                 }
             } else {
-                menu.addAction(tr("pull"),[this,serialNumber,localPath,devicePath]() {
+                menu.addAction(QIcon(":/img/pull"),tr("pull file"),[this,serialNumber,localPath,devicePath]() {
                     pullFile(serialNumber,localPath,devicePath);
                 });
             }
@@ -496,7 +484,7 @@ void MainWindow::screenShot(const QString &serialNumber)
     QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
     QPointer<CAndroidDevice> device = CAndroidContext::getDevice(serialNumber);
     if(!device.isNull()) {
-        emit processStart(tr("screen shot..."),tr("screen shot %1").arg(device->getModel()));
+        emit processStart(tr("screen shotting..."),tr("screen shot %1").arg(device->getModel()));
 
         QFutureWatcher<void> *watcher = new QFutureWatcher<void>();
         connect(watcher,&QFutureWatcher<void>::finished,[this,tmpPhonePath,watcher,device]() {
@@ -504,7 +492,7 @@ void MainWindow::screenShot(const QString &serialNumber)
                                QDir(QDir::homePath()).filePath("screen-shot-untitled.png"),
                                tr("Images (*.png)"));
             if(!savePath.isEmpty()) {
-                emit processStart(tr("save..."),tr("save image to %1").arg(savePath));
+                emit processStart(tr("saving..."),tr("save image to %1").arg(savePath));
                 QtConcurrent::run([=]() {
                     if(!device.isNull())
                         device->pull(tmpPhonePath,savePath);
@@ -554,7 +542,7 @@ void MainWindow::screenRecord(const QString &serialNumber)
                                    QDir(QDir::homePath()).filePath("screen-record-untitled.mp4"),
                                    tr("Video (*.mp4)"));
                 if(!savePath.isEmpty()) {
-                    emit processStart(tr("save..."),tr("save video to %1").arg(savePath));
+                    emit processStart(tr("saving..."),tr("save video to %1").arg(savePath));
                     QtConcurrent::run([=]() {
                         if(!device.isNull())
                             device->pull(tempPath,savePath);
@@ -571,7 +559,7 @@ void MainWindow::pushFile(const QString &serialNumber, const QString &localPath,
 {
     CAndroidDevice *device = CAndroidContext::getDevice(serialNumber);
     if(device != nullptr) {
-        emit processStart(tr("push..."),tr("push %1 to %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
+        emit processStart(tr("pushing..."),tr("push %1 to %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
         QtConcurrent::run([device,localPath,devicePath,this]() {
             device->push(localPath,devicePath);
             emit processEnd(0,"");
@@ -585,7 +573,7 @@ void MainWindow::pullFile(const QString &serialNumber, const QString &localPath,
 {
     CAndroidDevice *device = CAndroidContext::getDevice(serialNumber);
     if(device != nullptr) {
-        emit processStart(tr("pull..."),tr("push %1 from %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
+        emit processStart(tr("pulling..."),tr("pull %1 from %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
         QtConcurrent::run([device,localPath,devicePath,this]() {
             device->pull(devicePath,localPath);
             emit processEnd(0,"");
