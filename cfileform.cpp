@@ -12,10 +12,6 @@ CFileForm::CFileForm(QWidget *parent) :
     ui->setupUi(this);
     setAcceptDrops(true);
 
-//    QPalette p = palette();
-//    p.setColor(QPalette::Window,Qt::darkGray);
-//    setPalette(p);
-
     model = new QFileSystemModel(this);
     model->setRootPath(QDir::rootPath());
     model->setReadOnly(false);
@@ -40,14 +36,19 @@ CFileForm::CFileForm(QWidget *parent) :
             QDesktopServices::openUrl(QUrl(urlStr.append(clickPath), QUrl::TolerantMode));
         }
     });
-    connect(ui->fileListView,&QListView::customContextMenuRequested,ui->fileTreeView,&QTreeView::customContextMenuRequested);
+    connect(ui->fileListView,&QListView::customContextMenuRequested,this,[this](const QPoint &pos) {
+        QModelIndex index = this->ui->fileListView->indexAt(pos);
+        if(index.isValid()) {
+            QString path = this->model->filePath(index);
+            emit menuRequested("",path,"");
+        }
+    });
     connect(ui->fileTreeView,&QTreeView::customContextMenuRequested,this,[this](const QPoint &pos) {
         QModelIndex index = this->ui->fileTreeView->indexAt(pos);
-        if(!index.isValid()) {
-            return;
+        if(index.isValid()) {
+            QString path = this->model->filePath(index);
+            emit menuRequested("",path,"");
         }
-        QString path = this->model->filePath(index);
-        emit menuRequested("",path,"");
     });
 
     ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));

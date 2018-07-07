@@ -201,28 +201,19 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         this->screenItem->setPixmap(this->screenPixmap);
     });
 
-    connect(ui->zoomInButton,&QToolButton::clicked,this,[this]() {
-        this->scenePercent = this->scenePercent + 25;
+    connect(ui->zoomSlider,&QSlider::valueChanged,this,[this](int value){
+        this->scenePercent = value;
         this->ui->zoomLabel->setText(QString("%1%").arg(this->scenePercent));
         QSize wmSize = this->devicePointer->getWmSize();
         this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
     });
-    connect(ui->zoomOutButton,&QToolButton::clicked,this,[this]() {
-        this->scenePercent = this->scenePercent - 25;
-        this->ui->zoomLabel->setText(QString("%1%").arg(this->scenePercent));
-        QSize wmSize = this->devicePointer->getWmSize();
-        this->scene->setSceneRect(0,0,wmSize.width() * this->scenePercent / 100,wmSize.height() * this->scenePercent / 100);
-    });
+
     connect(this->scene,&QGraphicsScene::sceneRectChanged,this,[this](const QRectF &rect) {
-        if(this->scenePercent <= 25) {
-            this->ui->zoomOutButton->setDisabled(true);
-        } else {
-            this->ui->zoomOutButton->setEnabled(true);
-        }
         this->screenItem->setScale(this->scenePercent / 100.0f);
     });
-    this->ui->zoomOutButton->setDisabled(true);
+
     this->screenItem->setScale(this->scenePercent / 100.0f);
+    this->ui->zoomSlider->setValue(this->scenePercent);
 }
 
 CDeviceEditForm::~CDeviceEditForm()
@@ -237,6 +228,18 @@ void CDeviceEditForm::closeEvent(QCloseEvent *event)
 {
     this->ui->syncScreenCheckBox->setChecked(false);
     this->ui->syncTouchCheckBox->setChecked(false);
+}
+
+void CDeviceEditForm::wheelEvent(QWheelEvent *event)
+{
+    if((QApplication::keyboardModifiers() == Qt::ControlModifier)){
+        ui->zoomSlider->setValue(ui->zoomSlider->value() + (event->delta() > 0 ? 5 : -5));
+        event->accept();
+    }else{
+        QWidget::wheelEvent(event);
+    }
+
+
 }
 
 void CDeviceEditForm::inputKeyEvent(int keyCode)

@@ -9,6 +9,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QWheelEvent>
 #include "candroiddevice.h"
 #include "screenrecordoptiondialog.h"
 
@@ -45,6 +46,7 @@ public:
     ~CDeviceEditForm();
 protected:
     virtual void closeEvent(QCloseEvent *event);
+    virtual void wheelEvent(QWheelEvent *event);
 signals:
     void processStart(const QString &title,const QString &content);
     void processEnd(int exitCode,const QString &msg);
