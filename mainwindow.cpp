@@ -237,9 +237,14 @@ void MainWindow::changeFileViewMode(FileItemMode mode)
 {
     if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
         QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
-        if(splitter->widget(0)->inherits("CFileForm")) {
-            CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(0));
-            fileForm->setViewMode(mode);
+        for(int i = 0;i < splitter->count();i++){
+            if(splitter->widget(i)->inherits("CFileForm")) {
+                CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(i));
+                if(fileForm->isSelect()){
+                    fileForm->setViewMode(mode);
+                    return;
+                }
+            }
         }
     }
 }
