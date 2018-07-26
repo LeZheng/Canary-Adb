@@ -65,16 +65,16 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
             if(!savePath.isEmpty()) {
                 emit processStart(tr("save..."),tr("save image to %1").arg(savePath));
                 QtConcurrent::run([=]() {
-                    this->devicePointer->pull(tmpPhonePath,savePath);
-                    emit processEnd(0,"");
+                    ProcessResult result = this->devicePointer->pull(tmpPhonePath,savePath);
+                    emit processEnd(result.exitCode,result.resultStr);
                 });
             }
             watcher->deleteLater();
         });
         watcher->setFuture(QtConcurrent::run([this,tmpPhonePath]() {
             QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
-            this->devicePointer->screenShot(tmpPhonePath);
-            emit processEnd(0,"");
+            ProcessResult result = this->devicePointer->screenShot(tmpPhonePath);
+            emit processEnd(result.exitCode,result.resultStr);
         }));
     });
     connect(ui->screenRecordButton,&QToolButton::clicked,this,[this]() {
@@ -108,8 +108,8 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
                 if(!savePath.isEmpty()) {
                     emit processStart(tr("save..."),tr("save video to %1").arg(savePath));
                     QtConcurrent::run([=]() {
-                        this->devicePointer->pull(tempPath,savePath);
-                        emit processEnd(0,"");
+                        ProcessResult result = this->devicePointer->pull(tempPath,savePath);
+                        emit processEnd(result.exitCode,result.resultStr);
                     });
                 }
             });
@@ -127,8 +127,8 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input click event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
-                this->devicePointer->inputClick(pos);
-                emit processEnd(0,"");
+                ProcessResult result = this->devicePointer->inputClick(pos);
+                emit processEnd(result.exitCode,result.resultStr);
             });
         }
     });
@@ -137,8 +137,8 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input long click event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
-                this->devicePointer->inputSwipe(pos,pos,duration > 0 ? duration * 1000 : 1000);
-                emit processEnd(0,"");
+                ProcessResult result = this->devicePointer->inputSwipe(pos,pos,duration > 0 ? duration * 1000 : 1000);
+                emit processEnd(result.exitCode,result.resultStr);
             });
         }
     });
@@ -147,8 +147,8 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input swipe event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
-                this->devicePointer->inputSwipe(startPos,endPos,duration > 0 ? duration * 1000 : 1000);
-                emit processEnd(0,"");
+                ProcessResult result = this->devicePointer->inputSwipe(startPos,endPos,duration > 0 ? duration * 1000 : 1000);
+                emit processEnd(result.exitCode,result.resultStr);
             });
         }
     });
@@ -246,8 +246,8 @@ void CDeviceEditForm::inputKeyEvent(int keyCode)
 {
     emit processStart(tr("input..."),tr("input key event %1 to %2").arg(keyCode).arg(this->devicePointer->getModel()));
     QtConcurrent::run([keyCode,this]() {
-        this->devicePointer->inputKeyEvent(keyCode);
-        emit processEnd(0,"");
+        ProcessResult result = this->devicePointer->inputKeyEvent(keyCode);
+        emit processEnd(result.exitCode,result.resultStr);
     });
 }
 

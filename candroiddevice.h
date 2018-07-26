@@ -50,11 +50,11 @@ public:
     const CAndroidDevice * device;
 
     QString getName();
-    void uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
-    void pmClear();//(method "清除应用数据" "adb shell pm clear com.qihoo360.mobilesafe")
-    QString getRunningService();//(method "查看正在运行的 Services" "adb shell dumpsys activity services com.qihoo360.mobilesafe")
-    QString getInfo();//(method "获取应用信息" "adb shell dumpsys package <packagename>")
-    QString getInstallPath();//(method "获取安装路径" "adb shell pm path ecarx.weather")
+    ProcessResult uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
+    ProcessResult pmClear();//(method "清除应用数据" "adb shell pm clear com.qihoo360.mobilesafe")
+    ProcessResult getRunningService();//(method "查看正在运行的 Services" "adb shell dumpsys activity services com.qihoo360.mobilesafe")
+    ProcessResult getInfo();//(method "获取应用信息" "adb shell dumpsys package <packagename>")
+    ProcessResult getInstallPath();//(method "获取安装路径" "adb shell pm path ecarx.weather")
     //TODO 与应用交互
 
 private:
@@ -95,20 +95,20 @@ public:
     QMap<QString,QString> getSystemProps();
     QString getSystemProp(QString key);
     void updateSystemProps();
-    void screenShot(QString path);// (method "屏幕截图" "adb shell screencap -p /sdcard/sc.png")
+    ProcessResult screenShot(QString path);// (method "屏幕截图" "adb shell screencap -p /sdcard/sc.png")
     QByteArray screenShot();
-    void pull(QString srcPath,QString desPath = ".");// (method "导出文件或目录" "adb pull /sdcard/sc.png")
-    void push(QString srcPath,QString desPath);// (method "导入文件或目录" "adb push ~/sr.mp4 /sdcard/")
+    ProcessResult pull(QString srcPath,QString desPath = ".");// (method "导出文件或目录" "adb pull /sdcard/sc.png")
+    ProcessResult push(QString srcPath,QString desPath);// (method "导入文件或目录" "adb push ~/sr.mp4 /sdcard/")
     QProcess * screenRecord(QString recordPath,QString size = "",int bitRate = 4);// (method "屏幕录制" "adb shell screenrecord /sdcard/filename.mp4 --time-limit 5")
-    void reboot();// (method "重启手机" "adb reboot")
+    ProcessResult reboot();// (method "重启手机" "adb reboot")
     void updatePackageList();// (method "获取应用列表" "adb shell pm list packages"
     QList<CAndroidApp *> getApplications();
-    void install(QString apkPath);// (method "安装应用" "adb install -rsd temp.apk"
-    QString getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
+    ProcessResult install(QString apkPath);// (method "安装应用" "adb install -rsd temp.apk"
+    ProcessResult getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
     //TODO 按键模拟和输入
-    void inputKeyEvent(int keyCode);
-    void inputSwipe(const QPoint &startPos,const QPoint &endPos,int duration);
-    void inputClick(const QPoint &pos);
+    ProcessResult inputKeyEvent(int keyCode);
+    ProcessResult inputSwipe(const QPoint &startPos,const QPoint &endPos,int duration);
+    ProcessResult inputClick(const QPoint &pos);
     QProcess * logcat(QString format = "",QString patterns = "",QString tag = "",QString content = "",QString pid = 0);// (method "查看日志" "adb logcat -v long ActivityManager:I *:S")
     QList<CAndroidFile> listDir(const QString &path);
 private:

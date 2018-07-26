@@ -9,6 +9,7 @@
 #include <QProgressDialog>
 #include <QSplitter>
 #include <QToolButton>
+#include <QMessageBox>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"

@@ -237,10 +237,10 @@ void MainWindow::changeFileViewMode(FileItemMode mode)
 {
     if(this->ui->fileTabWidget->currentWidget()->inherits("QSplitter")) {
         QSplitter *splitter = qobject_cast<QSplitter *>(this->ui->fileTabWidget->currentWidget());
-        for(int i = 0;i < splitter->count();i++){
+        for(int i = 0; i < splitter->count(); i++) {
             if(splitter->widget(i)->inherits("CFileForm")) {
                 CFileForm *fileForm = qobject_cast<CFileForm *>(splitter->widget(i));
-                if(fileForm->isSelect()){
+                if(fileForm->isSelect()) {
                     fileForm->setViewMode(mode);
                     return;
                 }
@@ -316,6 +316,12 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
 {
     this->loadAnimation->stop();
     this->loadingDialog->close();
+    if(exitCode != 0) {
+        QMessageBox::warning(this, QApplication::applicationName(),
+                             msg,
+                             QMessageBox::Cancel,
+                             QMessageBox::Cancel);
+    }
 }
 
 void MainWindow::requestContextMenu(const QString &serialNumber, const QString &localPath,const QString &devicePath)
@@ -476,8 +482,8 @@ void MainWindow::installApk(const QString &serialNumber, const QString &path)
     if(device != nullptr) {
         emit processStart(tr("installing..."),tr("install %1 to %2").arg(path).arg(device->getModel()));
         QtConcurrent::run([device,path,this]() {
-            device->install(path);
-            emit processEnd(0,"");
+            ProcessResult result = device->install(path);
+            emit processEnd(result.exitCode,result.resultStr);
         });
     } else {
         //TODO
@@ -499,18 +505,24 @@ void MainWindow::screenShot(const QString &serialNumber)
             if(!savePath.isEmpty()) {
                 emit processStart(tr("saving..."),tr("save image to %1").arg(savePath));
                 QtConcurrent::run([=]() {
-                    if(!device.isNull())
-                        device->pull(tmpPhonePath,savePath);
-                    emit processEnd(0,"");
+                    if(!device.isNull()){
+                        ProcessResult result = device->pull(tmpPhonePath,savePath);
+                        emit processEnd(result.exitCode,result.resultStr);
+                    } else {
+                        emit processEnd(1,tr("device disconnect"));
+                    }
                 });
             }
             watcher->deleteLater();
         });
         watcher->setFuture(QtConcurrent::run([this,tmpPhonePath,device]() {
             QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
-            if(!device.isNull())
-                device->screenShot(tmpPhonePath);
-            emit processEnd(0,"");
+            if(!device.isNull()){
+                ProcessResult result = device->screenShot(tmpPhonePath);
+                emit processEnd(result.exitCode,result.resultStr);
+            }else{
+                emit processEnd(1,tr("device disconnect"));
+            }
         }));
     }
 }
@@ -549,9 +561,12 @@ void MainWindow::screenRecord(const QString &serialNumber)
                 if(!savePath.isEmpty()) {
                     emit processStart(tr("saving..."),tr("save video to %1").arg(savePath));
                     QtConcurrent::run([=]() {
-                        if(!device.isNull())
-                            device->pull(tempPath,savePath);
-                        emit processEnd(0,"");
+                        if(!device.isNull()){
+                            ProcessResult result = device->pull(tempPath,savePath);
+                            emit processEnd(result.exitCode,result.resultStr);
+                        }else{
+                            emit processEnd(1,tr("device disconnect"));
+                        }
                     });
                 }
             });
@@ -566,8 +581,8 @@ void MainWindow::pushFile(const QString &serialNumber, const QString &localPath,
     if(device != nullptr) {
         emit processStart(tr("pushing..."),tr("push %1 to %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
         QtConcurrent::run([device,localPath,devicePath,this]() {
-            device->push(localPath,devicePath);
-            emit processEnd(0,"");
+            ProcessResult result = device->push(localPath,devicePath);
+            emit processEnd(result.exitCode,result.resultStr);
         });
     } else {
         //TODO
@@ -580,8 +595,8 @@ void MainWindow::pullFile(const QString &serialNumber, const QString &localPath,
     if(device != nullptr) {
         emit processStart(tr("pulling..."),tr("pull %1 from %2 %3").arg(localPath).arg(device->getModel()).arg(devicePath));
         QtConcurrent::run([device,localPath,devicePath,this]() {
-            device->pull(devicePath,localPath);
-            emit processEnd(0,"");
+            ProcessResult result = device->pull(devicePath,localPath);
+            emit processEnd(result.exitCode,result.resultStr);
         });
     } else {
         //TODO
