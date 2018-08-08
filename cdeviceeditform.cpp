@@ -179,8 +179,10 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
                     } else {
                         QString tmpPhonePath = "/sdcard/canary-screen-tmp.png";
                         QString destPath = QDir::temp().absoluteFilePath("canary-screen-tmp.png");
-                        this->devicePointer->screenShot(tmpPhonePath);
-                        this->devicePointer->pull(tmpPhonePath,destPath);
+                        if(!this->devicePointer.isNull())
+                            this->devicePointer->screenShot(tmpPhonePath);
+                        if(!this->devicePointer.isNull())
+                            this->devicePointer->pull(tmpPhonePath,destPath);
                         if(this->isVisible()) {
                             bool loadOk = this->screenPixmap.load(destPath,"PNG");
                             if(loadOk) {
@@ -201,7 +203,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         this->screenItem->setPixmap(this->screenPixmap);
     });
 
-    connect(ui->zoomSlider,&QSlider::valueChanged,this,[this](int value){
+    connect(ui->zoomSlider,&QSlider::valueChanged,this,[this](int value) {
         this->scenePercent = value;
         this->ui->zoomLabel->setText(QString("%1%").arg(this->scenePercent));
         QSize wmSize = this->devicePointer->getWmSize();
@@ -232,10 +234,10 @@ void CDeviceEditForm::closeEvent(QCloseEvent *event)
 
 void CDeviceEditForm::wheelEvent(QWheelEvent *event)
 {
-    if((QApplication::keyboardModifiers() == Qt::ControlModifier)){
+    if((QApplication::keyboardModifiers() == Qt::ControlModifier)) {
         ui->zoomSlider->setValue(ui->zoomSlider->value() + (event->delta() > 0 ? 5 : -5));
         event->accept();
-    }else{
+    } else {
         QWidget::wheelEvent(event);
     }
 

@@ -35,5 +35,7 @@
         <file alias="pull">img/icon-pull.png</file>
         <file alias="push">img/icon-push.png</file>
         <file alias="open_folder">img/open-folder.png</file>
+        <file alias="start_record">img/media-start.png</file>
+        <file alias="stop_record">img/media-record.png</file>
     </qresource>
 </RCC>

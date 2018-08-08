@@ -11,7 +11,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
         deviceSerialNumber = devicePointer->serialNumber;
         this->isDeviceConnected = true;
     }
-
+    isRecording = false;
     logProcess = nullptr;
 
     connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
@@ -43,29 +43,49 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
         this->ui->logFormatComboBox->setDisabled(true);
     });
 
-    connect(this,&CConsoleForm::logConditionUpdated,[this]() {
+    connect(ui->recordToolButton,&QToolButton::clicked,this,[this]() {
+        if(this->isRecording) {
+            if(this->logProcess != nullptr) {
+                this->logProcess->kill();
+                this->isRecording = false;
+            }
+            this->ui->recordToolButton->setText(tr("start"));
+            this->ui->recordToolButton->setIcon(QIcon(":/img/start_record"));
+        } else {
+            this->ui->recordToolButton->setText(tr("stop"));
+            this->ui->recordToolButton->setIcon(QIcon(":/img/stop_record"));
+            emit logConditionUpdated();
+        }
+    });
+
+    connect(ui->clearToolButton,&QToolButton::clicked,ui->logContentTextEdit,&QTextEdit::clear);
+
+    connect(this,&CConsoleForm::logConditionUpdated,this,[this]() {
         QProcess * tempProcess = this->logProcess;
         if(tempProcess != nullptr) {
             tempProcess->kill();
+            this->isRecording = false;
         }
-        this->ui->logContentTextEdit->clear();
-        tempProcess = this->devicePointer->logcat(
-                          this->ui->logFormatComboBox->currentText(),
-                          this->ui->logLevelComboBox->currentText(),
-                          this->ui->filterTagLineEdit->text(),
-                          this->ui->filterContentLineEdit->text(),
-                          this->ui->filterPIDLineEdit->text());
-        this->logProcess = tempProcess;
+        if(!this->isRecording) {
+            tempProcess = this->devicePointer->logcat(
+                              this->ui->logFormatComboBox->currentText(),
+                              this->ui->logLevelComboBox->currentText(),
+                              this->ui->filterTagLineEdit->text(),
+                              this->ui->filterContentLineEdit->text(),
+                              this->ui->filterPIDLineEdit->text());
+            this->logProcess = tempProcess;
+            this->isRecording = true;
 
-        connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
-            this->ui->logContentTextEdit->append(tempProcess->readAll());
-        });
-        connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
-            if(tempProcess == this->logProcess) {
-                this->logProcess = nullptr;
-            }
-            delete tempProcess;
-        });
+            connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
+                this->ui->logContentTextEdit->append(tempProcess->readAll());
+            });
+            connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
+                if(tempProcess == this->logProcess) {
+                    this->logProcess = nullptr;
+                }
+                delete tempProcess;
+            });
+        }
     });
 
     connect(this->ui->logLevelComboBox,QOverload<const QString &>::of(&QComboBox::currentIndexChanged),this,&CConsoleForm::logConditionUpdated);
@@ -73,7 +93,6 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     connect(this->ui->filterPIDLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
     connect(this->ui->filterContentLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
     connect(this->ui->filterTagLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
-    emit logConditionUpdated();
 
     connect(this->ui->logContentTextEdit,&QTextEdit::customContextMenuRequested,[this]() {
         QMenu menu;
@@ -107,7 +126,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
 CConsoleForm::~CConsoleForm()
 {
     this->disconnect();
-    if(logProcess != nullptr){
+    if(logProcess != nullptr) {
         logProcess->kill();
     }
     delete ui;

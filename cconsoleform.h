@@ -30,6 +30,7 @@ private:
     QString deviceSerialNumber;
     QObjectCleanupHandler cleaner;
     bool isDeviceConnected;
+    bool isRecording;
 
     QProcess * logProcess;
 };

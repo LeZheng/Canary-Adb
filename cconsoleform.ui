@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>237</height>
+    <width>486</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -40,6 +40,47 @@
      <property name="spacing">
       <number>3</number>
      </property>
+     <item>
+      <widget class="QToolButton" name="recordToolButton">
+       <property name="text">
+        <string>start</string>
+       </property>
+       <property name="icon">
+        <iconset resource="canary-img.qrc">
+         <normaloff>:/img/start_record</normaloff>:/img/start_record</iconset>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="clearToolButton">
+       <property name="text">
+        <string>clear</string>
+       </property>
+       <property name="icon">
+        <iconset resource="canary-img.qrc">
+         <normaloff>:/img/edit_clear</normaloff>:/img/edit_clear</iconset>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item>
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
@@ -86,19 +127,6 @@
         </property>
        </item>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="label_4">
@@ -159,6 +187,12 @@
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
      </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
+     <property name="lineWrapMode">
+      <enum>QTextEdit::NoWrap</enum>
+     </property>
      <property name="readOnly">
       <bool>true</bool>
      </property>
@@ -215,6 +249,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="canary-img.qrc"/>
+ </resources>
  <connections/>
 </ui>
