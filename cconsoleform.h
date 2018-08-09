@@ -24,10 +24,11 @@ public:
 
 signals:
     void logConditionUpdated();
+    void deviceConnected();
+    void deviceDisconnected();
 
 private slots:
     void on_actioncopy_triggered();
-
     void on_actionsave_to_file_triggered();
 
 private:
@@ -35,10 +36,14 @@ private:
     QPointer<CAndroidDevice> devicePointer;
     QString deviceSerialNumber;
     QObjectCleanupHandler cleaner;
-    bool isDeviceConnected;
-    bool isRecording;
 
     QProcess * logProcess;
+
+    QStateMachine *machine;
+    QState *connectState;
+    QState *disconnectState;
+    QState *recordingState;
+    QState *pauseState;
 };
 
 #endif // CCONSOLEFORM_H

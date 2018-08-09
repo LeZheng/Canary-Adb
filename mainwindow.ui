@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
+    <width>1067</width>
     <height>648</height>
    </rect>
   </property>
@@ -34,7 +34,7 @@
      <widget class="QTabWidget" name="detailTabWidget">
       <property name="minimumSize">
        <size>
-        <width>400</width>
+        <width>460</width>
         <height>0</height>
        </size>
       </property>
@@ -56,8 +56,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
-     <height>22</height>
+     <width>1067</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -130,7 +130,7 @@
    <property name="minimumSize">
     <size>
      <width>250</width>
-     <height>35</height>
+     <height>39</height>
     </size>
    </property>
    <property name="features">

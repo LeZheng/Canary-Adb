@@ -9,91 +9,28 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     devicePointer = device;
     if(!devicePointer.isNull()) {
         deviceSerialNumber = devicePointer->serialNumber;
-        this->isDeviceConnected = true;
     }
-    isRecording = false;
     logProcess = nullptr;
 
+    connect(device,&CAndroidDevice::destroyed,this,&CConsoleForm::deviceDisconnected);
     connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
         QListIterator<CAndroidDevice *> deviceIter(deviceList);
         while(deviceIter.hasNext()) {
             CAndroidDevice * device = deviceIter.next();
             if(device->serialNumber == this->deviceSerialNumber) {
-                if(!this->isDeviceConnected) {
+                if(this->devicePointer.isNull()) {
                     this->devicePointer = device;
-                    this->isDeviceConnected = true;
-                    this->ui->filterContentLineEdit->setEnabled(true);
-                    this->ui->filterTagLineEdit->setEnabled(true);
-                    this->ui->filterPIDLineEdit->setEnabled(true);
-                    this->ui->logLevelComboBox->setEnabled(true);
-                    this->ui->logFormatComboBox->setEnabled(true);
-                }
-                if(this->logProcess == nullptr) {
-                    emit logConditionUpdated();
+                    emit deviceConnected();
                 }
                 return;
             }
         }
-        this->isDeviceConnected = false;
-        this->ui->filterContentLineEdit->setDisabled(true);
-        this->ui->filterTagLineEdit->setDisabled(true);
-        this->ui->filterPIDLineEdit->setDisabled(true);
-        this->ui->logLevelComboBox->setDisabled(true);
-        this->ui->logFormatComboBox->setDisabled(true);
-    });
-
-    connect(ui->recordToolButton,&QToolButton::clicked,this,[this]() {
-        if(this->isRecording) {
-            if(this->logProcess != nullptr) {
-                this->logProcess->kill();
-                this->isRecording = false;
-            }
-            this->ui->recordToolButton->setText(tr("start"));
-            this->ui->recordToolButton->setIcon(QIcon(":/img/start_record"));
-        } else {
-            this->ui->recordToolButton->setText(tr("stop"));
-            this->ui->recordToolButton->setIcon(QIcon(":/img/stop_record"));
-            emit logConditionUpdated();
-        }
+        this->devicePointer.clear();
+        emit deviceDisconnected();
     });
 
     connect(ui->clearToolButton,&QToolButton::clicked,ui->logContentTextEdit,&QTextEdit::clear);
-
-    connect(this,&CConsoleForm::logConditionUpdated,this,[this]() {
-        QProcess * tempProcess = this->logProcess;
-        if(tempProcess != nullptr) {
-            tempProcess->kill();
-            this->isRecording = false;
-        }
-        if(!this->isRecording) {
-            tempProcess = this->devicePointer->logcat(
-                              this->ui->logFormatComboBox->currentText(),
-                              this->ui->logLevelComboBox->currentText(),
-                              this->ui->filterTagLineEdit->text(),
-                              this->ui->filterContentLineEdit->text(),
-                              this->ui->filterPIDLineEdit->text());
-            this->logProcess = tempProcess;
-            this->isRecording = true;
-
-            connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
-                this->ui->logContentTextEdit->append(tempProcess->readAll());
-            });
-            connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
-                if(tempProcess == this->logProcess) {
-                    this->logProcess = nullptr;
-                }
-                delete tempProcess;
-            });
-        }
-    });
-
-    connect(this->ui->logLevelComboBox,QOverload<const QString &>::of(&QComboBox::currentIndexChanged),this,&CConsoleForm::logConditionUpdated);
-    connect(this->ui->logFormatComboBox,QOverload<const QString &>::of(&QComboBox::currentIndexChanged),this,&CConsoleForm::logConditionUpdated);
-    connect(this->ui->filterPIDLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
-    connect(this->ui->filterContentLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
-    connect(this->ui->filterTagLineEdit,&QLineEdit::textChanged,this,&CConsoleForm::logConditionUpdated);
-
     connect(this->ui->logContentTextEdit,&QTextEdit::customContextMenuRequested,[this]() {
         QMenu menu;
         if(!this->ui->logContentTextEdit->textCursor().selectedText().isEmpty()) {
@@ -104,6 +41,115 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
         menu.insertAction(nullptr,ui->actionsave_to_file);
         menu.exec(QCursor::pos());
     });
+
+    machine = new QStateMachine(this);
+    connectState = new QState();
+    disconnectState = new QState();
+    recordingState = new QState();
+    pauseState = new QState();
+
+    connectState->addTransition(this,&CConsoleForm::deviceDisconnected,disconnectState);
+    recordingState->addTransition(this,&CConsoleForm::deviceDisconnected,disconnectState);
+    pauseState->addTransition(this,&CConsoleForm::deviceDisconnected,disconnectState);
+    disconnectState->addTransition(this,&CConsoleForm::deviceConnected,connectState);
+    connectState->addTransition(ui->recordToolButton,&QToolButton::clicked,recordingState);
+    recordingState->addTransition(ui->recordToolButton,&QToolButton::clicked,pauseState);
+    pauseState->addTransition(ui->recordToolButton,&QToolButton::clicked,recordingState);
+
+    connectState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("the content used to filter"));
+    connectState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("the process id used to filter"));
+    connectState->assignProperty(ui->filterTagLineEdit,"toolTip",tr("the tag used to filter"));
+    connectState->assignProperty(ui->logLevelComboBox,"toolTip",tr("the level used to control log content"));
+    connectState->assignProperty(ui->logFormatComboBox,"toolTip",tr("the format used to control log content"));
+    connectState->assignProperty(ui->recordToolButton,"toolTip",tr("click to start record log immediately"));
+    connectState->assignProperty(ui->filterContentLineEdit,"readOnly",false);
+    connectState->assignProperty(ui->filterPIDLineEdit,"readOnly",false);
+    connectState->assignProperty(ui->filterTagLineEdit,"readOnly",false);
+    connectState->assignProperty(ui->logLevelComboBox,"enabled",true);
+    connectState->assignProperty(ui->logFormatComboBox,"enabled",true);
+    connectState->assignProperty(ui->recordToolButton,"enabled",true);
+    connectState->assignProperty(ui->recordToolButton,"text",tr("start"));
+    connectState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/start_record"));
+
+    recordingState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("not available at run time"));
+    recordingState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("not available at run time"));
+    recordingState->assignProperty(ui->filterTagLineEdit,"toolTip",tr("not available at run time"));
+    recordingState->assignProperty(ui->logLevelComboBox,"toolTip",tr("not available at run time"));
+    recordingState->assignProperty(ui->logFormatComboBox,"toolTip",tr("not available at run time"));
+    recordingState->assignProperty(ui->recordToolButton,"toolTip",tr("click to stop record log immediately"));
+    recordingState->assignProperty(ui->filterContentLineEdit,"readOnly",true);
+    recordingState->assignProperty(ui->filterPIDLineEdit,"readOnly",true);
+    recordingState->assignProperty(ui->filterTagLineEdit,"readOnly",true);
+    recordingState->assignProperty(ui->logLevelComboBox,"enabled",false);
+    recordingState->assignProperty(ui->logFormatComboBox,"enabled",false);
+    recordingState->assignProperty(ui->recordToolButton,"enable",true);
+    recordingState->assignProperty(ui->recordToolButton,"text",tr("stop"));
+    recordingState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/stop_record"));
+    connect(recordingState,&QState::entered,this,[this]() {
+        QProcess * tempProcess = this->logProcess;
+        if(tempProcess != nullptr) {
+            tempProcess->kill();
+        }
+        tempProcess = this->devicePointer->logcat(
+                          this->ui->logFormatComboBox->currentText(),
+                          this->ui->logLevelComboBox->currentText(),
+                          this->ui->filterTagLineEdit->text(),
+                          this->ui->filterContentLineEdit->text(),
+                          this->ui->filterPIDLineEdit->text());
+        this->logProcess = tempProcess;
+
+        connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
+            this->ui->logContentTextEdit->append(tempProcess->readAll());
+        });
+        connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
+            if(tempProcess == this->logProcess) {
+                this->logProcess = nullptr;
+            }
+            delete tempProcess;
+        });
+    });
+    connect(recordingState,&QState::exited,this,[this]() {
+        if(this->logProcess != nullptr) {
+            this->logProcess->kill();
+            this->logProcess = nullptr;
+        }
+    });
+
+    pauseState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("the content used to filter"));
+    pauseState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("the process id used to filter"));
+    pauseState->assignProperty(ui->filterTagLineEdit,"toolTip",tr("the tag used to filter"));
+    pauseState->assignProperty(ui->logLevelComboBox,"toolTip",tr("the level used to control log content"));
+    pauseState->assignProperty(ui->logFormatComboBox,"toolTip",tr("the format used to control log content"));
+    pauseState->assignProperty(ui->recordToolButton,"toolTip",tr("click to start record log immediately"));
+    pauseState->assignProperty(ui->filterContentLineEdit,"readOnly",false);
+    pauseState->assignProperty(ui->filterPIDLineEdit,"readOnly",false);
+    pauseState->assignProperty(ui->filterTagLineEdit,"readOnly",false);
+    pauseState->assignProperty(ui->logLevelComboBox,"enabled",true);
+    pauseState->assignProperty(ui->logFormatComboBox,"enabled",true);
+    pauseState->assignProperty(ui->recordToolButton,"enabled",true);
+    pauseState->assignProperty(ui->recordToolButton,"text",tr("start"));
+    pauseState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/start_record"));
+
+    disconnectState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->filterTagLineEdit,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->logLevelComboBox,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->logFormatComboBox,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->recordToolButton,"toolTip",tr("device not connected"));
+    disconnectState->assignProperty(ui->filterContentLineEdit,"readOnly",true);
+    disconnectState->assignProperty(ui->filterPIDLineEdit,"readOnly",true);
+    disconnectState->assignProperty(ui->filterTagLineEdit,"readOnly",true);
+    disconnectState->assignProperty(ui->logLevelComboBox,"enabled",false);
+    disconnectState->assignProperty(ui->logFormatComboBox,"enabled",false);
+    disconnectState->assignProperty(ui->recordToolButton,"enabled",false);
+
+    machine->addState(connectState);
+    machine->addState(disconnectState);
+    machine->addState(recordingState);
+    machine->addState(pauseState);
+
+    machine->setInitialState(connectState);
+    machine->start();
 }
 
 CConsoleForm::~CConsoleForm()

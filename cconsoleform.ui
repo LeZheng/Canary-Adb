@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>486</width>
+    <width>450</width>
     <height>418</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>400</width>
+    <width>450</width>
     <height>200</height>
    </size>
   </property>
@@ -42,6 +42,12 @@
      </property>
      <item>
       <widget class="QToolButton" name="recordToolButton">
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="statusTip">
+        <string>click to start record log</string>
+       </property>
        <property name="text">
         <string>start</string>
        </property>
@@ -56,6 +62,12 @@
      </item>
      <item>
       <widget class="QToolButton" name="clearToolButton">
+       <property name="toolTip">
+        <string>clear log content</string>
+       </property>
+       <property name="statusTip">
+        <string>click to clear log text</string>
+       </property>
        <property name="text">
         <string>clear</string>
        </property>
@@ -89,6 +101,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="statusTip">
+        <string>choose log level</string>
+       </property>
        <property name="text">
         <string>log level:</string>
        </property>
@@ -96,6 +111,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="logLevelComboBox">
+       <property name="toolTip">
+        <string>xxxxxxx</string>
+       </property>
+       <property name="statusTip">
+        <string>choose log level</string>
+       </property>
        <item>
         <property name="text">
          <string notr="true">Verbose</string>
@@ -136,6 +157,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="statusTip">
+        <string>choose log format</string>
+       </property>
        <property name="text">
         <string>log format:</string>
        </property>
@@ -143,6 +167,9 @@
      </item>
      <item>
       <widget class="QComboBox" name="logFormatComboBox">
+       <property name="statusTip">
+        <string>choose log format</string>
+       </property>
        <item>
         <property name="text">
          <string>brief</string>
@@ -205,6 +232,9 @@
      </property>
      <item>
       <widget class="QLabel" name="label_3">
+       <property name="statusTip">
+        <string>filter by tag</string>
+       </property>
        <property name="text">
         <string>Tag filter:</string>
        </property>
@@ -212,6 +242,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="filterTagLineEdit">
+       <property name="statusTip">
+        <string>please input the filter tag</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
@@ -219,6 +252,9 @@
      </item>
      <item>
       <widget class="QLabel" name="label_5">
+       <property name="statusTip">
+        <string>filter by content</string>
+       </property>
        <property name="text">
         <string>content filter:</string>
        </property>
@@ -226,6 +262,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="filterContentLineEdit">
+       <property name="statusTip">
+        <string>please input the filter content</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
@@ -233,6 +272,9 @@
      </item>
      <item>
       <widget class="QLabel" name="label_6">
+       <property name="statusTip">
+        <string>filter by process</string>
+       </property>
        <property name="text">
         <string>process filter:</string>
        </property>
@@ -240,6 +282,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="filterPIDLineEdit">
+       <property name="statusTip">
+        <string>please input the filter process</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
@@ -311,8 +356,8 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>242</x>
-     <y>208</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>242</x>
