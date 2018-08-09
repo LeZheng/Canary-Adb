@@ -248,9 +248,93 @@
     </layout>
    </item>
   </layout>
+  <action name="actioncopy">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/edit_copy</normaloff>:/img/edit_copy</iconset>
+   </property>
+   <property name="text">
+    <string>copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionselect_all">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/edit_select_all</normaloff>
+     <normalon>:/img/edit_select_all</normalon>:/img/edit_select_all</iconset>
+   </property>
+   <property name="text">
+    <string>select all</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionclear">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/edit_clear</normaloff>
+     <normalon>:/img/edit_clear</normalon>:/img/edit_clear</iconset>
+   </property>
+   <property name="text">
+    <string>clear</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionsave_to_file">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/document_save</normaloff>
+     <normalon>:/img/document_save</normalon>:/img/document_save</iconset>
+   </property>
+   <property name="text">
+    <string>save to file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="canary-img.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionclear</sender>
+   <signal>triggered()</signal>
+   <receiver>logContentTextEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>242</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>242</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionselect_all</sender>
+   <signal>triggered()</signal>
+   <receiver>logContentTextEdit</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>242</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

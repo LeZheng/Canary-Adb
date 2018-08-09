@@ -97,28 +97,11 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     connect(this->ui->logContentTextEdit,&QTextEdit::customContextMenuRequested,[this]() {
         QMenu menu;
         if(!this->ui->logContentTextEdit->textCursor().selectedText().isEmpty()) {
-            menu.addAction(QIcon(":/img/edit_copy"),tr("copy"),[this]() {
-                QClipboard *clipboard = QGuiApplication::clipboard();
-                clipboard->setText(this->ui->logContentTextEdit->textCursor().selectedText());
-            });
+            menu.insertAction(nullptr,ui->actioncopy);
         }
-        menu.addAction(QIcon(":/img/edit_select_all"),tr("select all"),[this]() {
-            this->ui->logContentTextEdit->selectAll();
-        });
-        menu.addAction(QIcon(":/img/edit_clear"),tr("clear"),[this]() {
-            this->ui->logContentTextEdit->clear();
-        });
-        menu.addAction(QIcon(":/img/document_save"),tr("export to file"),[this]() {
-            QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                               QDir::homePath(),
-                               tr("Text files (*.txt)"));
-            QFile saveFile(fileName);
-            if(saveFile.open(QFile::WriteOnly | QFile::Append)) {
-                saveFile.write(this->ui->logContentTextEdit->toPlainText().toUtf8());
-            } else {
-                //TODO error
-            }
-        });
+        menu.insertAction(nullptr,ui->actionselect_all);
+        menu.insertAction(nullptr,ui->actionclear);
+        menu.insertAction(nullptr,ui->actionsave_to_file);
         menu.exec(QCursor::pos());
     });
 }
@@ -130,4 +113,23 @@ CConsoleForm::~CConsoleForm()
         logProcess->kill();
     }
     delete ui;
+}
+
+void CConsoleForm::on_actioncopy_triggered()
+{
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(this->ui->logContentTextEdit->textCursor().selectedText());
+}
+
+void CConsoleForm::on_actionsave_to_file_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                       QDir::homePath(),
+                       tr("Text files (*.txt)"));
+    QFile saveFile(fileName);
+    if(saveFile.open(QFile::WriteOnly | QFile::Append)) {
+        saveFile.write(this->ui->logContentTextEdit->toPlainText().toUtf8());
+    } else {
+        //TODO error
+    }
 }

@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QStateMachine>
 #include "candroiddevice.h"
 
 
@@ -23,6 +24,11 @@ public:
 
 signals:
     void logConditionUpdated();
+
+private slots:
+    void on_actioncopy_triggered();
+
+    void on_actionsave_to_file_triggered();
 
 private:
     Ui::CConsoleForm *ui;
