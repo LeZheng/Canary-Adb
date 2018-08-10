@@ -331,7 +331,7 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>3</number>
