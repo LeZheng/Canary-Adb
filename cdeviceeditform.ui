@@ -29,9 +29,6 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <item row="1" column="0">
-    <widget class="QGraphicsView" name="graphicsView"/>
-   </item>
    <item row="1" column="1">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
@@ -419,10 +416,70 @@
      </item>
     </layout>
    </item>
+   <item row="1" column="0">
+    <widget class="QGraphicsView" name="graphicsView">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
+  <action name="actionscreen_record">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/screen_record</normaloff>
+     <normalon>:/img/screen_record</normalon>:/img/screen_record</iconset>
+   </property>
+   <property name="text">
+    <string>screen record</string>
+   </property>
+  </action>
+  <action name="actionscreen_shot">
+   <property name="icon">
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/screen_shot</normaloff>
+     <normalon>:/img/screen_shot</normalon>:/img/screen_shot</iconset>
+   </property>
+   <property name="text">
+    <string>screen shot</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="canary-img.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>screenRecordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionscreen_record</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>42</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>screenShotButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionscreen_shot</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>15</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

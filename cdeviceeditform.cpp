@@ -53,69 +53,26 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     connect(ui->volumeMuteButton,&QToolButton::clicked,this,[this]() {
         this->inputKeyEvent(164);
     });
-    connect(ui->screenShotButton,&QToolButton::clicked,this,[this]() {
-        QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
-        emit processStart(tr("screen shot..."),tr("screen shot %1").arg(this->devicePointer->getModel()));
 
-        QFutureWatcher<void> *watcher = new QFutureWatcher<void>();
-        connect(watcher,&QFutureWatcher<void>::finished,[this,tmpPhonePath,watcher]() {
-            QString savePath = QFileDialog::getSaveFileName(this, tr("Save File"),
-                               QDir(QDir::homePath()).filePath("screen-shot-untitled.png"),
-                               tr("Images (*.png)"));
-            if(!savePath.isEmpty()) {
-                emit processStart(tr("save..."),tr("save image to %1").arg(savePath));
-                QtConcurrent::run([=]() {
-                    ProcessResult result = this->devicePointer->pull(tmpPhonePath,savePath);
-                    emit processEnd(result.exitCode,result.resultStr);
-                });
-            }
-            watcher->deleteLater();
+    for(int i = 0; i < 10; i++) {
+        int number = i;
+        QAction *actNumber = new QAction(tr("input number %1").arg(number),this);
+        connect(actNumber,&QAction::triggered,this,[this,number](){
+            this->inputKeyEvent(number + 7);
         });
-        watcher->setFuture(QtConcurrent::run([this,tmpPhonePath]() {
-            QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
-            ProcessResult result = this->devicePointer->screenShot(tmpPhonePath);
-            emit processEnd(result.exitCode,result.resultStr);
-        }));
-    });
-    connect(ui->screenRecordButton,&QToolButton::clicked,this,[this]() {
-        QString tempPath = "/sdcard/canary-screen-record.mp4";
-        ScreenRecordOptionDialog dialog(this->devicePointer,this);
-        int resultCode = dialog.exec();
-        if(resultCode == QDialog::Accepted) {
-            int bitRate = dialog.getBitRate() * 1000000;
-            QString size = dialog.getSize();
-            QProcess * process = this->devicePointer->screenRecord(tempPath,size,bitRate);
-            QProgressDialog *dialog = new QProgressDialog("screen record...", "stop record", 0, 180,this);
-            QTimer *t = new QTimer(this);
-            connect(t, &QTimer::timeout, this, [dialog]() {
-                if(dialog->value() < dialog->maximum()) {
-                    dialog->setValue(dialog->value() + 1);
-                }
-            });
-            t->start(1000);
-            connect(dialog,&QProgressDialog::canceled,this,[=]() {
-                process->kill();
-            });
-            connect(process,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),this,[=]() {
-                process->deleteLater();
-                dialog->hide();
-                dialog->deleteLater();
-                t->stop();
-                t->deleteLater();
-                QString savePath = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                   QDir(QDir::homePath()).filePath("screen-record-untitled.mp4"),
-                                   tr("Video (*.mp4)"));
-                if(!savePath.isEmpty()) {
-                    emit processStart(tr("save..."),tr("save video to %1").arg(savePath));
-                    QtConcurrent::run([=]() {
-                        ProcessResult result = this->devicePointer->pull(tempPath,savePath);
-                        emit processEnd(result.exitCode,result.resultStr);
-                    });
-                }
-            });
-            dialog->show();
-        }
-    });
+        inputNumberActions.append(actNumber);
+    }
+
+    for(int i = 0; i < 26; i++) {
+        char letter = i + 65;
+        QAction *actLetter = new QAction(tr("input letter %1").arg(letter),this);
+        connect(actLetter,&QAction::triggered,this,[this,letter](){
+            this->inputKeyEvent(letter - 36);
+        });
+        inputLetterActions.append(actLetter);
+    }
+
+
     scene = new QGraphicsScene(ui->graphicsView);
     ui->graphicsView->setScene(scene);
     QSize wmSize = this->devicePointer->getWmSize();
@@ -240,8 +197,6 @@ void CDeviceEditForm::wheelEvent(QWheelEvent *event)
     } else {
         QWidget::wheelEvent(event);
     }
-
-
 }
 
 void CDeviceEditForm::inputKeyEvent(int keyCode)
@@ -276,4 +231,94 @@ void CScreenPixmapItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             emit itemClick(event->pos().toPoint());
         }
     }
+}
+
+void CDeviceEditForm::on_graphicsView_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu menu;
+    menu.insertAction(nullptr,ui->actionscreen_shot);
+    menu.insertAction(nullptr,ui->actionscreen_record);
+
+    QMenu inputNumberMenu;
+    QListIterator<QAction *> numberActionIter(inputNumberActions);
+    while(numberActionIter.hasNext()) {
+        inputNumberMenu.insertAction(nullptr,numberActionIter.next());
+    }
+    menu.addMenu(&inputNumberMenu);
+
+    QMenu inputLetterMenu;
+    QListIterator<QAction *> letterActionIter(inputLetterActions);
+    while(numberActionIter.hasNext()) {
+        inputLetterMenu.insertAction(nullptr,letterActionIter.next());
+    }
+    menu.addMenu(&inputLetterMenu);
+
+    menu.exec(QCursor::pos());
+}
+
+void CDeviceEditForm::on_actionscreen_record_triggered()
+{
+    QString tempPath = "/sdcard/canary-screen-record.mp4";
+    ScreenRecordOptionDialog dialog(this->devicePointer,this);
+    int resultCode = dialog.exec();
+    if(resultCode == QDialog::Accepted) {
+        int bitRate = dialog.getBitRate() * 1000000;
+        QString size = dialog.getSize();
+        QProcess * process = this->devicePointer->screenRecord(tempPath,size,bitRate);
+        QProgressDialog *dialog = new QProgressDialog("screen record...", "stop record", 0, 180,this);
+        QTimer *t = new QTimer(this);
+        connect(t, &QTimer::timeout, this, [dialog]() {
+            if(dialog->value() < dialog->maximum()) {
+                dialog->setValue(dialog->value() + 1);
+            }
+        });
+        t->start(1000);
+        connect(dialog,&QProgressDialog::canceled,this,[=]() {
+            process->kill();
+        });
+        connect(process,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),this,[=]() {
+            process->deleteLater();
+            dialog->hide();
+            dialog->deleteLater();
+            t->stop();
+            t->deleteLater();
+            QString savePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                               QDir(QDir::homePath()).filePath("screen-record-untitled.mp4"),
+                               tr("Video (*.mp4)"));
+            if(!savePath.isEmpty()) {
+                emit processStart(tr("save..."),tr("save video to %1").arg(savePath));
+                QtConcurrent::run([=]() {
+                    ProcessResult result = this->devicePointer->pull(tempPath,savePath);
+                    emit processEnd(result.exitCode,result.resultStr);
+                });
+            }
+        });
+        dialog->show();
+    }
+}
+
+void CDeviceEditForm::on_actionscreen_shot_triggered()
+{
+    QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
+    emit processStart(tr("screen shot..."),tr("screen shot %1").arg(this->devicePointer->getModel()));
+
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>();
+    connect(watcher,&QFutureWatcher<void>::finished,[this,tmpPhonePath,watcher]() {
+        QString savePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                           QDir(QDir::homePath()).filePath("screen-shot-untitled.png"),
+                           tr("Images (*.png)"));
+        if(!savePath.isEmpty()) {
+            emit processStart(tr("save..."),tr("save image to %1").arg(savePath));
+            QtConcurrent::run([=]() {
+                ProcessResult result = this->devicePointer->pull(tmpPhonePath,savePath);
+                emit processEnd(result.exitCode,result.resultStr);
+            });
+        }
+        watcher->deleteLater();
+    });
+    watcher->setFuture(QtConcurrent::run([this,tmpPhonePath]() {
+        QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
+        ProcessResult result = this->devicePointer->screenShot(tmpPhonePath);
+        emit processEnd(result.exitCode,result.resultStr);
+    }));
 }

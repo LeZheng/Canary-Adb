@@ -2,6 +2,7 @@
 #define CDEVICEEDITFORM_H
 
 #include <QWidget>
+#include <QMenu>
 #include <QFileDialog>
 #include <QFutureWatcher>
 #include <QProgressDialog>
@@ -52,6 +53,13 @@ signals:
     void processEnd(int exitCode,const QString &msg);
     void screenUpdated();
 
+private slots:
+    void on_graphicsView_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionscreen_record_triggered();
+
+    void on_actionscreen_shot_triggered();
+
 private:
     QString deviceSerialNumber;
     Ui::CDeviceEditForm *ui;
@@ -63,6 +71,9 @@ private:
     int scenePercent = 25;
 
     void inputKeyEvent(int keyCode);
+
+    QList<QAction *> inputNumberActions;
+    QList<QAction *> inputLetterActions;
 };
 
 #endif // CDEVICEEDITFORM_H
