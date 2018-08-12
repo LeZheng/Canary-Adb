@@ -26,31 +26,32 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
         this->ui->syncTouchCheckBox->setChecked(false);
     });
 
-    connect(ui->powerButton,&QToolButton::clicked,this,[this]() {
-        this->inputKeyEvent(26);
+    connect(ui->menuButton,&QToolButton::clicked,ui->actionmenu,&QAction::trigger);
+    connect(ui->actionmenu,&QAction::triggered,this,[this]() {
+        this->inputKeyEvent(187);
     });
-    connect(ui->menuButton,&QToolButton::clicked,this,[this]() {
-        this->inputKeyEvent(82);
-    });
-    connect(ui->homeButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->homeButton,&QToolButton::clicked,ui->actionhome,&QAction::trigger);
+    connect(ui->actionhome,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(3);
     });
-    connect(ui->goBackButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->goBackButton,&QToolButton::clicked,ui->actionback,&QAction::trigger);
+    connect(ui->actionback,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(4);
     });
-    connect(ui->screenOnButton,&QToolButton::clicked,this,[this]() {
+
+    connect(ui->actionscreen_on,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(224);
     });
-    connect(ui->screenOffButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->actionscreen_off,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(223);
     });
-    connect(ui->volumeHighButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->actionvolume_up,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(24);
     });
-    connect(ui->volumeLowButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->actionvolume_down,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(25);
     });
-    connect(ui->volumeMuteButton,&QToolButton::clicked,this,[this]() {
+    connect(ui->actionvolume_mute,&QAction::triggered,this,[this]() {
         this->inputKeyEvent(164);
     });
 
@@ -238,20 +239,23 @@ void CDeviceEditForm::on_graphicsView_customContextMenuRequested(const QPoint &p
     QMenu menu;
     menu.insertAction(nullptr,ui->actionscreen_shot);
     menu.insertAction(nullptr,ui->actionscreen_record);
+    menu.insertAction(nullptr,ui->actionscreen_on);
+    menu.insertAction(nullptr,ui->actionscreen_off);
+    menu.insertAction(nullptr,ui->actionvolume_up);
+    menu.insertAction(nullptr,ui->actionvolume_down);
+    menu.insertAction(nullptr,ui->actionvolume_mute);
 
-    QMenu inputNumberMenu;
+    QMenu *inputNumberMenu = menu.addMenu(tr("input number"));
     QListIterator<QAction *> numberActionIter(inputNumberActions);
     while(numberActionIter.hasNext()) {
-        inputNumberMenu.insertAction(nullptr,numberActionIter.next());
+        inputNumberMenu->insertAction(nullptr,numberActionIter.next());
     }
-    menu.addMenu(&inputNumberMenu);
 
-    QMenu inputLetterMenu;
+    QMenu *inputLetterMenu = menu.addMenu(tr("input letter"));
     QListIterator<QAction *> letterActionIter(inputLetterActions);
-    while(numberActionIter.hasNext()) {
-        inputLetterMenu.insertAction(nullptr,letterActionIter.next());
+    while(letterActionIter.hasNext()) {
+        inputLetterMenu->insertAction(nullptr,letterActionIter.next());
     }
-    menu.addMenu(&inputLetterMenu);
 
     menu.exec(QCursor::pos());
 }
