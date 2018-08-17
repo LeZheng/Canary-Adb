@@ -22,7 +22,9 @@ class ProcessResult
 public:
     const int exitCode;
     const QString resultStr;
+    const QByteArray resultArray;
     explicit ProcessResult(int exitCode,QString resultStr);
+    explicit ProcessResult(int exitCode,QByteArray resultArr,QString resultStr = "");
 };
 
 class CAndroidFile
@@ -96,7 +98,7 @@ public:
     QString getSystemProp(QString key);
     void updateSystemProps();
     ProcessResult screenShot(QString path);// (method "屏幕截图" "adb shell screencap -p /sdcard/sc.png")
-    QByteArray screenShot();
+    ProcessResult screenShot();
     ProcessResult pull(QString srcPath,QString desPath = ".");// (method "导出文件或目录" "adb pull /sdcard/sc.png")
     ProcessResult push(QString srcPath,QString desPath);// (method "导入文件或目录" "adb push ~/sr.mp4 /sdcard/")
     QProcess * screenRecord(QString recordPath,QString size = "",int bitRate = 4);// (method "屏幕录制" "adb shell screenrecord /sdcard/filename.mp4 --time-limit 5")

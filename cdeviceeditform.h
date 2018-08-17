@@ -11,6 +11,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QWheelEvent>
+#include <QStateMachine>
 #include "candroiddevice.h"
 #include "screenrecordoptiondialog.h"
 
@@ -52,12 +53,12 @@ signals:
     void processStart(const QString &title,const QString &content);
     void processEnd(int exitCode,const QString &msg);
     void screenUpdated();
+    void deviceConnected();
+    void deviceDisconnected();
 
 private slots:
     void on_graphicsView_customContextMenuRequested(const QPoint &pos);
-
     void on_actionscreen_record_triggered();
-
     void on_actionscreen_shot_triggered();
 
 private:
@@ -69,6 +70,9 @@ private:
     CScreenPixmapItem * screenItem;
     QPixmap screenPixmap;
     int scenePercent = 25;
+    QStateMachine *machine = new QStateMachine(this);
+    QState *connectedState = new QState(machine);
+    QState *disconnectState = new QState(machine);
 
     void inputKeyEvent(int keyCode);
 

@@ -18,12 +18,12 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
             if(device->serialNumber == this->deviceSerialNumber) {
                 this->setEnabled(true);
                 this->devicePointer = device;
+                emit deviceConnected();
                 return;
             }
         }
-        this->setDisabled(true);
+        emit deviceDisconnected();
         this->ui->syncScreenCheckBox->setChecked(false);
-        this->ui->syncTouchCheckBox->setChecked(false);
     });
 
     connect(ui->menuButton,&QToolButton::clicked,ui->actionmenu,&QAction::trigger);
@@ -58,7 +58,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     for(int i = 0; i < 10; i++) {
         int number = i;
         QAction *actNumber = new QAction(tr("input number %1").arg(number),this);
-        connect(actNumber,&QAction::triggered,this,[this,number](){
+        connect(actNumber,&QAction::triggered,this,[this,number]() {
             this->inputKeyEvent(number + 7);
         });
         inputNumberActions.append(actNumber);
@@ -67,7 +67,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     for(int i = 0; i < 26; i++) {
         char letter = i + 65;
         QAction *actLetter = new QAction(tr("input letter %1").arg(letter),this);
-        connect(actLetter,&QAction::triggered,this,[this,letter](){
+        connect(actLetter,&QAction::triggered,this,[this,letter]() {
             this->inputKeyEvent(letter - 36);
         });
         inputLetterActions.append(actLetter);
@@ -82,7 +82,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     this->scene->addItem(screenItem);
 
     connect(screenItem,&CScreenPixmapItem::itemClick,this,[this](const QPoint &pos) {
-        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+        if(this->ui->syncScreenCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input click event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
                 ProcessResult result = this->devicePointer->inputClick(pos);
@@ -92,7 +92,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     });
 
     connect(screenItem,&CScreenPixmapItem::itemLongClick,this,[this](const QPoint &pos,int duration) {
-        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+        if(this->ui->syncScreenCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input long click event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
                 ProcessResult result = this->devicePointer->inputSwipe(pos,pos,duration > 0 ? duration * 1000 : 1000);
@@ -102,7 +102,7 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     });
 
     connect(screenItem,&CScreenPixmapItem::itemSwipe,this,[this](const QPoint &startPos,const QPoint &endPos,int duration) {
-        if(this->ui->syncTouchCheckBox->checkState() == Qt::Checked) {
+        if(this->ui->syncScreenCheckBox->checkState() == Qt::Checked) {
             emit processStart(tr("input..."),tr("input swipe event to %1").arg(this->devicePointer->serialNumber));
             QtConcurrent::run([=]() {
                 ProcessResult result = this->devicePointer->inputSwipe(startPos,endPos,duration > 0 ? duration * 1000 : 1000);
@@ -112,13 +112,18 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
     });
 
     connect(ui->syncScreenCheckBox,&QCheckBox::stateChanged,this,[this](int state) {
-        if(state == Qt::Checked) {
+        if(state == Qt::Checked) {//TODO load failed again!
             QtConcurrent::run([this]() {
                 bool canLoadFromOutput = true;
                 bool needHandleNewLine = false;
                 while(this->ui->syncScreenCheckBox->checkState() == Qt::Checked && !this->devicePointer.isNull() && this->isVisible()) {
                     if(canLoadFromOutput) {
-                        QByteArray imgBuf = this->devicePointer->screenShot();
+                        ProcessResult result = this->devicePointer->screenShot();
+                        if(result.exitCode != 0){
+                            emit deviceDisconnected();
+                            break;
+                        }
+                        QByteArray imgBuf = result.resultArray;
                         if(this->isVisible()) {
                             if(!needHandleNewLine) {
                                 canLoadFromOutput = this->screenPixmap.loadFromData(imgBuf,"PNG");
@@ -174,12 +179,35 @@ CDeviceEditForm::CDeviceEditForm(CAndroidDevice * device,QWidget *parent) :
 
     this->screenItem->setScale(this->scenePercent / 100.0f);
     this->ui->zoomSlider->setValue(this->scenePercent);
+
+    connectedState->addTransition(this,&CDeviceEditForm::deviceDisconnected,disconnectState);
+    disconnectState->addTransition(this,&CDeviceEditForm::deviceConnected,connectedState);
+
+    connectedState->assignProperty(ui->graphicsView,"enabled",true);
+    connectedState->assignProperty(ui->syncScreenCheckBox,"enabled",true);
+    connectedState->assignProperty(ui->screenRecordButton,"enabled",true);
+    connectedState->assignProperty(ui->screenShotButton,"enabled",true);
+    connectedState->assignProperty(ui->zoomSlider,"enabled",true);
+    connectedState->assignProperty(ui->goBackButton,"enabled",true);
+    connectedState->assignProperty(ui->homeButton,"enabled",true);
+    connectedState->assignProperty(ui->menuButton,"enabled",true);
+
+    disconnectState->assignProperty(ui->graphicsView,"enabled",false);
+    disconnectState->assignProperty(ui->syncScreenCheckBox,"enabled",false);
+    disconnectState->assignProperty(ui->screenRecordButton,"enabled",false);
+    disconnectState->assignProperty(ui->screenShotButton,"enabled",false);
+    disconnectState->assignProperty(ui->zoomSlider,"enabled",false);
+    disconnectState->assignProperty(ui->goBackButton,"enabled",false);
+    disconnectState->assignProperty(ui->homeButton,"enabled",false);
+    disconnectState->assignProperty(ui->menuButton,"enabled",false);
+
+    machine->setInitialState(connectedState);
+    machine->start();
 }
 
 CDeviceEditForm::~CDeviceEditForm()
 {
     this->ui->syncScreenCheckBox->setChecked(false);
-    this->ui->syncTouchCheckBox->setChecked(false);
     this->disconnect();
     delete ui;
 }
@@ -187,7 +215,6 @@ CDeviceEditForm::~CDeviceEditForm()
 void CDeviceEditForm::closeEvent(QCloseEvent *event)
 {
     this->ui->syncScreenCheckBox->setChecked(false);
-    this->ui->syncTouchCheckBox->setChecked(false);
 }
 
 void CDeviceEditForm::wheelEvent(QWheelEvent *event)

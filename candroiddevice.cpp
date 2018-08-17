@@ -12,9 +12,9 @@ ProcessResult processCmd(QString cmd)
     process.start(cmd);
     process.waitForFinished(-1);
 
-    QString resultStr;
-    resultStr.append(QTextCodec::codecForLocale()->toUnicode(process.readAll()));
-    return ProcessResult(process.exitCode(),resultStr);
+    QByteArray array = process.readAll();
+    QString resultStr = QTextCodec::codecForLocale()->toUnicode(array);
+    return ProcessResult(process.exitCode(),array,resultStr);
 }
 
 
@@ -230,14 +230,12 @@ ProcessResult CAndroidDevice::screenShot(QString path)
     return result;
 }
 
-QByteArray CAndroidDevice::screenShot()
+ProcessResult CAndroidDevice::screenShot()
 {
-    QProcess process;
-    process.start(QString("%1 -s %2 shell screencap -p")
-                  .arg(CAndroidContext::androidAdbPath)
-                  .arg(serialNumber));
-    process.waitForFinished(-1);
-    return process.readAll();
+    ProcessResult result = processCmd(QString("%1 -s %2 shell screencap -p")
+                                      .arg(CAndroidContext::androidAdbPath)
+                                      .arg(serialNumber));
+    return result;
 }
 
 ProcessResult CAndroidDevice::pull(QString srcPath, QString desPath)
@@ -539,6 +537,12 @@ ProcessResult CAndroidApp::getInstallPath()
 
 ProcessResult::ProcessResult(int exitCode, QString resultStr):
     exitCode(exitCode),resultStr(resultStr)
+{
+
+}
+
+ProcessResult::ProcessResult(int exitCode, QByteArray resultArr,QString resultStr):
+    exitCode(exitCode),resultArray(resultArr),resultStr(resultStr)
 {
 
 }
