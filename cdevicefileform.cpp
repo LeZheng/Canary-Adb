@@ -34,9 +34,9 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         }
     });
 
-    connect(ui->fileTableWidget,&QTableWidget::customContextMenuRequested,this,[this](const QPoint &pos){
+    connect(ui->fileTableWidget,&QTableWidget::customContextMenuRequested,this,[this](const QPoint &pos) {
         int row = ui->fileTableWidget->rowAt(pos.y());
-        if(row < currentFiles.size() && row >= 0){
+        if(row < currentFiles.size() && row >= 0) {
             emit menuRequested(this->deviceSerialNumber,"",currentFiles.at(row).path);
         }
     });
@@ -67,7 +67,7 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
     });
 
     ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-    connect(ui->refreshToolButton,&QToolButton::clicked,this,[this](){
+    connect(ui->refreshToolButton,&QToolButton::clicked,this,[this]() {
         openDir(currentDir);
     });
 }
@@ -104,7 +104,7 @@ void CDeviceFileForm::dropEvent(QDropEvent *event)
             if(row >= 0) {
                 CAndroidFile deviceFile = currentFiles.at(row);
                 emit menuRequested(this->devicePointer->serialNumber,localPath,deviceFile.path);
-            }else{
+            } else {
                 emit menuRequested(this->devicePointer->serialNumber,localPath,currentDir);
             }
         }
@@ -151,10 +151,11 @@ void CDeviceFileForm::openDir(const QString &path)
         this->ui->fileTableWidget->setItem(i,2,ownerItem);
         this->ui->fileTableWidget->setItem(i,3,sizeItem);
         this->ui->fileTableWidget->setItem(i,4,timeItem);
-        this->currentDir = path;
-        this->ui->fileTableWidget->setBasePath(currentDir);
-        ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
     }
+
+    this->currentDir = path;
+    this->ui->fileTableWidget->setBasePath(currentDir);
+    ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
 }
 
 CDeviceFileTableWidget::CDeviceFileTableWidget(QWidget *parent):QTableWidget(parent)
@@ -166,9 +167,9 @@ QMimeData *CDeviceFileTableWidget::mimeData(const QList<QTableWidgetItem *> item
 {
     QMimeData *data = new QMimeData;
     QListIterator<QTableWidgetItem *> iter(items);
-    while(iter.hasNext()){
+    while(iter.hasNext()) {
         QTableWidgetItem *item = iter.next();
-        if(item->column() == 0){
+        if(item->column() == 0) {
             data->setText("android:" + serialNumber);
             QList<QUrl> urls;
             urls.append(QUrl(basePath + "/" + item->text()));

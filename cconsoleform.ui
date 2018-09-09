@@ -112,7 +112,7 @@
      <item>
       <widget class="QComboBox" name="logLevelComboBox">
        <property name="toolTip">
-        <string>xxxxxxx</string>
+        <string>choose log level</string>
        </property>
        <property name="statusTip">
         <string>choose log level</string>
@@ -170,39 +170,42 @@
        <property name="statusTip">
         <string>choose log format</string>
        </property>
+       <property name="currentText">
+        <string notr="true">brief</string>
+       </property>
        <item>
         <property name="text">
-         <string>brief</string>
+         <string notr="true">brief</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>process</string>
+         <string notr="true">process</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>tag</string>
+         <string notr="true">tag</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>thread</string>
+         <string notr="true">thread</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>raw</string>
+         <string notr="true">raw</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>time</string>
+         <string notr="true">time</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>long</string>
+         <string notr="true">long</string>
         </property>
        </item>
       </widget>

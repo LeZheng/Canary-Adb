@@ -366,7 +366,11 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
             for(int i = 0; i < deviceList.size(); i++) {
                 CAndroidDevice * device = deviceList.at(i);
                 pushFileMenu->addAction(QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber),[device,localPath,this]() {
-                    //TODO
+                    CDeviceFileDialog dialog(device,QFileInfo(localPath).fileName());
+                    if(dialog.exec() == QDialog::Accepted) {
+                        QString dPath = dialog.getChoosePath();
+                        pushFile(device->serialNumber,localPath,dPath);
+                    }
                 });
             }
         }
@@ -505,7 +509,7 @@ void MainWindow::screenShot(const QString &serialNumber)
             if(!savePath.isEmpty()) {
                 emit processStart(tr("saving..."),tr("save image to %1").arg(savePath));
                 QtConcurrent::run([=]() {
-                    if(!device.isNull()){
+                    if(!device.isNull()) {
                         ProcessResult result = device->pull(tmpPhonePath,savePath);
                         emit processEnd(result.exitCode,result.resultStr);
                     } else {
@@ -517,10 +521,10 @@ void MainWindow::screenShot(const QString &serialNumber)
         });
         watcher->setFuture(QtConcurrent::run([this,tmpPhonePath,device]() {
             QString tmpPhonePath = "/sdcard/canary-screen-shot.png";
-            if(!device.isNull()){
+            if(!device.isNull()) {
                 ProcessResult result = device->screenShot(tmpPhonePath);
                 emit processEnd(result.exitCode,result.resultStr);
-            }else{
+            } else {
                 emit processEnd(1,tr("device disconnect"));
             }
         }));
@@ -561,10 +565,10 @@ void MainWindow::screenRecord(const QString &serialNumber)
                 if(!savePath.isEmpty()) {
                     emit processStart(tr("saving..."),tr("save video to %1").arg(savePath));
                     QtConcurrent::run([=]() {
-                        if(!device.isNull()){
+                        if(!device.isNull()) {
                             ProcessResult result = device->pull(tempPath,savePath);
                             emit processEnd(result.exitCode,result.resultStr);
-                        }else{
+                        } else {
                             emit processEnd(1,tr("device disconnect"));
                         }
                     });

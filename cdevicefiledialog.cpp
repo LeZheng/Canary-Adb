@@ -43,7 +43,7 @@ CDeviceFileDialog::CDeviceFileDialog(CAndroidDevice * device,const QString &defa
         if(row < this->currentFiles.size()) {
             CAndroidFile file = this->currentFiles.at(row);
             this->currentFileName = file.fileName;
-            if(!file.privilege.startsWith("d")){
+            if(!file.privilege.startsWith("d")) {
                 this->ui->nameLineEdit->setText(file.fileName);
             }
         }
@@ -74,15 +74,18 @@ CDeviceFileDialog::CDeviceFileDialog(CAndroidDevice * device,const QString &defa
         this->ui->nextToolButton->setDisabled(nextPathStack.isEmpty());
     });
 
-    connect(ui->nameLineEdit,&QLineEdit::textChanged,this,[this](){
-        if(this->ui->nameLineEdit->text().isEmpty()){
+    connect(ui->nameLineEdit,&QLineEdit::textChanged,this,[this]() {
+        if(this->ui->nameLineEdit->text().isEmpty()) {
             this->ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
             this->ui->nameLineEdit->setClearButtonEnabled(false);
-        }else{
+        } else {
             this->ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
             this->ui->nameLineEdit->setClearButtonEnabled(true);
         }
     });
+
+    ui->nextToolButton->setEnabled(false);
+    ui->prevToolButton->setEnabled(false);
 }
 
 CDeviceFileDialog::~CDeviceFileDialog()
@@ -92,9 +95,9 @@ CDeviceFileDialog::~CDeviceFileDialog()
 
 QString CDeviceFileDialog::getChoosePath()
 {
-    if(currentFileName != ui->nameLineEdit->text()){
+    if(currentFileName != ui->nameLineEdit->text()) {
         return currentDir + "/" + currentFileName + "/" + ui->nameLineEdit->text();
-    }else{
+    } else {
         return currentDir + "/" + currentFileName;
     }
 }
@@ -122,7 +125,8 @@ void CDeviceFileDialog::openDir(const QString &path)
         this->ui->fileTableWidget->setItem(i,2,ownerItem);
         this->ui->fileTableWidget->setItem(i,3,sizeItem);
         this->ui->fileTableWidget->setItem(i,4,timeItem);
-        this->currentDir = path;
-        ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
     }
+
+    this->currentDir = path;
+    ui->pathLineEdit->setText(currentDir.isEmpty() ? "/" : currentDir);
 }
