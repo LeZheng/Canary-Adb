@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     window->move((a.desktop()->width() - window->width()) / 2, (a.desktop()->height() - window->height()) / 2);
 
     QPixmap pixmap(":/img/startup_bg");
-    QSplashScreen *splash = new QSplashScreen(pixmap.scaled(400,270));
-    splash->resize(400,270);
+    QSplashScreen *splash = new QSplashScreen(pixmap.scaled(400,328));
+    splash->resize(400,328);
     splash->show();
     splash->showMessage(splash->tr("start init..."),Qt::AlignBottom,Qt::white);
     a.processEvents();
