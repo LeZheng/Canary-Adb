@@ -33,7 +33,8 @@ SOURCES += \
     cdeviceeditform.cpp \
     screenrecordoptiondialog.cpp \
     cdevicefileform.cpp \
-    cdevicefiledialog.cpp
+    cdevicefiledialog.cpp \
+    cstartupform.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS += \
     cdeviceeditform.h \
     screenrecordoptiondialog.h \
     cdevicefileform.h \
-    cdevicefiledialog.h
+    cdevicefiledialog.h \
+    cstartupform.h
 
 FORMS += \
         mainwindow.ui \
@@ -54,7 +56,8 @@ FORMS += \
     cdeviceeditform.ui \
     screenrecordoptiondialog.ui \
     cdevicefileform.ui \
-    cdevicefiledialog.ui
+    cdevicefiledialog.ui \
+    cstartupform.ui
 
 RESOURCES += \
     canary-img.qrc

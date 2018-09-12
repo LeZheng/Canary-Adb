@@ -418,7 +418,7 @@ void CAndroidContext::startListenAdb()
         isRunning = true;
         QtConcurrent::run([this]() {
             while(this->isRunning) {
-                emit updateStateChanged(tr("update devices"));
+                emit updateStateChanged(0,tr("update devices"));
                 ProcessResult result = processCmd(QString("%1 devices").arg(CAndroidContext::androidAdbPath));
                 if(result.exitCode == 0) {
                     QStringList deviceStrList = result.resultStr.trimmed().split("\n");
@@ -439,18 +439,19 @@ void CAndroidContext::startListenAdb()
                             } else {
                                 CAndroidDevice * device = new CAndroidDevice(serialNumber);
                                 emit findNewDevice(device);
-
-                                emit updateStateChanged(tr("udpate device[%1]'s name").arg(serialNumber));
+                                double dProgress = 100.0 / deviceStrList.size();
+                                double baseProgress = dProgress * i;
+                                emit updateStateChanged(baseProgress + dProgress / 6,tr("udpate device[%1]'s name").arg(serialNumber));
                                 device->updateModel();
-                                emit updateStateChanged(tr("udpate device[%1]'s wm density").arg(serialNumber));
+                                emit updateStateChanged(baseProgress + dProgress * 2 / 6,tr("udpate device[%1]'s wm density").arg(serialNumber));
                                 device->updateWmDensity();
-                                emit updateStateChanged(tr("udpate device[%1]'s wm size").arg(serialNumber));
+                                emit updateStateChanged(baseProgress + dProgress * 3 / 6,tr("udpate device[%1]'s wm size").arg(serialNumber));
                                 device->updateWmSize();
-                                emit updateStateChanged(tr("udpate device[%1]'s android id").arg(serialNumber));
+                                emit updateStateChanged(baseProgress + dProgress * 4 / 6,tr("udpate device[%1]'s android id").arg(serialNumber));
                                 device->updateAndroidId();
-                                emit updateStateChanged(tr("udpate device[%1]'s android version").arg(serialNumber));
+                                emit updateStateChanged(baseProgress + dProgress * 5 / 6,tr("udpate device[%1]'s android version").arg(serialNumber));
                                 device->updateAndroidVersion();
-                                emit updateStateChanged(tr("udpate device[%1]'s package list").arg(serialNumber));
+                                emit updateStateChanged(baseProgress + dProgress * 6 / 6,tr("udpate device[%1]'s package list").arg(serialNumber));
                                 device->updatePackageList();
                                 tmpDeviceMap.insert(serialNumber,device);
                             }

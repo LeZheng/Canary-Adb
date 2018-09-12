@@ -146,7 +146,7 @@ public:
 
 signals:
     void deviceListUpdated();
-    void updateStateChanged(const QString &msg);
+    void updateStateChanged(int progress,const QString &msg);
     void findNewDevice(CAndroidDevice *device);
     void deviceListNotUpdated();
 

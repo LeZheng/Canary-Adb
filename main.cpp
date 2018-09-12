@@ -8,6 +8,7 @@
 #include <QSettings>
 
 #include "candroiddevice.h"
+#include "cstartupform.h"
 
 #if defined(Q_OS_WIN32)
 const QString adbFileName = "adb.exe";
@@ -56,28 +57,31 @@ int main(int argc, char *argv[])
     window->move((a.desktop()->width() - window->width()) / 2, (a.desktop()->height() - window->height()) / 2);
 
     QPixmap pixmap(":/img/startup_bg");
-    QSplashScreen *splash = new QSplashScreen(pixmap.scaled(400,328));
-    splash->resize(400,328);
+
+    CStartUpForm *splash = new CStartUpForm();
+    splash->setAttribute(Qt::WA_DeleteOnClose,true);
+    splash->move((a.desktop()->width() - splash->width()) / 2, (a.desktop()->height() - splash->height()) / 2);
     splash->show();
-    splash->showMessage(splash->tr("start init..."),Qt::AlignBottom,Qt::white);
+    splash->showMessage(splash->tr("start init..."),Qt::AlignBottom,Qt::yellow);
     a.processEvents();
     CAndroidContext::getInstance()->startListenAdb();
-    a.connect(CAndroidContext::getInstance(),&CAndroidContext::updateStateChanged,splash,[splash](const QString &msg) {
-        splash->showMessage(msg,Qt::AlignBottom,Qt::white);
+    a.connect(CAndroidContext::getInstance(),&CAndroidContext::updateStateChanged,splash,[splash](int progress,const QString &msg) {
+        splash->showMessage(msg,Qt::AlignBottom,Qt::yellow);
+        splash->setCurrentProgress(progress);
     });
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::findNewDevice,splash,[splash](CAndroidDevice *device) {
-        splash->showMessage(splash->tr("init device:%1 ...").arg(device->serialNumber),Qt::AlignBottom,Qt::white);
+        splash->showMessage(splash->tr("init device:%1 ...").arg(device->serialNumber),Qt::AlignBottom,Qt::yellow);
     });
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,splash,[splash,window]() {
         window->show();
-        splash->finish(window);
-        delete splash;
+        splash->close();
     });
     a.connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListNotUpdated,splash,[splash,window]() {
         window->show();
-        splash->finish(window);
-        delete splash;
+        splash->close();
     });
+
+
 
     return a.exec();
 }
