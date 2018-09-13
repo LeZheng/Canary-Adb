@@ -53,7 +53,7 @@ CFileForm::CFileForm(QWidget *parent) :
 
     ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));
     ui->prevBtn->setFixedSize(QSize(24,24));
-    connect(this->ui->prevBtn,&QPushButton::clicked,[this]() {
+    connect(this->ui->prevBtn,&QToolButton::clicked,[this]() {
         QModelIndex pIndex = this->ui->fileTreeView->rootIndex();
         QModelIndex index = pIndex.parent();
         if(index.isValid()) {
@@ -67,7 +67,7 @@ CFileForm::CFileForm(QWidget *parent) :
     });
     ui->nextBtn->setIcon(style->standardIcon(QStyle::SP_ArrowRight));
     ui->nextBtn->setFixedSize(QSize(24,24));
-    connect(ui->nextBtn,&QPushButton::clicked,[this]() {
+    connect(ui->nextBtn,&QToolButton::clicked,[this]() {
         if(!this->historyPathStack.isEmpty()) {
             QModelIndex index = this->historyPathStack.pop();
             this->ui->fileTreeView->setRootIndex(index);
@@ -78,7 +78,7 @@ CFileForm::CFileForm(QWidget *parent) :
     });
     ui->browserBtn->setIcon(style->standardIcon(QStyle::SP_DirOpenIcon));
     ui->browserBtn->setFixedSize(QSize(24,24));
-    connect(ui->browserBtn,&QPushButton::clicked,[this]() {
+    connect(ui->browserBtn,&QToolButton::clicked,[this]() {
         QString path = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                        QDir::rootPath(),
                        QFileDialog::ShowDirsOnly
@@ -200,10 +200,10 @@ void CFileForm::mousePressEvent(QMouseEvent *event)
 void CFileForm::dragEnterEvent(QDragEnterEvent *event)
 {
     if(event->mimeData()->hasUrls() && event->mimeData()->hasText()
-            && event->mimeData()->text().startsWith("android:")
-            && getCurrentItemView()->rootIndex().isValid()) {
+       && event->mimeData()->text().startsWith("android:")
+       && getCurrentItemView()->rootIndex().isValid()) {
         event->accept();
-    }else{
+    } else {
         QWidget::dragEnterEvent(event);
     }
 }
@@ -211,23 +211,23 @@ void CFileForm::dragEnterEvent(QDragEnterEvent *event)
 void CFileForm::dropEvent(QDropEvent *event)
 {
     if(event->mimeData()->hasUrls() && event->mimeData()->hasText()
-            && event->mimeData()->text().startsWith("android:")) {
+       && event->mimeData()->text().startsWith("android:")) {
         QString deviceNumber = event->mimeData()->text();
         deviceNumber = deviceNumber.right(deviceNumber.size() - 8);
         QUrl url = event->mimeData()->urls().at(0);
         QString localPath;
         QPoint pos = QCursor::pos();
-        if(this->viewMode() == FileItemMode::TREE){
+        if(this->viewMode() == FileItemMode::TREE) {
             pos.setY(pos.y() - ui->fileTreeView->header()->height());
         }
         QModelIndex index = getCurrentItemView()->indexAt(getCurrentItemView()->mapFromGlobal(pos));
-        if(index.isValid()){
+        if(index.isValid()) {
             localPath = this->model->filePath(index);
-        }else{
+        } else {
             QModelIndex rootIndex = getCurrentItemView()->rootIndex();
-            if(rootIndex.isValid()){
+            if(rootIndex.isValid()) {
                 localPath = this->model->filePath(rootIndex);
-            }else{
+            } else {
                 localPath = QDir::rootPath();
             }
         }

@@ -164,6 +164,7 @@ void MainWindow::initFileWidget()
     titleWidget->addSeparator();
     titleWidget->addWidget(splitButton);
 
+    titleWidget->layout()->setMargin(6);
     this->ui->leftDockWidget->setTitleBarWidget(titleWidget);
 
     connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);

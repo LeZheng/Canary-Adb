@@ -8,6 +8,7 @@ CStartUpForm::CStartUpForm(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowFlags(Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_TranslucentBackground, true);
 
     ui->widget->setAutoFillBackground(true);
     QPixmap pixmap(":/img/startup_bg");
@@ -15,6 +16,8 @@ CStartUpForm::CStartUpForm(QWidget *parent) :
     QPalette palette = ui->widget->palette();
     palette.setBrush(QPalette::Background, QBrush(fitpixmap));
     ui->widget->setPalette(palette);
+
+    animation = nullptr;
 }
 
 CStartUpForm::~CStartUpForm()
@@ -32,5 +35,15 @@ void CStartUpForm::showMessage(const QString &message, Qt::AlignmentFlag alignme
 
 void CStartUpForm::setCurrentProgress(int progress)
 {
-    ui->progressBar->setValue(progress);
+    if(animation != nullptr && animation->state() == QPropertyAnimation::Stopped) {
+        animation->stop();
+        animation->deleteLater();
+        animation == nullptr;
+    }
+
+    animation = new QPropertyAnimation(ui->progressBar, "value");
+    animation->setDuration(300);
+    animation->setStartValue(ui->progressBar->value());
+    animation->setEndValue(progress);
+    animation->start(QAbstractAnimation::KeepWhenStopped);
 }

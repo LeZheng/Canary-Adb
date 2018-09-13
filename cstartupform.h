@@ -2,6 +2,7 @@
 #define STARTUPFORM_H
 
 #include <QWidget>
+#include <QPropertyAnimation>
 
 namespace Ui
 {
@@ -21,6 +22,7 @@ public slots:
     void setCurrentProgress(int progress);
 private:
     Ui::CStartUpForm *ui;
+    QPropertyAnimation *animation;
 };
 
 #endif // STARTUPFORM_H
