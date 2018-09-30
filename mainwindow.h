@@ -10,6 +10,7 @@
 #include <QSplitter>
 #include <QToolButton>
 #include <QMessageBox>
+#include <QToolTip>
 
 #include "cdeviceform.h"
 #include "cconsoleform.h"
@@ -24,7 +25,7 @@ namespace Ui
 class MainWindow;
 }
 
-enum class DetailViewType{LOG,SCREEN};
+enum class DetailViewType {LOG,SCREEN};
 
 class MainWindow : public QMainWindow
 {

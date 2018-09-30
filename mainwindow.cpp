@@ -317,11 +317,12 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
 {
     this->loadAnimation->stop();
     this->loadingDialog->close();
-    if(exitCode != 0) {
-        QMessageBox::warning(this, QApplication::applicationName(),
-                             msg,
-                             QMessageBox::Cancel,
-                             QMessageBox::Cancel);
+    if(exitCode != 0 && !msg.isEmpty()) {
+        QFontMetrics metrics(QToolTip::font());
+        QRect msgRect = metrics.boundingRect(msg);
+        QRect rect = this->frameGeometry();
+        QToolTip::showText(QPoint(rect.right() - msgRect.width() - 20,rect.bottom() - msgRect.height() - 20),
+                           msg,this,this->frameGeometry(),5000);//TODO
     }
 }
 
