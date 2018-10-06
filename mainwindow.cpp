@@ -283,6 +283,8 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         tabName = tr("log");
     } else if(type == DetailViewType::SCREEN) {
         tabName = tr("screen");
+    } else if(type == DetailViewType::MONITOR) {
+        tabName = tr("monitor");
     }
 
     for(int i = 0; i < widget->count(); i++) {
@@ -302,6 +304,10 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         widget->setCurrentWidget(editForm);
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
+    } else if(type == DetailViewType::MONITOR) {
+        CMonitorForm *monitorForm = new CMonitorForm(widget);
+        widget->addTab(monitorForm,tabName);
+        widget->setCurrentWidget(monitorForm);
     }
 }
 
@@ -326,7 +332,7 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
     }
 }
 
-void MainWindow::requestContextMenu(const QString &serialNumber, const QString &localPath,const QString &devicePath)
+void MainWindow::requestContextMenu(cons                qDebug() << "open monitor"; t QString &serialNumber, const QString &localPath,const QString &devicePath)
 {
     QMenu menu;
     if(serialNumber.isEmpty() && !localPath.isEmpty()) {
@@ -400,6 +406,11 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     openDeviceDetailView(device,DetailViewType::LOG);
+            });
+            menu.addAction(tr("monitor"),[this,serialNumber]() { //TODO icon
+                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
+                if(device != nullptr)
+                    openDeviceDetailView(device,DetailViewType::MONITOR);
             });
             menu.addAction(QIcon(":/img/pull"),tr("pull file"),this,[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);

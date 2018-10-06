@@ -19,13 +19,14 @@
 #include "cdeviceeditform.h"
 #include "cdevicefileform.h"
 #include "cdevicefiledialog.h"
+#include "cmonitorform.h"
 
 namespace Ui
 {
 class MainWindow;
 }
 
-enum class DetailViewType {LOG,SCREEN};
+enum class DetailViewType {LOG,SCREEN,MONITOR};
 
 class MainWindow : public QMainWindow
 {

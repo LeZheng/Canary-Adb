@@ -179,17 +179,30 @@ void CAndroidDevice::updateCpuInfo()
                                .arg(serialNumber)).resultStr.trimmed();
 }
 
-QString CAndroidDevice::getMemInfo()
+QMap<QString,QString> CAndroidDevice::getMemInfo()
 {
-
-    return this->memInfo;
+    return this->memInfoMap;
 }
 
 void CAndroidDevice::updateMemInfo()
 {
-    this->memInfo = processCmd(QString("%1 -s %2 shell cat /proc/meminfo")
-                               .arg(CAndroidContext::androidAdbPath)
-                               .arg(serialNumber)).resultStr.trimmed();
+    QString memInfoStr = processCmd(QString("%1 -s %2 shell cat /proc/meminfo")
+                                    .arg(CAndroidContext::androidAdbPath)
+                                    .arg(serialNumber)).resultStr.trimmed();
+    QStringList lineList = memInfoStr.split("\n");
+    if(!lineList.isEmpty()) {
+        this->memInfoMap.clear();
+        QListIterator<QString> lineIter(lineList);
+        while(lineIter.hasNext()) {
+            QString line = lineIter.next();
+            int colonIndex = line.indexOf(':');
+            if(colonIndex >= 0) {
+                this->memInfoMap.insert(
+                    line.left(colonIndex),
+                    line.right(line.size() - colonIndex - 1).trimmed());
+            }
+        }
+    }
 }
 
 QMap<QString, QString> CAndroidDevice::getSystemProps()

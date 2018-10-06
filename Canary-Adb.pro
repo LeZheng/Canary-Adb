@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,7 +34,8 @@ SOURCES += \
     screenrecordoptiondialog.cpp \
     cdevicefileform.cpp \
     cdevicefiledialog.cpp \
-    cstartupform.cpp
+    cstartupform.cpp \
+    cmonitorform.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -46,7 +47,8 @@ HEADERS += \
     screenrecordoptiondialog.h \
     cdevicefileform.h \
     cdevicefiledialog.h \
-    cstartupform.h
+    cstartupform.h \
+    cmonitorform.h
 
 FORMS += \
         mainwindow.ui \
@@ -57,7 +59,8 @@ FORMS += \
     screenrecordoptiondialog.ui \
     cdevicefileform.ui \
     cdevicefiledialog.ui \
-    cstartupform.ui
+    cstartupform.ui \
+    cmonitorform.ui
 
 RESOURCES += \
     canary-img.qrc

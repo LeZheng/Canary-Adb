@@ -92,7 +92,7 @@ public:
     void updateNetworkInfo();
     QString getCpuInfo();
     void updateCpuInfo();
-    QString getMemInfo();
+    QMap<QString,QString> getMemInfo();
     void updateMemInfo();
     QMap<QString,QString> getSystemProps();
     QString getSystemProp(QString key);
@@ -123,7 +123,7 @@ private:
     QString androidVersion;// (field "android-version" :read "adb shell getprop ro.build.version.release")
     QString networkInfo;// (field "网络信息" :read "adb shell ifconfig")
     QString cpuInfo;// (field "cpu 信息" :read "adb shell cat /proc/cpuinfo")
-    QString memInfo;// (field "内存信息" :read "adb shell cat /proc/meminfo")
+    QMap<QString,QString> memInfoMap; //(field "内存信息" :read "adb shell cat /proc/meminfo")
     QMap<QString, QString> sysProps;// (field "系统属性" :read "adb shell cat /system/build.prop")
     QMap<QString,CAndroidApp *> applicationMap;
 };
