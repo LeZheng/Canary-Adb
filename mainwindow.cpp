@@ -305,7 +305,7 @@ void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type
         connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
         connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
     } else if(type == DetailViewType::MONITOR) {
-        CMonitorForm *monitorForm = new CMonitorForm(widget);
+        CMonitorForm *monitorForm = new CMonitorForm(device,widget);
         widget->addTab(monitorForm,tabName);
         widget->setCurrentWidget(monitorForm);
     }
@@ -332,7 +332,7 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
     }
 }
 
-void MainWindow::requestContextMenu(cons                qDebug() << "open monitor"; t QString &serialNumber, const QString &localPath,const QString &devicePath)
+void MainWindow::requestContextMenu(const QString &serialNumber, const QString &localPath,const QString &devicePath)
 {
     QMenu menu;
     if(serialNumber.isEmpty() && !localPath.isEmpty()) {
