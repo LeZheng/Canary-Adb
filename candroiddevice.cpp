@@ -434,7 +434,15 @@ void CAndroidContext::startListenAdb()
                 emit updateStateChanged(0,tr("update devices"));
                 ProcessResult result = processCmd(QString("%1 devices").arg(CAndroidContext::androidAdbPath));
                 if(result.exitCode == 0) {
-                    QStringList deviceStrList = result.resultStr.trimmed().split("\n");
+                    QStringList deviceStrList;
+                    QString content = result.resultStr.trimmed();
+                    QTextStream in(&content);
+                    while(!in.atEnd()) {
+                        QString line = in.readLine();
+                        if(!line.isEmpty()) {
+                            deviceStrList.append(line);
+                        }
+                    }
                     if(deviceStrList.size() > 0) {
                         deviceStrList.removeAt(0);
                     }
