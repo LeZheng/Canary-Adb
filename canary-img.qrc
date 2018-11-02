@@ -37,5 +37,6 @@
         <file alias="open_folder">img/open-folder.png</file>
         <file alias="start_record">img/media-start.png</file>
         <file alias="stop_record">img/media-record.png</file>
+        <file alias="android_app_icon">img/android-app-icon.png</file>
     </qresource>
 </RCC>

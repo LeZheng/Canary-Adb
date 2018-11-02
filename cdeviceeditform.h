@@ -55,6 +55,8 @@ signals:
     void screenUpdated();
     void deviceConnected();
     void deviceDisconnected();
+    void requestScreenShot(const QString &serialNumber);
+    void requestScreenRecord(const QString &serialNumber);
 
 private slots:
     void on_graphicsView_customContextMenuRequested(const QPoint &pos);

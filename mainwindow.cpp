@@ -7,21 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->ui->rightDockWidget->setTitleBarWidget(new QWidget(this));
-    this->ui->rightDockWidget->titleBarWidget()->setFixedHeight(0);
-
-    connect(this->ui->detailTabWidget,&QTabWidget::tabCloseRequested,this->ui->detailTabWidget,&QTabWidget::tabBarDoubleClicked);
-    connect(this->ui->detailTabWidget,&QTabWidget::tabBarDoubleClicked,[this](int index) {
-        QWidget * widget = this->ui->detailTabWidget->widget(index);
-        QString tabText = this->ui->detailTabWidget->tabText(index);
-        tabText = tabText.right(tabText.size() - tabText.lastIndexOf(" [") - 2);
-        tabText = tabText.left(tabText.size() - 1);
-        if(this->deviceTabMap.contains(tabText)) {
-            this->deviceTabMap.remove(tabText);
-        }
-        this->ui->detailTabWidget->removeTab(index);
-        widget->deleteLater();
-    });
+    deviceComboBox = new QComboBox(this);
 
     loadingDialog = new QProgressDialog(this);
     loadingDialog->setRange(0,100);
@@ -39,6 +25,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this,&MainWindow::processStart,this,&MainWindow::showLoadingDialog);
     connect(this,&MainWindow::processEnd,this,&MainWindow::hideLoadingDialog);
+    connect(ui->actionscreen_shot,&QAction::triggered,this,[this]() {
+        if(this->deviceComboBox->currentIndex() >= 0 && this->deviceComboBox->currentIndex() < this->serialNumberList.size()) {
+            screenShot(this->serialNumberList.at(this->deviceComboBox->currentIndex()));
+        }
+    });
+    connect(ui->actionscreen_record,&QAction::triggered,this,[this]() {
+        if(this->deviceComboBox->currentIndex() >= 0 && this->deviceComboBox->currentIndex() < this->serialNumberList.size()) {
+            screenRecord(this->serialNumberList.at(this->deviceComboBox->currentIndex()));
+        }
+    });
 }
 
 MainWindow::~MainWindow()
@@ -48,12 +44,40 @@ MainWindow::~MainWindow()
 
 void MainWindow::initToolBar()
 {
-    //TODO
+    QList<QAction *> actions = ui->leftToolBar->actions();
+    for(int i = 0; i < actions.size(); i++) {
+        QAction *action = actions.at(i);
+        ui->leftToolBar->widgetForAction(action)->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+        connect(action,&QAction::triggered,this,[this,action,i](bool checked) {
+            foreach (QAction *tempAction, ui->leftToolBar->actions()) {
+                tempAction->setChecked(tempAction == action);
+            }
+            int currentDeviceIndex = this->deviceComboBox->currentIndex();
+            if(currentDeviceIndex >= 0) {
+                this->ui->deviceStackedWidget->setCurrentIndex(currentDeviceIndex);
+                QStackedWidget * stackWidget = qobject_cast<QStackedWidget *>(this->ui->deviceStackedWidget->currentWidget());
+                if(stackWidget && i < stackWidget->count()) {
+                    stackWidget->setCurrentIndex(i);
+                }
+            }
+        });
+    }
+    actions.at(0)->setChecked(true);
+
+    QWidget *spaceWidget = new QWidget(ui->mainToolBar);
+    spaceWidget->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    spaceWidget->setMinimumWidth(ui->leftToolBar->width() - 20);
+    ui->mainToolBar->addWidget(spaceWidget);
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addWidget(deviceComboBox);
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction(ui->actionscreen_shot);
+    ui->mainToolBar->addAction(ui->actionscreen_record);
 }
 
 void MainWindow::initFileWidget()
 {
-    QToolBar *titleWidget = new QToolBar(this->ui->leftDockWidget);
+    QToolBar *titleWidget = new QToolBar(this->ui->rightDockWidget);
     QToolButton *addTabButton = new QToolButton(titleWidget);
     addTabButton->setIcon(QIcon(":/img/tab_new"));
     connect(addTabButton,&QToolButton::clicked,this,[this]() {
@@ -88,8 +112,8 @@ void MainWindow::initFileWidget()
             fileForm->setViewMode(FileItemMode::TREE);
         }
         splitter->widget(1)->hide();
-        connect(ui->leftDockWidget,&QDockWidget::dockLocationChanged,this,[this,splitter](Qt::DockWidgetArea area) {
-            if(area == Qt::LeftDockWidgetArea) {
+        connect(ui->rightDockWidget,&QDockWidget::dockLocationChanged,this,[this,splitter](Qt::DockWidgetArea area) {
+            if(area == Qt::RightDockWidgetArea) {
                 splitter->setOrientation(Qt::Vertical);
             } else if(area == Qt::BottomDockWidgetArea) {
                 splitter->setOrientation(Qt::Horizontal);
@@ -165,7 +189,7 @@ void MainWindow::initFileWidget()
     titleWidget->addWidget(splitButton);
 
     titleWidget->layout()->setMargin(6);
-    this->ui->leftDockWidget->setTitleBarWidget(titleWidget);
+    this->ui->rightDockWidget->setTitleBarWidget(titleWidget);
 
     connect(ui->fileTabWidget,&QTabWidget::tabBarDoubleClicked,ui->fileTabWidget,&QTabWidget::tabCloseRequested);
     connect(ui->fileTabWidget,&QTabWidget::tabCloseRequested,this,[this](int index) {
@@ -205,28 +229,62 @@ void MainWindow::initFileWidget()
 
 void MainWindow::initDeviceWidget()
 {
-    connect(ui->deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
+    connect(deviceComboBox,QOverload<int>::of(&QComboBox::currentIndexChanged),ui->deviceStackedWidget,&QStackedWidget::setCurrentIndex);
     connect(CAndroidContext::getInstance(),&CAndroidContext::deviceListUpdated,this,[this]() {
         QList<CAndroidDevice *> deviceList = CAndroidContext::getDevices();
-        this->ui->deviceComboBox->clear();
-        while(this->ui->deviceStackedWidget->count() > 0) {
-            QWidget *widget = this->ui->deviceStackedWidget->widget(0);
-            this->ui->deviceStackedWidget->removeWidget(widget);
-            delete widget;
-        }
+        for(int i = 0; i < deviceList.size(); i++) {
+            CAndroidDevice * device = deviceList.at(i);
+            const QString serialNumber = device->serialNumber;
+            if(!this->deviceStackMap.contains(serialNumber)) {
+                const int index = this->deviceComboBox->count();
+                this->deviceComboBox->addItem(QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
+                this->serialNumberList.insert(index,serialNumber);
 
-        if(!deviceList.isEmpty()) {
-            QStringList deviceNameList;
-            for(int i = 0; i < deviceList.size(); i++) {
-                CAndroidDevice * device = deviceList.at(i);
-                deviceNameList << QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber);
-                CDeviceForm *deviceForm = new CDeviceForm(device,this->ui->deviceStackedWidget);
-                this->ui->deviceStackedWidget->addWidget(deviceForm);
-                connect(deviceForm,&CDeviceForm::menuRequested,this,&MainWindow::requestContextMenu);
+                QStackedWidget *stackedWidget = new QStackedWidget(this->ui->deviceStackedWidget);
+
+                CDeviceForm *deviceInfoForm = new CDeviceForm(device,stackedWidget);
+                deviceInfoForm->updateDevices();
+                connect(deviceInfoForm,&CDeviceForm::menuRequested,this,&MainWindow::requestContextMenu);
+                stackedWidget->addWidget(deviceInfoForm);
+
+                QListWidget *appListWidget = new QListWidget(stackedWidget);
+                appListWidget->clear();
+                foreach (CAndroidApp * app, device->getApplications()) {
+                    appListWidget->addItem(app->getName());
+                }
+                stackedWidget->addWidget(appListWidget);
+
+                CDeviceFileForm *fileForm = new CDeviceFileForm(device,stackedWidget);
+                connect(fileForm,&CDeviceFileForm::menuRequested,this,&MainWindow::requestContextMenu);
+                stackedWidget->addWidget(fileForm);
+
+                stackedWidget->addWidget(new CConsoleForm(device,stackedWidget));
+
+                CDeviceEditForm *editForm = new CDeviceEditForm(device,stackedWidget);
+                connect(editForm,&CDeviceEditForm::requestScreenShot,this,&MainWindow::screenShot);
+                connect(editForm,&CDeviceEditForm::requestScreenRecord,this,&MainWindow::screenRecord);
+                connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
+                connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
+                stackedWidget->addWidget(editForm);
+
+                //TODO
+                this->ui->deviceStackedWidget->addWidget(stackedWidget);
+                this->deviceStackMap.insert(serialNumber,stackedWidget);
+
+                connect(device,&CAndroidDevice::destroyed,this,[this,serialNumber,index]() {
+                    this->deviceComboBox->removeItem(index);
+                    QStackedWidget *stackedWidget = this->deviceStackMap.take(serialNumber);
+                    stackedWidget->deleteLater();
+                    if(serialNumber == this->serialNumberList.at(index)) {
+                        this->serialNumberList.removeAt(index);
+                    } else {
+                        this->serialNumberList.removeOne(serialNumber);
+                    }
+                });
             }
-            this->ui->deviceComboBox->addItems(deviceNameList);
         }
     });
+    emit CAndroidContext::getInstance()->deviceListUpdated();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -247,67 +305,6 @@ void MainWindow::changeFileViewMode(FileItemMode mode)
                 }
             }
         }
-    }
-}
-
-void MainWindow::openDeviceDetailView(CAndroidDevice *device,DetailViewType type)
-{
-    QTabWidget *widget = nullptr;
-    QString serialNumber = device->serialNumber;
-    if(this->deviceTabMap.contains(serialNumber)) {
-        this->ui->detailTabWidget->setCurrentWidget(this->deviceTabMap.value(device->serialNumber));
-        widget = this->deviceTabMap.value(serialNumber);
-    } else {
-        widget = new QTabWidget(this->ui->detailTabWidget);
-        widget->setTabPosition(QTabWidget::South);
-        widget->setTabsClosable(true);
-        connect(widget,&QTabWidget::tabCloseRequested,this,[this,widget,serialNumber](int index) {
-            QWidget *tempWidget = widget->widget(index);
-            widget->removeTab(index);
-            if(widget->count() == 0) {
-                int index = this->ui->detailTabWidget->indexOf(widget);
-                if(index >= 0) {
-                    this->ui->detailTabWidget->removeTab(index);
-                    this->deviceTabMap.remove(serialNumber);
-                    widget->deleteLater();
-                }
-            } else {
-                tempWidget->deleteLater();
-            }
-        });
-        this->ui->detailTabWidget->addTab(widget,QString("%1 [%2]").arg(device->getModel()).arg(device->serialNumber));
-        this->deviceTabMap.insert(device->serialNumber,widget);
-    }
-    QString tabName = "none";
-    if(type == DetailViewType::LOG) {
-        tabName = tr("log");
-    } else if(type == DetailViewType::SCREEN) {
-        tabName = tr("screen");
-    } else if(type == DetailViewType::MONITOR) {
-        tabName = tr("monitor");
-    }
-
-    for(int i = 0; i < widget->count(); i++) {
-        if(widget->tabText(i) == tabName) {
-            widget->setCurrentIndex(i);
-            return;
-        }
-    }
-
-    if(type == DetailViewType::LOG) {
-        CConsoleForm * logForm = new CConsoleForm(device,widget);
-        widget->addTab(logForm,tabName);
-        widget->setCurrentWidget(logForm);
-    } else if(type == DetailViewType::SCREEN) {
-        CDeviceEditForm * editForm = new CDeviceEditForm(device,widget);
-        widget->addTab(editForm,tabName);
-        widget->setCurrentWidget(editForm);
-        connect(editForm,&CDeviceEditForm::processStart,this,&MainWindow::showLoadingDialog);
-        connect(editForm,&CDeviceEditForm::processEnd,this,&MainWindow::hideLoadingDialog);
-    } else if(type == DetailViewType::MONITOR) {
-        CMonitorForm *monitorForm = new CMonitorForm(device,widget);
-        widget->addTab(monitorForm,tabName);
-        widget->setCurrentWidget(monitorForm);
     }
 }
 
@@ -386,11 +383,6 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
 
     if(!serialNumber.isEmpty()) {
         if(localPath.isEmpty() && devicePath.isEmpty()) {
-            menu.addAction(QIcon(":/img/phone_small"),tr("open screen"),[this,serialNumber]() {
-                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-                if(device != nullptr)
-                    openDeviceDetailView(device,DetailViewType::SCREEN);
-            });
             menu.addAction(QIcon(":/img/screen_record"),tr("screen record"),[this,serialNumber]() {
                 screenRecord(serialNumber);
             });
@@ -401,16 +393,6 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     device->reboot();
-            });
-            menu.addAction(QIcon(":/img/text-log"),tr("logcat"),[this,serialNumber]() {
-                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-                if(device != nullptr)
-                    openDeviceDetailView(device,DetailViewType::LOG);
-            });
-            menu.addAction(tr("monitor"),[this,serialNumber]() { //TODO icon
-                CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
-                if(device != nullptr)
-                    openDeviceDetailView(device,DetailViewType::MONITOR);
             });
             menu.addAction(QIcon(":/img/pull"),tr("pull file"),this,[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);

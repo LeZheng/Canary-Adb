@@ -26,8 +26,6 @@ namespace Ui
 class MainWindow;
 }
 
-enum class DetailViewType {LOG,SCREEN,MONITOR};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -41,9 +39,11 @@ signals:
     void processEnd(int exitCode,const QString &msg);
 private:
     Ui::MainWindow *ui;
-    QMap<QString,QTabWidget *> deviceTabMap;
+    QComboBox *deviceComboBox;
+    QMap<QString,QStackedWidget *> deviceStackMap;
     QProgressDialog * loadingDialog;
     QPropertyAnimation *loadAnimation;
+    QList<QString> serialNumberList;
 
     void initToolBar();
     void initFileWidget();
@@ -52,7 +52,6 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 private slots:
     void changeFileViewMode(FileItemMode mode);
-    void openDeviceDetailView(CAndroidDevice *device,DetailViewType type);
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);
     void requestContextMenu(const QString &serialNumber,const QString &localPath,const QString &devicePath);

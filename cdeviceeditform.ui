@@ -35,30 +35,6 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="QToolButton" name="screenShotButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normalon>:/img/screen_shot</normalon>
-        </iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="screenRecordButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normalon>:/img/screen_record</normalon>
-        </iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -321,38 +297,5 @@
  <resources>
   <include location="canary-img.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>screenRecordButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionscreen_record</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>42</x>
-     <y>17</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>screenShotButton</sender>
-   <signal>clicked()</signal>
-   <receiver>actionscreen_shot</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>15</x>
-     <y>17</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
