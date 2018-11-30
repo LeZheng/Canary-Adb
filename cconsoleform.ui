@@ -53,7 +53,8 @@
        </property>
        <property name="icon">
         <iconset resource="canary-img.qrc">
-         <normaloff>:/img/start_record</normaloff>:/img/start_record</iconset>
+         <normaloff>:/img/ic_play</normaloff>
+         <normalon>:/img/ic_play_white</normalon>:/img/ic_play</iconset>
        </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -73,7 +74,8 @@
        </property>
        <property name="icon">
         <iconset resource="canary-img.qrc">
-         <normaloff>:/img/edit_clear</normaloff>:/img/edit_clear</iconset>
+         <normaloff>:/img/ic_delete_forever</normaloff>
+         <normalon>:/img/ic_delete_forever_white</normalon>:/img/ic_delete_forever</iconset>
        </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -299,7 +301,8 @@
   <action name="actioncopy">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/edit_copy</normaloff>:/img/edit_copy</iconset>
+     <normaloff>:/img/ic_copy</normaloff>
+     <normalon>:/img/ic_copy_white</normalon>:/img/ic_copy</iconset>
    </property>
    <property name="text">
     <string>copy</string>
@@ -311,8 +314,8 @@
   <action name="actionselect_all">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/edit_select_all</normaloff>
-     <normalon>:/img/edit_select_all</normalon>:/img/edit_select_all</iconset>
+     <normaloff>:/img/ic_select_all</normaloff>
+     <normalon>:/img/ic_select_all_white</normalon>:/img/ic_select_all</iconset>
    </property>
    <property name="text">
     <string>select all</string>
@@ -324,8 +327,8 @@
   <action name="actionclear">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/edit_clear</normaloff>
-     <normalon>:/img/edit_clear</normalon>:/img/edit_clear</iconset>
+     <normaloff>:/img/ic_delete_forever</normaloff>
+     <normalon>:/img/ic_delete_forever_white</normalon>:/img/ic_delete_forever</iconset>
    </property>
    <property name="text">
     <string>clear</string>
@@ -337,8 +340,8 @@
   <action name="actionsave_to_file">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/document_save</normaloff>
-     <normalon>:/img/document_save</normalon>:/img/document_save</iconset>
+     <normaloff>:/img/ic_save</normaloff>
+     <normalon>:/img/ic_save_white</normalon>:/img/ic_save</iconset>
    </property>
    <property name="text">
     <string>save to file</string>

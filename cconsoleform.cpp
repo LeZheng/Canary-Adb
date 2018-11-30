@@ -69,7 +69,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     connectState->assignProperty(ui->logFormatComboBox,"enabled",true);
     connectState->assignProperty(ui->recordToolButton,"enabled",true);
     connectState->assignProperty(ui->recordToolButton,"text",tr("start"));
-    connectState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/start_record"));
+    connectState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_play"));
 
     recordingState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("not available at run time"));
     recordingState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("not available at run time"));
@@ -84,7 +84,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     recordingState->assignProperty(ui->logFormatComboBox,"enabled",false);
     recordingState->assignProperty(ui->recordToolButton,"enable",true);
     recordingState->assignProperty(ui->recordToolButton,"text",tr("stop"));
-    recordingState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/stop_record"));
+    recordingState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_record"));
     connect(recordingState,&QState::entered,this,[this]() {
         QProcess * tempProcess = this->logProcess;
         if(tempProcess != nullptr) {
@@ -128,7 +128,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     pauseState->assignProperty(ui->logFormatComboBox,"enabled",true);
     pauseState->assignProperty(ui->recordToolButton,"enabled",true);
     pauseState->assignProperty(ui->recordToolButton,"text",tr("start"));
-    pauseState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/start_record"));
+    pauseState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_play"));
 
     disconnectState->assignProperty(ui->filterContentLineEdit,"toolTip",tr("device not connected"));
     disconnectState->assignProperty(ui->filterPIDLineEdit,"toolTip",tr("device not connected"));

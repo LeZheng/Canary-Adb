@@ -110,9 +110,9 @@
       <string>...</string>
      </property>
      <property name="icon">
-      <iconset>
-       <normalon>:/img/key_back</normalon>
-      </iconset>
+      <iconset resource="canary-img.qrc">
+       <normaloff>:/img/ic_back</normaloff>
+       <normalon>:/img/ic_back_white</normalon>:/img/ic_back</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -146,9 +146,9 @@
       <string>...</string>
      </property>
      <property name="icon">
-      <iconset>
-       <normalon>:/img/key_home</normalon>
-      </iconset>
+      <iconset resource="canary-img.qrc">
+       <normaloff>:/img/ic_home</normaloff>
+       <normalon>:/img/ic_home_white</normalon>:/img/ic_home</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -183,7 +183,8 @@
      </property>
      <property name="icon">
       <iconset resource="canary-img.qrc">
-       <normaloff>:/img/key_menu</normaloff>:/img/key_menu</iconset>
+       <normaloff>:/img/ic_menu</normaloff>
+       <normalon>:/img/ic_menu_white</normalon>:/img/ic_menu</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -204,8 +205,8 @@
   <action name="actionscreen_record">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/screen_record</normaloff>
-     <normalon>:/img/screen_record</normalon>:/img/screen_record</iconset>
+     <normaloff>:/img/camera_roll</normaloff>
+     <normalon>:/img/camera_roll_white</normalon>:/img/camera_roll</iconset>
    </property>
    <property name="text">
     <string>screen record</string>
@@ -214,8 +215,8 @@
   <action name="actionscreen_shot">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/screen_shot</normaloff>
-     <normalon>:/img/screen_shot</normalon>:/img/screen_shot</iconset>
+     <normaloff>:/img/ic_shot</normaloff>
+     <normalon>:/img/ic_shot_white</normalon>:/img/ic_shot</iconset>
    </property>
    <property name="text">
     <string>screen shot</string>
@@ -224,7 +225,8 @@
   <action name="actionvolume_up">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/volume_high</normaloff>:/img/volume_high</iconset>
+     <normaloff>:/img/ic_volume_up</normaloff>
+     <normalon>:/img/ic_volume_up_white</normalon>:/img/ic_volume_up</iconset>
    </property>
    <property name="text">
     <string>volume up</string>
@@ -233,7 +235,8 @@
   <action name="actionvolume_down">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/volume_low</normaloff>:/img/volume_low</iconset>
+     <normaloff>:/img/ic_volume_down</normaloff>
+     <normalon>:/img/ic_volume_down_white</normalon>:/img/ic_volume_down</iconset>
    </property>
    <property name="text">
     <string>volume down</string>
@@ -242,7 +245,8 @@
   <action name="actionvolume_mute">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/volume_muted</normaloff>:/img/volume_muted</iconset>
+     <normaloff>:/img/ic_volume_mute</normaloff>
+     <normalon>:/img/ic_volume_mute_white</normalon>:/img/ic_volume_mute</iconset>
    </property>
    <property name="text">
     <string>volume mute</string>
@@ -269,7 +273,8 @@
   <action name="actionhome">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/key_home</normaloff>:/img/key_home</iconset>
+     <normaloff>:/img/ic_home</normaloff>
+     <normalon>:/img/ic_home_white</normalon>:/img/ic_home</iconset>
    </property>
    <property name="text">
     <string>home</string>
@@ -278,7 +283,8 @@
   <action name="actionback">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/key_back</normaloff>:/img/key_back</iconset>
+     <normaloff>:/img/ic_back</normaloff>
+     <normalon>:/img/ic_back_white</normalon>:/img/ic_back</iconset>
    </property>
    <property name="text">
     <string>back</string>
@@ -287,7 +293,8 @@
   <action name="actionmenu">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/key_menu</normaloff>:/img/key_menu</iconset>
+     <normaloff>:/img/ic_menu</normaloff>
+     <normalon>:/img/ic_menu_white</normalon>:/img/ic_menu</iconset>
    </property>
    <property name="text">
     <string>menu</string>

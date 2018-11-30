@@ -79,7 +79,7 @@ void MainWindow::initFileWidget()
 {
     QToolBar *titleWidget = new QToolBar(this->ui->rightDockWidget);
     QToolButton *addTabButton = new QToolButton(titleWidget);
-    addTabButton->setIcon(QIcon(":/img/tab_new"));
+    addTabButton->setIcon(QIcon(":/img/ic_new"));
     connect(addTabButton,&QToolButton::clicked,this,[this]() {
         QSplitter *splitter = new QSplitter(this->ui->fileTabWidget);
         splitter->setOrientation(Qt::Vertical);
@@ -125,13 +125,13 @@ void MainWindow::initFileWidget()
         }
     });
     QToolButton *gridViewButton = new QToolButton(titleWidget);
-    gridViewButton->setIcon(QIcon(":/img/view_grid"));
+    gridViewButton->setIcon(QIcon(":/img/ic_grid"));
     gridViewButton->setCheckable(true);
     QToolButton *listViewButton = new QToolButton(titleWidget);
     listViewButton->setIcon(QIcon(":/img/view_list"));
     listViewButton->setCheckable(true);
     QToolButton *treeViewButton = new QToolButton(titleWidget);
-    treeViewButton->setIcon(QIcon(":/img/view_tree"));
+    treeViewButton->setIcon(QIcon(":/img/ic_list"));
     treeViewButton->setCheckable(true);
     connect(listViewButton,&QToolButton::clicked,[=]() {
         changeFileViewMode(FileItemMode::LIST);
@@ -345,10 +345,10 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
                 }
             }
         });
-        menu.addAction(QIcon(":/img/edit_delete"),tr("delete"),[this,localPath]() {
+        menu.addAction(QIcon(":/img/ic_delete_forever"),tr("delete"),[this,localPath]() {
             QFile::remove(localPath);
         });
-        menu.addAction(QIcon(":/img/open_folder"),tr("open in folder"),[this,localPath]() {
+        menu.addAction(QIcon(":/img/ic_open_folder"),tr("open in folder"),[this,localPath]() {
             QString fileDir = QFileInfo(localPath).absoluteDir().absolutePath();
             QString urlStr = "file:";
             QDesktopServices::openUrl(QUrl(urlStr.append(fileDir), QUrl::TolerantMode));
@@ -383,13 +383,13 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
 
     if(!serialNumber.isEmpty()) {
         if(localPath.isEmpty() && devicePath.isEmpty()) {
-            menu.addAction(QIcon(":/img/screen_record"),tr("screen record"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/camera_roll"),tr("screen record"),[this,serialNumber]() {
                 screenRecord(serialNumber);
             });
-            menu.addAction(QIcon(":/img/screen_shot"),tr("screen shot"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/ic_shot"),tr("screen shot"),[this,serialNumber]() {
                 screenShot(serialNumber);
             });
-            menu.addAction(QIcon(":/img/reboot"),tr("reboot"),[this,serialNumber]() {
+            menu.addAction(QIcon(":/img/ic_reboot"),tr("reboot"),[this,serialNumber]() {
                 CAndroidDevice * device = CAndroidContext::getDevice(serialNumber);
                 if(device != nullptr)
                     device->reboot();

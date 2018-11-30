@@ -49,7 +49,6 @@ CDeviceFileDialog::CDeviceFileDialog(CAndroidDevice * device,const QString &defa
         }
     });
 
-    ui->nextToolButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowRight));
     ui->nextToolButton->setFixedSize(QSize(24,24));
     connect(ui->nextToolButton,&QToolButton::clicked,this,[this]() {
         if(!nextPathStack.isEmpty()) {
@@ -59,7 +58,6 @@ CDeviceFileDialog::CDeviceFileDialog(CAndroidDevice * device,const QString &defa
         }
     });
 
-    ui->prevToolButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowLeft));
     ui->prevToolButton->setFixedSize(QSize(24,24));
     connect(ui->prevToolButton,&QToolButton::clicked,this,[this]() {
         if(!prevPathStack.isEmpty()) {

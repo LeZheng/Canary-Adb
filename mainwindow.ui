@@ -173,9 +173,9 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normalon>:/img/phone_small</normalon>
-    </iconset>
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/device_info</normaloff>
+     <normalon>:/img/device_info_white</normalon>:/img/device_info</iconset>
    </property>
    <property name="text">
     <string>base info</string>
@@ -187,7 +187,8 @@
    </property>
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/android_app_icon</normaloff>:/img/android_app_icon</iconset>
+     <normaloff>:/img/ic_apps</normaloff>
+     <normalon>:/img/ic_apps_white</normalon>:/img/ic_apps</iconset>
    </property>
    <property name="text">
     <string>app list</string>
@@ -201,9 +202,9 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normalon>:/img/open_folder</normalon>
-    </iconset>
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/device_storage</normaloff>
+     <normalon>:/img/device_storage_white</normalon>:/img/device_storage</iconset>
    </property>
    <property name="text">
     <string>file system</string>
@@ -214,9 +215,9 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normalon>:/img/text-log</normalon>
-    </iconset>
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/text_log</normaloff>
+     <normalon>:/img/text_log_white</normalon>:/img/text_log</iconset>
    </property>
    <property name="text">
     <string>logcat</string>
@@ -227,9 +228,9 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normalon>:/img/phone</normalon>
-    </iconset>
+    <iconset resource="canary-img.qrc">
+     <normaloff>:/img/device_screen</normaloff>
+     <normalon>:/img/device_screen_white</normalon>:/img/device_screen</iconset>
    </property>
    <property name="text">
     <string>display</string>
@@ -238,7 +239,8 @@
   <action name="actionscreen_shot">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/screen_shot</normaloff>:/img/screen_shot</iconset>
+     <normaloff>:/img/ic_shot</normaloff>
+     <normalon>:/img/ic_shot_white</normalon>:/img/ic_shot</iconset>
    </property>
    <property name="text">
     <string>screen shot</string>
@@ -247,7 +249,8 @@
   <action name="actionscreen_record">
    <property name="icon">
     <iconset resource="canary-img.qrc">
-     <normaloff>:/img/screen_record</normaloff>:/img/screen_record</iconset>
+     <normaloff>:/img/camera_roll</normaloff>
+     <normalon>:/img/camera_roll_white</normalon>:/img/camera_roll</iconset>
    </property>
    <property name="text">
     <string>screen record</string>

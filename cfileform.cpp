@@ -51,7 +51,6 @@ CFileForm::CFileForm(QWidget *parent) :
         }
     });
 
-    ui->prevBtn->setIcon(style->standardIcon(QStyle::SP_ArrowLeft));
     ui->prevBtn->setFixedSize(QSize(24,24));
     connect(this->ui->prevBtn,&QToolButton::clicked,[this]() {
         QModelIndex pIndex = this->ui->fileTreeView->rootIndex();
@@ -65,7 +64,6 @@ CFileForm::CFileForm(QWidget *parent) :
             emit basePathChanged(this->model->filePath(index));
         }
     });
-    ui->nextBtn->setIcon(style->standardIcon(QStyle::SP_ArrowRight));
     ui->nextBtn->setFixedSize(QSize(24,24));
     connect(ui->nextBtn,&QToolButton::clicked,[this]() {
         if(!this->historyPathStack.isEmpty()) {
@@ -76,7 +74,6 @@ CFileForm::CFileForm(QWidget *parent) :
             emit basePathChanged(this->model->filePath(index));
         }
     });
-    ui->browserBtn->setIcon(style->standardIcon(QStyle::SP_DirOpenIcon));
     ui->browserBtn->setFixedSize(QSize(24,24));
     connect(ui->browserBtn,&QToolButton::clicked,[this]() {
         QString path = QFileDialog::getExistingDirectory(this, tr("Open Directory"),

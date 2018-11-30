@@ -41,7 +41,6 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         }
     });
 
-    ui->nextToolButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowRight));
     ui->nextToolButton->setFixedSize(QSize(24,24));
     connect(ui->nextToolButton,&QToolButton::clicked,this,[this]() {
         if(!nextPathStack.isEmpty()) {
@@ -51,7 +50,6 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         }
     });
 
-    ui->prevToolButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowLeft));
     ui->prevToolButton->setFixedSize(QSize(24,24));
     connect(ui->prevToolButton,&QToolButton::clicked,this,[this]() {
         if(!prevPathStack.isEmpty()) {
@@ -66,7 +64,6 @@ CDeviceFileForm::CDeviceFileForm(CAndroidDevice * device,QWidget *parent) :
         this->ui->nextToolButton->setDisabled(nextPathStack.isEmpty());
     });
 
-    ui->refreshToolButton->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     connect(ui->refreshToolButton,&QToolButton::clicked,this,[this]() {
         openDir(currentDir);
     });

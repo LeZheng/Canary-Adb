@@ -34,12 +34,22 @@
      <property name="text">
       <string/>
      </property>
+     <property name="icon">
+      <iconset resource="canary-img.qrc">
+       <normaloff>:/img/ic_back</normaloff>
+       <normalon>:/img/ic_back_white</normalon>:/img/ic_back</iconset>
+     </property>
     </widget>
    </item>
    <item row="0" column="1">
     <widget class="QToolButton" name="nextToolButton">
      <property name="text">
       <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="canary-img.qrc">
+       <normaloff>:/img/ic_forward</normaloff>
+       <normalon>:/img/ic_forward_white</normalon>:/img/ic_forward</iconset>
      </property>
     </widget>
    </item>
@@ -54,6 +64,11 @@
     <widget class="QToolButton" name="refreshToolButton">
      <property name="text">
       <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="canary-img.qrc">
+       <normaloff>:/img/ic_open_folder</normaloff>
+       <normalon>:/img/ic_open_folder_white</normalon>:/img/ic_open_folder</iconset>
      </property>
     </widget>
    </item>
@@ -94,6 +109,8 @@
    <header>cdevicefileform.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="canary-img.qrc"/>
+ </resources>
  <connections/>
 </ui>
