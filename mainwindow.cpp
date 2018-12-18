@@ -127,16 +127,16 @@ void MainWindow::initFileWidget()
     QToolButton *gridViewButton = new QToolButton(titleWidget);
     gridViewButton->setIcon(QIcon(":/img/ic_grid"));
     gridViewButton->setCheckable(true);
-    QToolButton *listViewButton = new QToolButton(titleWidget);
-    listViewButton->setIcon(QIcon(":/img/view_list"));
-    listViewButton->setCheckable(true);
+//    QToolButton *listViewButton = new QToolButton(titleWidget);
+//    listViewButton->setIcon(QIcon(":/img/view_list"));
+//    listViewButton->setCheckable(true);
     QToolButton *treeViewButton = new QToolButton(titleWidget);
     treeViewButton->setIcon(QIcon(":/img/ic_list"));
     treeViewButton->setCheckable(true);
-    connect(listViewButton,&QToolButton::clicked,[=]() {
-        changeFileViewMode(FileItemMode::LIST);
-        emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
-    });
+//    connect(listViewButton,&QToolButton::clicked,[=]() {
+//        changeFileViewMode(FileItemMode::LIST);
+//        emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
+//    });
     connect(gridViewButton,&QToolButton::clicked,[=]() {
         changeFileViewMode(FileItemMode::GRID);
         emit this->ui->fileTabWidget->currentChanged(this->ui->fileTabWidget->currentIndex());
@@ -183,7 +183,7 @@ void MainWindow::initFileWidget()
     titleWidget->addWidget(addTabButton);
     titleWidget->addSeparator();
     titleWidget->addWidget(gridViewButton);
-    titleWidget->addWidget(listViewButton);
+//    titleWidget->addWidget(listViewButton);
     titleWidget->addWidget(treeViewButton);
     titleWidget->addSeparator();
     titleWidget->addWidget(splitButton);
@@ -219,7 +219,7 @@ void MainWindow::initFileWidget()
     connect(this,&MainWindow::currentFileFormChanged,this,[=](CFileForm *form) {
         FileItemMode mode = form->viewMode();
         gridViewButton->setChecked(mode == FileItemMode::GRID ? true : false);
-        listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
+//        listViewButton->setChecked(mode == FileItemMode::LIST ? true : false);
         treeViewButton->setChecked(mode == FileItemMode::TREE ? true : false);
     });
     this->ui->fileTabWidget->setTabBarAutoHide(true);
