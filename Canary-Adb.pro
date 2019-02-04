@@ -35,7 +35,8 @@ SOURCES += \
     cdevicefileform.cpp \
     cdevicefiledialog.cpp \
     cstartupform.cpp \
-    cmonitorform.cpp
+    cmonitorform.cpp \
+    candroidfilesystemmodel.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     cdevicefileform.h \
     cdevicefiledialog.h \
     cstartupform.h \
-    cmonitorform.h
+    cmonitorform.h \
+    candroidfilesystemmodel.h
 
 FORMS += \
         mainwindow.ui \

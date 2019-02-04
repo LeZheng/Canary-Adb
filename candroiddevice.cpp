@@ -13,7 +13,8 @@ ProcessResult processCmd(QString cmd)
     process.waitForFinished(-1);
 
     QByteArray array = process.readAll();
-    QString resultStr = QTextCodec::codecForLocale()->toUnicode(array);
+    QString resultStr = QTextCodec::codecForLocale()->toUnicode(
+                            array.isEmpty() ? process.readAllStandardError() : array);
     return ProcessResult(process.exitCode(),array,resultStr);
 }
 
@@ -296,6 +297,7 @@ ProcessResult CAndroidDevice::reboot()
 
 void CAndroidDevice::updatePackageList()
 {
+    applicationMap.clear();
     ProcessResult result = processCmd(QString("%1 -s %2 shell pm list packages")
                                       .arg(CAndroidContext::androidAdbPath)
                                       .arg(serialNumber));
@@ -306,10 +308,11 @@ void CAndroidDevice::updatePackageList()
         if(!packageName.isEmpty()) {
             if(packageName.startsWith(packagePrefix)) {
                 packageName = packageName.right(packageName.size() - packagePrefix.size());
-                applicationMap.insert(packageName,new CAndroidApp(packageName,this));
-            } else {
-                applicationMap.insert(packageName,new CAndroidApp(packageName,this));
             }
+            CAndroidApp * app = new CAndroidApp(packageName);
+            app->moveToThread(this->thread());
+            app->setParent(this);
+            applicationMap.insert(packageName, app);
         }
     }
 }
@@ -326,10 +329,30 @@ QList<CAndroidApp *> CAndroidDevice::getApplications()
 
 ProcessResult CAndroidDevice::install(QString apkPath)
 {
-    return processCmd(QString("%1 -s %2 install -r %3")
-                      .arg(CAndroidContext::androidAdbPath)
-                      .arg(serialNumber)
-                      .arg(apkPath));
+    ProcessResult result = processCmd(QString("%1 -s %2 install -r %3")
+                                      .arg(CAndroidContext::androidAdbPath)
+                                      .arg(serialNumber)
+                                      .arg(apkPath));
+    if(result.exitCode == 0) {
+        updatePackageList();
+        emit appListUpdated();
+    }
+    return result;
+}
+
+ProcessResult CAndroidDevice::uninstall(QString packageName)
+{
+    CAndroidApp * app = applicationMap.value(packageName, nullptr);
+    if(app == nullptr) {
+        return ProcessResult(1, tr("application(%1) is not exist!").arg(packageName));
+    } else {
+        ProcessResult result = app->uninstall();
+        if(result.exitCode == 0) {
+            updatePackageList();
+            emit appListUpdated();
+        }
+        return result;
+    }
 }
 
 ProcessResult CAndroidDevice::getRunningService()
@@ -381,7 +404,6 @@ QProcess *CAndroidDevice::logcat(QString format, QString logLevel, QString tag, 
     if(!pid.isEmpty())
         cmd.append(" --pid ").append(pid);
 
-    qDebug() << cmd;
     QProcess * process = new QProcess();
     process->start(cmd);
     return process;
@@ -555,6 +577,12 @@ ProcessResult CAndroidApp::getInstallPath()
                       .arg(CAndroidContext::androidAdbPath)
                       .arg(device->serialNumber)
                       .arg(package));
+}
+
+void CAndroidApp::setParent(CAndroidDevice *parent)
+{
+    this->device = parent;
+    QObject::setParent(parent);
 }
 
 ProcessResult::ProcessResult(int exitCode, QString resultStr):

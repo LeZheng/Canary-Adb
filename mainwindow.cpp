@@ -248,11 +248,23 @@ void MainWindow::initDeviceWidget()
                 stackedWidget->addWidget(deviceInfoForm);
 
                 QListWidget *appListWidget = new QListWidget(stackedWidget);
-                appListWidget->clear();
-                foreach (CAndroidApp * app, device->getApplications()) {
-                    appListWidget->addItem(app->getName());
-                }
+                appListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
                 stackedWidget->addWidget(appListWidget);
+                auto appListUpdate = [appListWidget, device]() {
+                    appListWidget->clear();
+                    foreach (CAndroidApp * app, device->getApplications()) {
+                        appListWidget->addItem(app->getName());
+                    }
+                };
+                connect(device, &CAndroidDevice::appListUpdated, appListWidget, appListUpdate);
+                connect(appListWidget, &QListWidget::customContextMenuRequested, this, [this,appListWidget, device](const QPoint &pos) {
+                    QListWidgetItem *item = appListWidget->itemAt(pos);
+                    if(item != nullptr && device != nullptr) {
+                        requestAppContextMenu(device->serialNumber, item->text());
+                    }
+                });
+                appListUpdate();
+
 
                 CDeviceFileForm *fileForm = new CDeviceFileForm(device,stackedWidget);
                 connect(fileForm,&CDeviceFileForm::menuRequested,this,&MainWindow::requestContextMenu);
@@ -324,7 +336,7 @@ void MainWindow::hideLoadingDialog(int exitCode, const QString &msg)
         QFontMetrics metrics(QToolTip::font());
         QRect msgRect = metrics.boundingRect(msg);
         QRect rect = this->frameGeometry();
-        QToolTip::showText(QPoint(rect.right() - msgRect.width() - 20,rect.bottom() - msgRect.height() - 20),
+        QToolTip::showText(mapToGlobal(geometry().bottomRight() - msgRect.bottomRight()),
                            msg,this,this->frameGeometry(),5000);//TODO
     }
 }
@@ -473,6 +485,65 @@ void MainWindow::requestContextMenu(const QString &serialNumber, const QString &
     if(menu.actions().size() > 0) {
         menu.exec(QCursor::pos());
     }
+}
+
+void MainWindow::requestAppContextMenu(const QString &serialNumber, const QString &packageName)
+{
+    QMenu menu(this);
+
+    menu.addAction(QIcon(":img/uninstall"), tr("uninstall"), [=]() {
+        QString sNumber;
+        bool ok;
+        if(serialNumber.isEmpty()) {
+            QList<QString> sNumberList;
+            foreach(CAndroidDevice * tDevice, CAndroidContext::getDevices()) {
+                if(tDevice != nullptr && !tDevice->serialNumber.isEmpty())
+                    sNumberList << tDevice->serialNumber;
+            }
+            sNumber = QInputDialog::getItem(this,
+                                            tr("choose device"),
+                                            tr("Please choose a device"),
+                                            sNumberList,
+                                            0, false, &ok);
+            if(!ok) {
+                return;
+            }
+        } else {
+            sNumber = serialNumber;
+        }
+
+        CAndroidDevice * device = CAndroidContext::getDevice(sNumber);
+        if(device == nullptr) {
+            QToolTip::showText(mapToGlobal(this->geometry().bottomRight()), "No device found : " + sNumber);
+        } else {
+            QString pName;
+            if(packageName.isEmpty()) {
+                QList<CAndroidApp *> appList = device->getApplications();
+                QList<QString> appStrList;
+                foreach (CAndroidApp *app, appList) {
+                    appStrList << app->getName();
+                }
+                pName = QInputDialog::getItem(this,
+                                              tr("choose application"),
+                                              tr("application package :"),
+                                              appStrList,
+                                              0, false, &ok);
+                if(!ok) {
+                    return;
+                }
+            } else {
+                pName = packageName;
+            }
+
+            emit processStart(tr("uninstall..."),tr("uninstall %1 from %2").arg(pName).arg(device->getModel()));
+            QtConcurrent::run([device,pName,this]() {
+                ProcessResult result = device->uninstall(pName);
+                emit processEnd(result.exitCode,result.resultStr);
+            });
+        }
+    });
+
+    menu.exec(QCursor::pos());
 }
 
 void MainWindow::installApk(const QString &serialNumber, const QString &path)

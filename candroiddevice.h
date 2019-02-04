@@ -49,7 +49,7 @@ class CAndroidApp : public QObject
 public:
     explicit CAndroidApp(const QString package,CAndroidDevice *parent = nullptr);
     const QString package;
-    const CAndroidDevice * device;
+    CAndroidDevice * device;
 
     QString getName();
     ProcessResult uninstall();//(method "卸载应用" "adb uninstall com.qihoo360.mobilesafe")
@@ -58,7 +58,7 @@ public:
     ProcessResult getInfo();//(method "获取应用信息" "adb shell dumpsys package <packagename>")
     ProcessResult getInstallPath();//(method "获取安装路径" "adb shell pm path ecarx.weather")
     //TODO 与应用交互
-
+    void setParent(CAndroidDevice *parent = nullptr);
 private:
     QString name;
 };
@@ -106,6 +106,7 @@ public:
     void updatePackageList();// (method "获取应用列表" "adb shell pm list packages"
     QList<CAndroidApp *> getApplications();
     ProcessResult install(QString apkPath);// (method "安装应用" "adb install -rsd temp.apk"
+    ProcessResult uninstall(QString packageName);
     ProcessResult getRunningService();// (method "查看正在运行的 Services" "adb shell dumpsys activity services")
     //TODO 按键模拟和输入
     ProcessResult inputKeyEvent(int keyCode);
@@ -126,6 +127,9 @@ private:
     QMap<QString,QString> memInfoMap; //(field "内存信息" :read "adb shell cat /proc/meminfo")
     QMap<QString, QString> sysProps;// (field "系统属性" :read "adb shell cat /system/build.prop")
     QMap<QString,CAndroidApp *> applicationMap;
+
+signals:
+    void appListUpdated();
 };
 
 class CAndroidContext : public QObject

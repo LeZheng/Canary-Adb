@@ -55,6 +55,7 @@ private slots:
     void showLoadingDialog(const QString &title,const QString &content);
     void hideLoadingDialog(int exitCode,const QString &msg);
     void requestContextMenu(const QString &serialNumber,const QString &localPath,const QString &devicePath);
+    void requestAppContextMenu(const QString &serialNumber, const QString &packageName);
     void installApk(const QString &serialNumber,const QString &path);
     void screenShot(const QString &serialNumber);
     void screenRecord(const QString &serialNumber);
