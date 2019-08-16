@@ -33,8 +33,9 @@ int main(int argc, char *argv[])
     QString defaultToolPath = QCoreApplication::applicationDirPath() + QDir::separator() + "platform-tools";
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
-    QSettings setting;
+    QSettings setting(QCoreApplication::applicationDirPath() + QDir::separator() + "app-config.ini", QSettings::IniFormat);
     QString adbPath = setting.value("anroid/adb/path",defaultToolPath + QDir::separator() + adbFileName).toString();
+    qDebug() << adbPath;
     while(!QFile(adbPath).exists()) {
         QString sdkPath = QFileDialog::getExistingDirectory(nullptr, a.tr("Choose Android SDK Directory"),
                           QDir::rootPath(),
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
     CAndroidContext::androidAdbPath = adbPath;
 
     MainWindow *window = new MainWindow;
+    window->setWindowTitle(QCoreApplication::applicationName());
     window->move((a.desktop()->width() - window->width()) / 2, (a.desktop()->height() - window->height()) / 2);
 
     QPixmap pixmap(":/img/startup_bg");
