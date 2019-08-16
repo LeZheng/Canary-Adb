@@ -99,7 +99,8 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
         this->logProcess = tempProcess;
 
         connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
-            this->ui->logContentTextEdit->append(tempProcess->readAll());
+            QString logText = QString(tempProcess->readAll()).replace('\r', "");
+            this->ui->logContentTextEdit->append(logText);
         });
         connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
             if(tempProcess == this->logProcess) {
