@@ -67,6 +67,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     connectState->assignProperty(ui->filterTagLineEdit,"readOnly",false);
     connectState->assignProperty(ui->logLevelComboBox,"enabled",true);
     connectState->assignProperty(ui->logFormatComboBox,"enabled",true);
+    connectState->assignProperty(ui->writeFileCheckBox,"enabled",true);
     connectState->assignProperty(ui->recordToolButton,"enabled",true);
     connectState->assignProperty(ui->recordToolButton,"text",tr("start"));
     connectState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_play"));
@@ -82,6 +83,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     recordingState->assignProperty(ui->filterTagLineEdit,"readOnly",true);
     recordingState->assignProperty(ui->logLevelComboBox,"enabled",false);
     recordingState->assignProperty(ui->logFormatComboBox,"enabled",false);
+    recordingState->assignProperty(ui->writeFileCheckBox,"enabled",false);
     recordingState->assignProperty(ui->recordToolButton,"enable",true);
     recordingState->assignProperty(ui->recordToolButton,"text",tr("stop"));
     recordingState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_record"));
@@ -98,9 +100,24 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
                           this->ui->filterPIDLineEdit->text());
         this->logProcess = tempProcess;
 
-        connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess]() {
-            QString logText = QString(tempProcess->readAll()).replace('\r', "");
-            this->ui->logContentTextEdit->append(logText);
+        QDir(".").mkdir("adb_log");
+        QString fileName = QString("log_%1_%2.txt")
+                           .arg(this->devicePointer->getModel())
+                           .arg(QDateTime::currentDateTime().toString("yyyy_MM_dd__hh_mm_ss"));
+        auto f = new QFile (QString("%1/%2").arg("./adb_log").arg(fileName));
+        if(ui->writeFileCheckBox->isChecked()) {
+            f->open(QIODevice::WriteOnly);
+        }
+
+        connect(tempProcess,&QProcess::readyRead,this,[this,tempProcess,f]() {
+            auto dataBytes = tempProcess->readAll();
+            if(ui->showConsoleCheckBox->isChecked()) {
+                QString logText = QString(dataBytes).replace('\r', "");
+                this->ui->logContentTextEdit->append(logText);
+            }
+            if(f->isOpen()) {
+                f->write(dataBytes);
+            }
         });
         connect(tempProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),tempProcess,[tempProcess,this]() {
             if(tempProcess == this->logProcess) {
@@ -128,6 +145,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     pauseState->assignProperty(ui->logLevelComboBox,"enabled",true);
     pauseState->assignProperty(ui->logFormatComboBox,"enabled",true);
     pauseState->assignProperty(ui->recordToolButton,"enabled",true);
+    pauseState->assignProperty(ui->writeFileCheckBox,"enabled",true);
     pauseState->assignProperty(ui->recordToolButton,"text",tr("start"));
     pauseState->assignProperty(ui->recordToolButton,"icon",QIcon(":/img/ic_play"));
 
@@ -142,6 +160,7 @@ CConsoleForm::CConsoleForm(CAndroidDevice *device,QWidget *parent) :
     disconnectState->assignProperty(ui->filterTagLineEdit,"readOnly",true);
     disconnectState->assignProperty(ui->logLevelComboBox,"enabled",false);
     disconnectState->assignProperty(ui->logFormatComboBox,"enabled",false);
+    disconnectState->assignProperty(ui->writeFileCheckBox,"enabled",false);
     disconnectState->assignProperty(ui->recordToolButton,"enabled",false);
 
     machine->addState(connectState);

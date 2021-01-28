@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QSettings>
+#include <QDir>
 
 #include "candroiddevice.h"
 #include "cstartupform.h"
@@ -21,6 +22,8 @@ const QString adbFileName = "adb";
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QDir().mkdir("adb_log");
 
     QCoreApplication::setOrganizationName("LeZheng");
     QCoreApplication::setOrganizationDomain("lezheng.com");
