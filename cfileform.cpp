@@ -184,7 +184,7 @@ bool CFileForm::eventFilter(QObject *watched, QEvent *event)
         setSelect(true);
         emit selected();
     }
-    QWidget::eventFilter(watched, event);
+    return QWidget::eventFilter(watched, event);
 }
 
 void CFileForm::mousePressEvent(QMouseEvent *event)
